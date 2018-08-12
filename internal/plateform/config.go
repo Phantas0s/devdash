@@ -15,7 +15,7 @@ func MapConfig(data []byte) config {
 	viper.SetConfigType("yaml")
 	err := viper.ReadConfig(bytes.NewBuffer(data))
 	if err != nil {
-		panic(fmt.Errorf("Fatal error reading config file: %s \n", err))
+		panic(fmt.Errorf("could not read config data %s: %s \n", string(data), err))
 	}
 
 	var cfg config
