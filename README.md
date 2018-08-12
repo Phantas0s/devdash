@@ -1,3 +1,3 @@
-# Termetrics 
+# termetrics 
 
 WIP
