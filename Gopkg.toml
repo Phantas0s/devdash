@@ -32,3 +32,15 @@
 [[constraint]]
   name = "github.com/spf13/viper"
   version = "1.1.0"
+
+[[constraint]]
+  name = "github.com/gizak/termui"
+  version = "2.2.0"
+
+[[constraint]]
+  branch = "master"
+  name = "google.golang.org/api"
+
+[[constraint]]
+  branch = "master"
+  name = "golang.org/x/oauth2"
