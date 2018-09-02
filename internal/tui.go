@@ -1,27 +1,78 @@
+// This package is an abstraction for any Terminal UI you want to use.
+// It is not necessary since I don't need it and add complexity. It is kind of an
+// experiment how to use interface effectively.
 package internal
 
-// TODO should be dcoupled, not termui here
-import "github.com/gizak/termui"
-
-type TB interface {
-	TextBox(data string, fg uint16, bd uint16, bdlabel string, h int) *termui.Par
+type renderer interface {
+	Render()
+	Close()
 }
 
-// Or property with ALL properties
-type TextBoxAttr struct {
-	data    string
-	fg      uint16
-	bd      uint16
-	bdlabel string
-	h       int
+type drawer interface {
+	TextBox(data string, fg uint16, bd uint16, bdlabel string, h int)
+	LineChart(data []float64, dimensions []string)
+	BarChart(data []int, dimensions []string, barWidth int)
 }
 
-type TUI struct {
-	// TODO general interface for now, to change to something more specific
-	widgets []interface{}
-	textbox TB
+type kManager interface {
+	KQuit(key string)
 }
 
-func (t TUI) AddTextBox(attr TextBoxAttr) {
-	t.widgets = append(t.widgets, t.textbox.TextBox(attr.data, attr.fg, attr.bd, attr.bdlabel, attr.h))
+type manager interface {
+	kManager
+	renderer
+	drawer
+}
+
+type textBoxAttr struct {
+	Data    string
+	Fg      uint16
+	Bd      uint16
+	Bdlabel string
+	H       int
+}
+
+type lineChartAttr struct {
+	Data       []float64
+	Dimensions []string
+}
+
+type barChartAttr struct {
+	Data       []int
+	Dimensions []string
+	BarWidth   int
+}
+
+func NewTUI(instance manager) *Tui {
+	return &Tui{
+		instance: instance,
+	}
+}
+
+type Tui struct {
+	instance manager
+}
+
+func (t *Tui) AddTextBox(attr textBoxAttr) {
+	t.instance.TextBox(attr.Data, attr.Fg, attr.Bd, attr.Bdlabel, attr.H)
+}
+
+func (t *Tui) AddLineChart(attr lineChartAttr) {
+	t.instance.LineChart(attr.Data, attr.Dimensions)
+}
+
+func (t *Tui) AddBarChart(attr barChartAttr) {
+	t.instance.BarChart(attr.Data, attr.Dimensions, attr.BarWidth)
+}
+
+func (t *Tui) AddKQuit(key string) {
+	t.instance.KQuit(key)
+}
+
+func (t *Tui) Render() {
+	t.instance.Render()
+}
+
+func (t *Tui) Close() {
+	t.instance.Close()
 }
