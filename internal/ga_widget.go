@@ -19,25 +19,26 @@ type gaWidget struct {
 	viewID string
 }
 
-func NewGaWidget(keyfile string, viewID string, tui *Tui) (gaWidget, error) {
+func NewGaWidget(keyfile string, viewID string) (gaWidget, error) {
 	client, err := plateform.NewGaClient(keyfile)
 	if err != nil {
 		return gaWidget{}, err
 	}
 
 	return gaWidget{
-		tui:    tui,
 		client: client,
 		viewID: viewID,
 	}, nil
 }
 
-func (g gaWidget) createWidgets(widgetName string, widget interface{}) error {
+func (g gaWidget) createWidgets(widgetName string, widget Widget, tui *Tui) error {
+	g.tui = tui
+
 	switch widgetName {
 	case realtime:
-		g.gaRTActiveUser()
+		g.gaRTActiveUser(widget)
 	case users:
-		g.gaWeekUsers()
+		g.gaWeekUsers(widget)
 	default:
 		return errors.New("can't find the widget " + widgetName)
 	}
@@ -46,25 +47,29 @@ func (g gaWidget) createWidgets(widgetName string, widget interface{}) error {
 }
 
 // GaRTActiveUser get the real time active users from Google Analytics
-func (g gaWidget) gaRTActiveUser() error {
+func (g gaWidget) gaRTActiveUser(widget Widget) error {
 	users, err := g.client.RealTimeUsers(g.viewID)
 	if err != nil {
 		return err
 	}
 
-	g.tui.AddTextBox(textBoxAttr{
+	err = g.tui.AddTextBox(textBoxAttr{
 		Data:    users,
 		Fg:      2,
 		Bd:      2,
 		Bdlabel: "Real time users: ",
 		H:       3,
+		Size:    widget.Size,
 	})
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 // GaWeekUsers get the number of users the 7 last days on your website
-func (g gaWidget) gaWeekUsers() error {
+func (g gaWidget) gaWeekUsers(widget Widget) error {
 	rep, err := g.client.GetReport(g.viewID)
 	if err != nil {
 		return err
@@ -92,6 +97,7 @@ func (g gaWidget) gaWeekUsers() error {
 		Data:       u,
 		Dimensions: dates,
 		BarWidth:   6,
+		Size:       widget.Size,
 	})
 
 	return nil

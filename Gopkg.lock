@@ -109,6 +109,14 @@
   version = "v1.2.0"
 
 [[projects]]
+  digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
   digest = "1:bd1ae00087d17c5a748660b8e89e1043e1e5479d0fea743352cda2f8dd8c4f84"
   name = "github.com/spf13/afero"
   packages = [
@@ -245,8 +253,8 @@
   analyzer-version = 1
   input-imports = [
     "github.com/gizak/termui",
+    "github.com/pkg/errors",
     "github.com/spf13/viper",
-    "golang.org/x/oauth2",
     "golang.org/x/oauth2/google",
     "golang.org/x/oauth2/jwt",
     "google.golang.org/api/analytics/v3",

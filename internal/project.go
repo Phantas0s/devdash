@@ -27,19 +27,22 @@ func NewProject(
 	}
 }
 
-func (p project) Render() error {
+func (p project) Render(tui *Tui) error {
 	for i := 0; i < len(p.widgets); i++ {
 		for _, ws := range p.widgets[i] {
+			// parse widgets for one row
 			for wn, w := range ws {
 				serviceID := strings.Split(wn, ".")[0]
 				switch serviceID {
 				case "ga":
-					p.gaWidget.createWidgets(wn, w)
+					p.gaWidget.createWidgets(wn, w, tui)
 				default:
 					return errors.New("could not find the service - please verify your configuration file")
 				}
 			}
+			tui.AddRow()
 		}
 	}
+
 	return nil
 }

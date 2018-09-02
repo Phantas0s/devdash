@@ -41,16 +41,17 @@ func main() {
 		}
 
 		gaService := p.Services.GoogleAnalytics
-		gaWidget, err := internal.NewGaWidget(gaService.Keyfile, gaService.ViewID, tui)
+		gaWidget, err := internal.NewGaWidget(gaService.Keyfile, gaService.ViewID)
 		if err != nil {
 			fmt.Println(err)
 		}
+
 		project := internal.NewProject(pn, rows, gaWidget)
 		if err != nil {
 			fmt.Println(err)
 		}
 
-		err = project.Render()
+		err = project.Render(tui)
 		if err != nil {
 			fmt.Println(err)
 		}

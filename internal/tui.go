@@ -3,15 +3,21 @@
 // experiment how to use interface effectively.
 package internal
 
+import (
+	"strings"
+
+	"github.com/pkg/errors"
+)
+
 type renderer interface {
 	Render()
 	Close()
 }
 
 type drawer interface {
-	TextBox(data string, fg uint16, bd uint16, bdlabel string, h int)
-	LineChart(data []float64, dimensions []string)
-	BarChart(data []int, dimensions []string, barWidth int)
+	TextBox(data string, fg uint16, bd uint16, bdlabel string, h int, size int)
+	BarChart(data []int, dimensions []string, barWidth int, size int)
+	AddRow() error
 }
 
 type kManager interface {
@@ -30,17 +36,14 @@ type textBoxAttr struct {
 	Bd      uint16
 	Bdlabel string
 	H       int
-}
-
-type lineChartAttr struct {
-	Data       []float64
-	Dimensions []string
+	Size    string
 }
 
 type barChartAttr struct {
 	Data       []int
 	Dimensions []string
 	BarWidth   int
+	Size       string
 }
 
 func NewTUI(instance manager) *Tui {
@@ -53,16 +56,33 @@ type Tui struct {
 	instance manager
 }
 
-func (t *Tui) AddTextBox(attr textBoxAttr) {
-	t.instance.TextBox(attr.Data, attr.Fg, attr.Bd, attr.Bdlabel, attr.H)
+func (t *Tui) AddTextBox(attr textBoxAttr) error {
+	size, err := mapSize(attr.Size)
+	if err != nil {
+		return err
+	}
+
+	t.instance.TextBox(
+		attr.Data,
+		attr.Fg,
+		attr.Bd,
+		attr.Bdlabel,
+		attr.H,
+		size,
+	)
+
+	return nil
 }
 
-func (t *Tui) AddLineChart(attr lineChartAttr) {
-	t.instance.LineChart(attr.Data, attr.Dimensions)
-}
+func (t *Tui) AddBarChart(attr barChartAttr) error {
+	size, err := mapSize(attr.Size)
+	if err != nil {
+		return err
+	}
 
-func (t *Tui) AddBarChart(attr barChartAttr) {
-	t.instance.BarChart(attr.Data, attr.Dimensions, attr.BarWidth)
+	t.instance.BarChart(attr.Data, attr.Dimensions, attr.BarWidth, size)
+
+	return nil
 }
 
 func (t *Tui) AddKQuit(key string) {
@@ -75,4 +95,28 @@ func (t *Tui) Render() {
 
 func (t *Tui) Close() {
 	t.instance.Close()
+}
+
+func mapSize(size string) (int, error) {
+	s := strings.ToLower(size)
+	switch s {
+	case "xs":
+		return 2, nil
+	case "s":
+		return 4, nil
+	case "m":
+		return 6, nil
+	case "l":
+		return 8, nil
+	case "xl":
+		return 10, nil
+	case "xxl":
+		return 12, nil
+	default:
+		return 0, errors.Errorf("could not find size %s", s)
+	}
+}
+
+func (t *Tui) AddRow() {
+	t.instance.AddRow()
 }
