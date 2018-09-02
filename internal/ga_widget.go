@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/Phantas0s/termetrics/internal/plateform"
+	"github.com/Phantas0s/devdash/internal/plateform"
 )
 
 const (
