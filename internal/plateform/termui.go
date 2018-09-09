@@ -9,14 +9,9 @@ import (
 
 const maxRowSize = 12
 
-type widget struct {
-	element termui.GridBufferer
-	size    int
-}
-
 type termUI struct {
 	body *termui.Grid
-	row  []widget
+	row  []*termui.Row
 }
 
 // NewTermUI returns a new Terminal Interface object with a given output mode.
@@ -34,7 +29,7 @@ func NewTermUI() (*termUI, error) {
 
 	return &termUI{
 		body: body,
-		row:  []widget{},
+		row:  []*termui.Row{},
 	}, nil
 }
 
@@ -57,7 +52,7 @@ func (t *termUI) TextBox(
 	textBox.BorderLabel = bdlabel
 	textBox.Height = h
 
-	t.row = append(t.row, widget{element: textBox, size: size})
+	t.row = append(t.row, termui.NewCol(size, 0, textBox))
 }
 
 func (t *termUI) BarChart(data []int, dimensions []string, barWidth int, size int) {
@@ -73,7 +68,7 @@ func (t *termUI) BarChart(data []int, dimensions []string, barWidth int, size in
 	bc.BarColor = termui.ColorRed
 	bc.NumColor = termui.ColorYellow
 
-	t.row = append(t.row, widget{element: bc, size: size})
+	t.row = append(t.row, termui.NewCol(size, 0, bc))
 }
 
 // KQuit set a key to quit the application.
@@ -89,22 +84,21 @@ func (t *termUI) AddRow() error {
 		return err
 	}
 
-	var col []*termui.Row
-	for _, w := range t.row {
-		col = append(col, termui.NewCol(w.size, 0, w.element))
-	}
-
-	t.body.AddRows(termui.NewRow(col...))
+	t.body.AddRows(termui.NewRow(t.row...))
 	// clean the internal row
-	t.row = []widget{}
+	t.body.Align()
+	termui.Render(t.body)
+	t.row = []*termui.Row{}
 
 	return nil
 }
 
 func (t termUI) validateRowSize() error {
 	var ts int
-	for _, w := range t.row {
-		ts += w.size
+	for _, r := range t.row {
+		for _, c := range r.Cols {
+			ts += c.Offset
+		}
 	}
 
 	if ts > maxRowSize {
@@ -115,11 +109,5 @@ func (t termUI) validateRowSize() error {
 }
 
 func (t *termUI) Render() {
-	// Calculate the layout.
-	t.body.Align()
-	// Render the termui body.
-	termui.Clear()
-	termui.Render(t.body)
-	// TODO render and loop are two different things - responsibility principle
 	termui.Loop()
 }

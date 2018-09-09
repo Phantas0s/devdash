@@ -40,8 +40,8 @@ func (p project) Render(tui *Tui) error {
 					return errors.New("could not find the service - please verify your configuration file")
 				}
 			}
-			tui.AddRow()
 		}
+		tui.AddRow()
 	}
 
 	return nil
