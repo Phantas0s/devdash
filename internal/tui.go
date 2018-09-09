@@ -16,7 +16,7 @@ type renderer interface {
 
 type drawer interface {
 	TextBox(data string, fg uint16, bd uint16, bdlabel string, h int, size int)
-	BarChart(data []int, dimensions []string, barWidth int, size int)
+	BarChart(data []int, dimensions []string, barWidth int, bdLabel string, size int)
 	AddRow() error
 }
 
@@ -43,6 +43,7 @@ type barChartAttr struct {
 	Data       []int
 	Dimensions []string
 	BarWidth   int
+	Bdlabel    string
 	Size       string
 }
 
@@ -80,7 +81,7 @@ func (t *Tui) AddBarChart(attr barChartAttr) error {
 		return err
 	}
 
-	t.instance.BarChart(attr.Data, attr.Dimensions, attr.BarWidth, size)
+	t.instance.BarChart(attr.Data, attr.Dimensions, attr.BarWidth, attr.Bdlabel, size)
 
 	return nil
 }

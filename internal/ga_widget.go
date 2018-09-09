@@ -97,6 +97,7 @@ func (g gaWidget) gaWeekUsers(widget Widget) error {
 		Data:       u,
 		Dimensions: dates,
 		BarWidth:   6,
+		Bdlabel:    "Weekly users",
 		Size:       widget.Size,
 	})
 

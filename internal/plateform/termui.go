@@ -55,9 +55,9 @@ func (t *termUI) TextBox(
 	t.row = append(t.row, termui.NewCol(size, 0, textBox))
 }
 
-func (t *termUI) BarChart(data []int, dimensions []string, barWidth int, size int) {
+func (t *termUI) BarChart(data []int, dimensions []string, barWidth int, bdLabel string, size int) {
 	bc := termui.NewBarChart()
-	bc.BorderLabel = "Bar Chart"
+	bc.BorderLabel = bdLabel
 	bc.Data = data
 	bc.BarWidth = barWidth
 	bc.BarGap = 0
