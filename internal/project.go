@@ -2,6 +2,7 @@ package internal
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 )
 
@@ -27,7 +28,7 @@ func NewProject(
 	}
 }
 
-func (p project) Render(tui *Tui) error {
+func (p project) Render(tui *Tui) (err error) {
 	for i := 0; i < len(p.widgets); i++ {
 		for _, ws := range p.widgets[i] {
 			// parse widgets for one row
@@ -35,7 +36,8 @@ func (p project) Render(tui *Tui) error {
 				serviceID := strings.Split(wn, ".")[0]
 				switch serviceID {
 				case "ga":
-					p.gaWidget.createWidgets(wn, w, tui)
+					fmt.Println(wn)
+					err = p.gaWidget.createWidgets(wn, w, tui)
 				default:
 					return errors.New("could not find the service - please verify your configuration file")
 				}
@@ -44,5 +46,5 @@ func (p project) Render(tui *Tui) error {
 		tui.AddRow()
 	}
 
-	return nil
+	return
 }

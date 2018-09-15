@@ -34,6 +34,7 @@ func main() {
 
 		// create a slice of slice with shape row[rowNbr][WidgetNbr]map[widgetName]Widget
 		rows := make([][]map[string]internal.Widget, len(p.Widgets))
+		fmt.Println(p.Widgets)
 		for i := 0; i < len(p.Widgets); i++ {
 			for wn, w := range p.Widgets[i] {
 				rows[i] = append(rows[i], map[string]internal.Widget{wn: w})

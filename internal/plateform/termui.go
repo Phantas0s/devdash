@@ -86,8 +86,6 @@ func (t *termUI) AddRow() error {
 
 	t.body.AddRows(termui.NewRow(t.row...))
 	// clean the internal row
-	t.body.Align()
-	termui.Render(t.body)
 	t.row = []*termui.Row{}
 
 	return nil
@@ -109,5 +107,7 @@ func (t termUI) validateRowSize() error {
 }
 
 func (t *termUI) Render() {
+	t.body.Align()
+	termui.Render(t.body)
 	termui.Loop()
 }

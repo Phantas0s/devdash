@@ -31,19 +31,19 @@ func NewGaWidget(keyfile string, viewID string) (gaWidget, error) {
 	}, nil
 }
 
-func (g gaWidget) createWidgets(widgetName string, widget Widget, tui *Tui) error {
+func (g gaWidget) createWidgets(widgetName string, widget Widget, tui *Tui) (err error) {
 	g.tui = tui
 
 	switch widgetName {
 	case realtime:
-		g.gaRTActiveUser(widget)
+		err = g.gaRTActiveUser(widget)
 	case users:
-		g.gaWeekUsers(widget)
+		err = g.gaWeekUsers(widget)
 	default:
 		return errors.New("can't find the widget " + widgetName)
 	}
 
-	return nil
+	return
 }
 
 // GaRTActiveUser get the real time active users from Google Analytics
