@@ -25,19 +25,18 @@ func main() {
 	tui := internal.NewTUI(termui)
 	tui.AddKQuit(cfg.KQuit())
 
-	for pn, p := range cfg.Projects {
-		fmt.Println(pn)
+	for _, p := range cfg.Projects {
+		pn := p.Name
 
 		if err != nil {
 			fmt.Println(err)
 		}
 
 		// create a slice of slice with shape row[rowNbr][WidgetNbr]map[widgetName]Widget
-		rows := make([][]map[string]internal.Widget, len(p.Widgets))
-		fmt.Println(p.Widgets)
-		for i := 0; i < len(p.Widgets); i++ {
-			for wn, w := range p.Widgets[i] {
-				rows[i] = append(rows[i], map[string]internal.Widget{wn: w})
+		rows := make([][]internal.Widget, len(p.Widgets))
+		for ir, r := range p.Widgets {
+			for _, w := range r.Row {
+				rows[ir] = append(rows[ir], w)
 			}
 		}
 

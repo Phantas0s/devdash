@@ -31,16 +31,16 @@ func NewGaWidget(keyfile string, viewID string) (gaWidget, error) {
 	}, nil
 }
 
-func (g gaWidget) createWidgets(widgetName string, widget Widget, tui *Tui) (err error) {
+func (g gaWidget) createWidgets(widget Widget, tui *Tui) (err error) {
 	g.tui = tui
 
-	switch widgetName {
+	switch widget.Name {
 	case realtime:
 		err = g.gaRTActiveUser(widget)
 	case users:
 		err = g.gaWeekUsers(widget)
 	default:
-		return errors.New("can't find the widget " + widgetName)
+		return errors.New("can't find the widget " + widget.Name)
 	}
 
 	return

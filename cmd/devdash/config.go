@@ -16,17 +16,22 @@ const (
 )
 
 type config struct {
-	General  General             `mapstructure "general"`
-	Projects map[string]Projects `mapstructure "projects"`
+	General  General   `mapstructure "general"`
+	Projects []Project `mapstructure "projects"`
 }
 
 type General struct {
 	Keys map[string]string
 }
 
-type Projects struct {
-	Services Services                     `mapstructure "services"`
-	Widgets  []map[string]internal.Widget `mapstructure "widgets"`
+type Project struct {
+	Name     string   `mapstructure:"name"`
+	Services Services `mapstructure "services"`
+	Widgets  []Row    `mapstructure "widgets"`
+}
+
+type Row struct {
+	Row []internal.Widget `mapstructure "row"`
 }
 
 type Services struct {
