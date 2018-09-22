@@ -15,6 +15,7 @@ type renderer interface {
 }
 
 type drawer interface {
+	Text(text string, fg uint16, size int)
 	TextBox(data string, fg uint16, bd uint16, bdlabel string, h int, size int)
 	BarChart(data []int, dimensions []string, barWidth int, bdLabel string, size int)
 	AddRow() error
@@ -39,6 +40,12 @@ type textBoxAttr struct {
 	Size    string
 }
 
+type textAttr struct {
+	Text string
+	Fg   uint16
+	Size string
+}
+
 type barChartAttr struct {
 	Data       []int
 	Dimensions []string
@@ -55,6 +62,16 @@ func NewTUI(instance manager) *Tui {
 
 type Tui struct {
 	instance manager
+}
+
+func (t *Tui) AddText(attr textAttr) error {
+	size, err := mapSize(attr.Size)
+	if err != nil {
+		return err
+	}
+	t.instance.Text(attr.Text, attr.Fg, size)
+
+	return nil
 }
 
 func (t *Tui) AddTextBox(attr textBoxAttr) error {

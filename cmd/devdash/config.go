@@ -36,15 +36,11 @@ type Row struct {
 
 type Services struct {
 	GoogleAnalytics GoogleAnalytics `mapstructure:"google_analytics"`
-	Trello          Trello          `mapstructure:"Trello"`
 }
 
 type GoogleAnalytics struct {
 	Keyfile string `mapstructure:"keyfile"`
 	ViewID  string `mapstructure:"view_id"`
-}
-
-type Trello struct {
 }
 
 func mapConfig(data []byte) config {

@@ -29,6 +29,7 @@ func NewProject(
 }
 
 func (p project) Render(tui *Tui) (err error) {
+	p.addTitle(tui)
 	for i := 0; i < len(p.widgets); i++ {
 		for _, w := range p.widgets[i] {
 			// parse widgets for one row
@@ -44,4 +45,12 @@ func (p project) Render(tui *Tui) (err error) {
 	}
 
 	return
+}
+
+func (p project) addTitle(tui *Tui) {
+	tui.AddText(textAttr{
+		Text: p.name,
+		Fg:   2,
+		Size: "XL",
+	})
 }

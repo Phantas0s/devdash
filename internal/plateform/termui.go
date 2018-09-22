@@ -55,6 +55,14 @@ func (t *termUI) TextBox(
 	t.row = append(t.row, termui.NewCol(size, 0, textBox))
 }
 
+func (t *termUI) Text(text string, fg uint16, size int) {
+	pro := termui.NewPar(text)
+	pro.Border = false
+	pro.TextFgColor = termui.Attribute(fg)
+
+	t.body.AddRows(termui.NewCol(size, 0, pro))
+}
+
 func (t *termUI) BarChart(data []int, dimensions []string, barWidth int, bdLabel string, size int) {
 	bc := termui.NewBarChart()
 	bc.BorderLabel = bdLabel
@@ -79,11 +87,6 @@ func (termUI) KQuit(key string) {
 }
 
 func (t *termUI) AddRow() error {
-	err := t.validateRowSize()
-	if err != nil {
-		return err
-	}
-
 	t.body.AddRows(termui.NewRow(t.row...))
 	t.body.Align()
 	termui.Render(t.body)
