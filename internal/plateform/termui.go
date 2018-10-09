@@ -10,8 +10,10 @@ import (
 const maxRowSize = 12
 
 type termUI struct {
-	body *termui.Grid
-	row  []*termui.Row
+	body    *termui.Grid
+	widgets []termui.GridBufferer
+	col     []*termui.Row
+	row     []*termui.Row
 }
 
 // NewTermUI returns a new Terminal Interface object with a given output mode.
@@ -52,7 +54,7 @@ func (t *termUI) TextBox(
 	textBox.BorderLabel = bdlabel
 	textBox.Height = h
 
-	t.row = append(t.row, termui.NewCol(size, 0, textBox))
+	t.widgets = append(t.widgets, textBox)
 }
 
 func (t *termUI) Text(text string, fg uint16, size int) {
@@ -76,7 +78,7 @@ func (t *termUI) BarChart(data []int, dimensions []string, barWidth int, bdLabel
 	bc.BarColor = termui.ColorRed
 	bc.NumColor = termui.ColorYellow
 
-	t.row = append(t.row, termui.NewCol(size, 0, bc))
+	t.widgets = append(t.widgets, bc)
 }
 
 // KQuit set a key to quit the application.
@@ -86,13 +88,19 @@ func (termUI) KQuit(key string) {
 	})
 }
 
+func (t *termUI) AddCol(size int) {
+	t.col = append(t.col, termui.NewCol(size, 0, t.widgets...))
+	t.widgets = []termui.GridBufferer{}
+}
+
 func (t *termUI) AddRow() error {
-	t.body.AddRows(termui.NewRow(t.row...))
+	t.body.AddRows(termui.NewRow(t.col...))
 	t.body.Align()
 	termui.Render(t.body)
 
 	// clean the internal row
 	t.row = []*termui.Row{}
+	t.col = []*termui.Row{}
 
 	return nil
 }

@@ -18,6 +18,7 @@ type drawer interface {
 	Text(text string, fg uint16, size int)
 	TextBox(data string, fg uint16, bd uint16, bdlabel string, h int, size int)
 	BarChart(data []int, dimensions []string, barWidth int, bdLabel string, size int)
+	AddCol(size int)
 	AddRow() error
 }
 
@@ -65,40 +66,26 @@ type Tui struct {
 }
 
 func (t *Tui) AddText(attr textAttr) error {
-	size, err := mapSize(attr.Size)
-	if err != nil {
-		return err
-	}
-	t.instance.Text(attr.Text, attr.Fg, size)
+	t.instance.Text(attr.Text, attr.Fg, 2)
 
 	return nil
 }
 
 func (t *Tui) AddTextBox(attr textBoxAttr) error {
-	size, err := mapSize(attr.Size)
-	if err != nil {
-		return err
-	}
-
 	t.instance.TextBox(
 		attr.Data,
 		attr.Fg,
 		attr.Bd,
 		attr.Bdlabel,
 		attr.H,
-		size,
+		2,
 	)
 
 	return nil
 }
 
 func (t *Tui) AddBarChart(attr barChartAttr) error {
-	size, err := mapSize(attr.Size)
-	if err != nil {
-		return err
-	}
-
-	t.instance.BarChart(attr.Data, attr.Dimensions, attr.BarWidth, attr.Bdlabel, size)
+	t.instance.BarChart(attr.Data, attr.Dimensions, attr.BarWidth, attr.Bdlabel, 2)
 
 	return nil
 }
@@ -133,6 +120,16 @@ func mapSize(size string) (int, error) {
 	default:
 		return 0, errors.Errorf("could not find size %s", s)
 	}
+}
+
+func (t *Tui) AddCol(size string) error {
+	s, err := mapSize(size)
+	if err != nil {
+		return err
+	}
+	t.instance.AddCol(s)
+
+	return nil
 }
 
 func (t *Tui) AddRow() {

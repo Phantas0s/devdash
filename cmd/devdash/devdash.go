@@ -32,11 +32,28 @@ func main() {
 			fmt.Println(err)
 		}
 
-		// create a slice of slice with shape row[rowNbr][WidgetNbr]map[widgetName]Widget
-		rows := make([][]internal.Widget, len(p.Widgets))
+		wc := 0
+		for _, r := range p.Widgets {
+			for _, c := range r.Row {
+				for _, ws := range c.Col {
+					for _ = range ws.Elements {
+						wc = len(ws.Elements)
+					}
+				}
+			}
+		}
+
+		rows := make([][][]internal.Widget, wc)
+		sizes := make([][]string, wc)
 		for ir, r := range p.Widgets {
-			for _, w := range r.Row {
-				rows[ir] = append(rows[ir], w)
+			for ic, c := range r.Row {
+				for _, ws := range c.Col {
+					sizes[ir] = append(sizes[ir], ws.Size)
+					for _, w := range ws.Elements {
+						rows[ir] = append(rows[ir], []internal.Widget{})
+						rows[ir][ic] = append(rows[ir][ic], w)
+					}
+				}
 			}
 		}
 
@@ -46,7 +63,7 @@ func main() {
 			fmt.Println(err)
 		}
 
-		project := internal.NewProject(pn, rows, gaWidget)
+		project := internal.NewProject(pn, rows, sizes, gaWidget)
 		if err != nil {
 			fmt.Println(err)
 		}

@@ -31,7 +31,16 @@ type Project struct {
 }
 
 type Row struct {
-	Row []internal.Widget `mapstructure "row"`
+	Row []Column `mapstructure "row"`
+}
+
+type Column struct {
+	Col []Widgets `mapstructure "Col"`
+}
+
+type Widgets struct {
+	Size     string            `json:"size"`
+	Elements []internal.Widget `json:"elements"`
 }
 
 type Services struct {
