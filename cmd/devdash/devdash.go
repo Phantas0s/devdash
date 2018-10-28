@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"time"
 
 	"github.com/Phantas0s/devdash/internal"
 	"github.com/Phantas0s/devdash/internal/plateform"
@@ -24,12 +25,33 @@ func main() {
 
 	tui := internal.NewTUI(termui)
 	tui.AddKQuit(cfg.KQuit())
+	defer tui.Close()
 
-	for _, p := range cfg.Projects {
+	err = run(cfg.Projects, tui)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	ticker := time.NewTicker(time.Duration(cfg.General.Refresh) * time.Minute)
+	go func() {
+		for range ticker.C {
+			tui.Init()
+			err := run(cfg.Projects, tui)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+	}()
+
+	tui.Render()
+}
+
+func run(projects []Project, tui *internal.Tui) (err error) {
+	for _, p := range projects {
 		pn := p.Name
 
 		if err != nil {
-			fmt.Println(err)
+			return err
 		}
 
 		wc := 0
@@ -60,20 +82,19 @@ func main() {
 		gaService := p.Services.GoogleAnalytics
 		gaWidget, err := internal.NewGaWidget(gaService.Keyfile, gaService.ViewID)
 		if err != nil {
-			fmt.Println(err)
+			return err
 		}
 
 		project := internal.NewProject(pn, rows, sizes, gaWidget)
 		if err != nil {
-			fmt.Println(err)
+			return err
 		}
 
 		err = project.Render(tui)
 		if err != nil {
-			fmt.Println(err)
+			return err
 		}
 	}
 
-	tui.Render()
-	tui.Close()
+	return nil
 }

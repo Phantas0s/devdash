@@ -33,6 +33,7 @@ func NewProject(
 
 func (p project) Render(tui *Tui) (err error) {
 	p.addTitle(tui)
+
 	for r, row := range p.widgets {
 		for c, col := range row {
 			for _, w := range col {

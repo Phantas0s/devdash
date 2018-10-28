@@ -21,7 +21,8 @@ type config struct {
 }
 
 type General struct {
-	Keys map[string]string
+	Keys    map[string]string
+	Refresh int64 `mapstructure:"refresh"`
 }
 
 type Project struct {

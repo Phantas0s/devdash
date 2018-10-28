@@ -30,6 +30,7 @@ type manager interface {
 	kManager
 	renderer
 	drawer
+	Init()
 }
 
 type textBoxAttr struct {
@@ -134,4 +135,8 @@ func (t *Tui) AddCol(size string) error {
 
 func (t *Tui) AddRow() {
 	t.instance.AddRow()
+}
+
+func (t *Tui) Init() {
+	t.instance.Init()
 }

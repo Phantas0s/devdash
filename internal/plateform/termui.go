@@ -123,3 +123,17 @@ func (t termUI) validateRowSize() error {
 func (t *termUI) Render() {
 	termui.Loop()
 }
+
+func (t *termUI) Init() {
+	// set the basic properties
+	body := termui.NewGrid()
+	body.X = 0
+	body.Y = 0
+	body.BgColor = termui.ThemeAttr("bg")
+	body.Width = termui.TermWidth()
+
+	t.body = body
+	t.widgets = []termui.GridBufferer{}
+	t.col = []*termui.Row{}
+	t.row = []*termui.Row{}
+}
