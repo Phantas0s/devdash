@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"os/exec"
 	"time"
 
 	"github.com/Phantas0s/devdash/internal"
@@ -35,6 +37,10 @@ func main() {
 	ticker := time.NewTicker(time.Duration(cfg.General.Refresh) * time.Minute)
 	go func() {
 		for range ticker.C {
+			cmd := exec.Command("clear") //Linux example, its tested
+			cmd.Stdout = os.Stdout
+			cmd.Run()
+
 			tui.Init()
 			err := run(cfg.Projects, tui)
 			if err != nil {
