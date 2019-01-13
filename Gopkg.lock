@@ -117,6 +117,14 @@
   version = "v0.8.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:fd18b3e9b2ec7f9b5d268e94346dbcc425f0455e207f4d688597cd86001543b7"
+  name = "github.com/sparrc/go-ping"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ef3ab45e41b017889941ea5bb796dd502d2b5a1b"
+
+[[projects]]
   digest = "1:6a4a11ba764a56d2758899ec6f3848d24698d48442ebce85ee7a3f63284526cd"
   name = "github.com/spf13/afero"
   packages = [
@@ -161,11 +169,25 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d6b719875cf8091fbab38527d81d34e71f4521b9ee9ccfbd4a32cff2ac5af96e"
+  digest = "1:9f3a60def1a1eb5ac184e71dde43c6f99606f54d106db7c95f8b8338629a777b"
+  name = "github.com/tatsushid/go-fastping"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "d7bb493dee3e090e2ffb6914adddf17c1e7c026c"
+
+[[projects]]
+  branch = "master"
+  digest = "1:2092dc9eaa13ef38d2bedabf5b580c7d45a98f9ec8c508e18f1d9c389f075f83"
   name = "golang.org/x/net"
   packages = [
+    "bpf",
     "context",
     "context/ctxhttp",
+    "icmp",
+    "internal/iana",
+    "internal/socket",
+    "ipv4",
+    "ipv6",
   ]
   pruneopts = "UT"
   revision = "161cd47e91fd58ac17490ef4d742dc98bb4cf60e"
@@ -254,7 +276,9 @@
   input-imports = [
     "github.com/gizak/termui",
     "github.com/pkg/errors",
+    "github.com/sparrc/go-ping",
     "github.com/spf13/viper",
+    "github.com/tatsushid/go-fastping",
     "golang.org/x/oauth2/google",
     "golang.org/x/oauth2/jwt",
     "google.golang.org/api/analytics/v3",

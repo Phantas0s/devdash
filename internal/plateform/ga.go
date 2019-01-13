@@ -25,16 +25,13 @@ type Client struct {
 // New takes a keyfile for authentication and
 // returns a new Google Analytics Reporting Client struct.
 func NewGaClient(keyfile string) (*Client, error) {
-	// Read the keyfile.
 	data, err := ioutil.ReadFile(keyfile)
 	if err != nil {
 		return nil, fmt.Errorf("reading keyfile %q failed: %v", keyfile, err)
 	}
 
-	// Create the initial client.
 	client := &Client{}
 
-	// Create a JWT config from the keyfile.
 	client.config, err = google.JWTConfigFromJSON(data, ga.AnalyticsReadonlyScope)
 	if err != nil {
 		return nil, fmt.Errorf("creating JWT config from json keyfile %q failed: %v", keyfile, err)
@@ -42,13 +39,13 @@ func NewGaClient(keyfile string) (*Client, error) {
 
 	client.client = client.config.Client(context.Background())
 
-	// Construct the analytics reporting v4 service object.
+	// analytics reporting v4 service
 	client.service, err = ga.New(client.client)
 	if err != nil {
 		return nil, fmt.Errorf("creating the analytics reporting service v4 object failed: %v", err)
 	}
 
-	// Construct the analytics reporting v3 service object.
+	// analytics reporting v3 service object.
 	// TODO: remove v3 once v4 supports the realtime reporting API.
 	client.servicev3, err = gav3.New(client.client)
 	if err != nil {
@@ -74,14 +71,13 @@ func (c *Client) GetReport(viewID string) (*ga.GetReportsResponse, error) {
 					{Expression: "ga:users"},
 				},
 				Dimensions: []*ga.Dimension{
-					{Name: "ga:day"},
 					{Name: "ga:month"},
+					{Name: "ga:day"},
 				},
 			},
 		},
 	}
 
-	// Call the BatchGet method and return the response.
 	return c.service.Reports.BatchGet(req).Do()
 }
 
@@ -92,7 +88,6 @@ func (c *Client) GetReport(viewID string) (*ga.GetReportsResponse, error) {
 func (c *Client) RealTimeUsers(viewID string) (string, error) {
 	metric := "rt:activeUsers"
 
-	// Call the realtime get method.
 	resp, err := c.realtimeService.Get(gaPrefix+viewID, metric).Do()
 	if err != nil {
 		return "", err

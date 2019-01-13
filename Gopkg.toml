@@ -48,3 +48,11 @@
 [[constraint]]
   name = "github.com/pkg/errors"
   version = "0.8.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/tatsushid/go-fastping"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/sparrc/go-ping"

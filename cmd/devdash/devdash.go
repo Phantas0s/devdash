@@ -54,46 +54,28 @@ func main() {
 
 func run(projects []Project, tui *internal.Tui) (err error) {
 	for _, p := range projects {
-		pn := p.Name
-
+		rows, sizes := p.OrderWidgets()
 		if err != nil {
 			return err
 		}
-
-		wc := 0
-		for _, r := range p.Widgets {
-			for _, c := range r.Row {
-				for _, ws := range c.Col {
-					for _ = range ws.Elements {
-						wc = len(ws.Elements)
-					}
-				}
-			}
-		}
-
-		rows := make([][][]internal.Widget, wc)
-		sizes := make([][]string, wc)
-		for ir, r := range p.Widgets {
-			for ic, c := range r.Row {
-				for _, ws := range c.Col {
-					sizes[ir] = append(sizes[ir], ws.Size)
-					for _, w := range ws.Elements {
-						rows[ir] = append(rows[ir], []internal.Widget{})
-						rows[ir][ic] = append(rows[ir][ic], w)
-					}
-				}
-			}
-		}
+		project := internal.NewProject(p.Name, rows, sizes)
 
 		gaService := p.Services.GoogleAnalytics
-		gaWidget, err := internal.NewGaWidget(gaService.Keyfile, gaService.ViewID)
-		if err != nil {
-			return err
+		if !gaService.empty() {
+			gaWidget, err := internal.NewGaWidget(gaService.Keyfile, gaService.ViewID)
+			if err != nil {
+				return err
+			}
+			project.WithGa(gaWidget)
 		}
 
-		project := internal.NewProject(pn, rows, sizes, gaWidget)
-		if err != nil {
-			return err
+		monService := p.Services.Monitor
+		if !monService.empty() {
+			monWidget, err := internal.NewMonitorWidget(monService.Address)
+			if err != nil {
+				return err
+			}
+			project.WithMonitor(monWidget)
 		}
 
 		err = project.Render(tui)
