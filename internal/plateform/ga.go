@@ -58,14 +58,13 @@ func NewGaClient(keyfile string) (*Client, error) {
 
 // GetReport queries the Analytics Reporting API V4 using the
 // Analytics Reporting API V4 service object.
-// It returns the Analytics Reporting API V4 response
-func (c *Client) GetReport(viewID string) (*ga.GetReportsResponse, error) {
+func (c *Client) GetReport(viewID string, startDate string, endDate string) (*ga.GetReportsResponse, error) {
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
 				ViewId: viewID,
 				DateRanges: []*ga.DateRange{
-					{StartDate: "7daysAgo", EndDate: "today"},
+					{StartDate: startDate, EndDate: endDate},
 				},
 				Metrics: []*ga.Metric{
 					{Expression: "ga:users"},

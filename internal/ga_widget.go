@@ -30,14 +30,14 @@ func NewGaWidget(keyfile string, viewID string) (*gaWidget, error) {
 	}, nil
 }
 
-func (g *gaWidget) createWidgets(widget Widget, tui *Tui) (err error) {
+func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	g.tui = tui
 
 	switch widget.Name {
 	case realtime:
 		err = g.gaRTActiveUser(widget)
 	case users:
-		err = g.gaWeekUsers(widget)
+		err = g.gaUsers(widget)
 	default:
 		return errors.New("can't find the widget " + widget.Name)
 	}
@@ -72,9 +72,19 @@ func (g *gaWidget) gaRTActiveUser(widget Widget) error {
 	return nil
 }
 
-// GaWeekUsers get the number of users the 7 last days on your website
-func (g *gaWidget) gaWeekUsers(widget Widget) error {
-	rep, err := g.client.GetReport(g.viewID)
+// gaUsers get the number of users the 7 last days on your website
+func (g *gaWidget) gaUsers(widget Widget) error {
+	startDate := "7daysAgo"
+	if _, ok := widget.Options["start_date"]; ok {
+		startDate = widget.Options["start_date"]
+	}
+
+	endDate := "today"
+	if _, ok := widget.Options["end_date"]; ok {
+		endDate = widget.Options["end_date"]
+	}
+
+	rep, err := g.client.GetReport(g.viewID, startDate, endDate)
 	if err != nil {
 		return err
 	}

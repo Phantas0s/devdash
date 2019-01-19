@@ -25,7 +25,7 @@ func NewMonitorWidget(address string) (*monitorWidget, error) {
 	}, nil
 }
 
-func (m *monitorWidget) createWidgets(widget Widget, tui *Tui) (err error) {
+func (m *monitorWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	m.tui = tui
 
 	switch widget.Name {

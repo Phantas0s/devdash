@@ -7,12 +7,13 @@ import (
 )
 
 type service interface {
-	createWidgets(widget Widget, tui *Tui) (err error)
+	CreateWidgets(widget Widget, tui *Tui) (err error)
 }
 
 type Widget struct {
-	Name string
-	Size string
+	Name    string            `mapstructures:"name"`
+	Size    string            `mapstructures:"size"`
+	Options map[string]string `mapstructure "options"`
 }
 
 type project struct {
@@ -56,13 +57,13 @@ func (p *project) Render(tui *Tui) (err error) {
 						return errors.Errorf("can't use the widget %s without the service GoogleAnalytics - please fix your configuration file.", w.Name)
 					}
 
-					err = p.gaWidget.createWidgets(w, tui)
+					err = p.gaWidget.CreateWidgets(w, tui)
 				case "mon":
 					if p.monitorWidget == nil {
 						return errors.Errorf("can't use the widget %s without the service Monitor - please fix your configuration file.", w.Name)
 					}
 
-					err = p.monitorWidget.createWidgets(w, tui)
+					err = p.monitorWidget.CreateWidgets(w, tui)
 				default:
 					return errors.Errorf("could not find the service for widget %s - wrong name - please verify your configuration file", w.Name)
 				}
