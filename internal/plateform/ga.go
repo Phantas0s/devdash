@@ -73,6 +73,13 @@ func (c *Client) GetReport(viewID string, startDate string, endDate string) (*ga
 					{Name: "ga:month"},
 					{Name: "ga:day"},
 				},
+				OrderBys: []*ga.OrderBy{
+					{
+						FieldName: "ga:month",
+						SortOrder: "DESCENDING",
+					},
+				},
+				IncludeEmptyRows: true,
 			},
 		},
 	}
