@@ -59,7 +59,7 @@ func (m *monitorWidget) pingWidget(widget Widget) error {
 	if stats.PacketsRecv == 0 {
 		fg = uint16(2)
 	}
-	err = m.tui.AddTextBox(textBoxAttr{
+	m.tui.AddTextBox(textBoxAttr{
 		Data:    fmt.Sprintf("Sent: %d / Received: %d / Time: %d", stats.PacketsSent, stats.PacketsRecv, stats.AvgRtt),
 		Fg:      fg,
 		Bd:      5,
@@ -67,9 +67,6 @@ func (m *monitorWidget) pingWidget(widget Widget) error {
 		H:       3,
 		Size:    widget.Size,
 	})
-	if err != nil {
-		return err
-	}
 
 	return nil
 }
@@ -99,7 +96,7 @@ func (m *monitorWidget) availabilityWidget(widget Widget) error {
 		fg = uint16(2)
 	}
 
-	err = m.tui.AddTextBox(textBoxAttr{
+	m.tui.AddTextBox(textBoxAttr{
 		Data:    fmt.Sprintf("Status: %s / Status code: %d", status, statusCode),
 		Fg:      fg,
 		Bd:      5,
@@ -107,9 +104,6 @@ func (m *monitorWidget) availabilityWidget(widget Widget) error {
 		H:       3,
 		Size:    widget.Size,
 	})
-	if err != nil {
-		return err
-	}
 
 	return nil
 }

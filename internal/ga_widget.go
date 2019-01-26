@@ -1,15 +1,17 @@
 package internal
 
 import (
-	"errors"
 	"strconv"
+	"strings"
 
 	"github.com/Phantas0s/devdash/internal/plateform"
+	"github.com/pkg/errors"
 )
 
 const (
 	realtime = "ga.realtime"
 	users    = "ga.users"
+	pages    = "ga.pages"
 )
 
 type gaWidget struct {
@@ -38,8 +40,10 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 		err = g.gaRTActiveUser(widget)
 	case users:
 		err = g.gaUsers(widget)
+	case pages:
+		err = g.getFirstPages(widget, 3)
 	default:
-		return errors.New("can't find the widget " + widget.Name)
+		return errors.Errorf("can't find the widget %s", widget.Name)
 	}
 
 	return
@@ -57,7 +61,7 @@ func (g *gaWidget) gaRTActiveUser(widget Widget) error {
 		fg = uint16(2)
 	}
 
-	err = g.tui.AddTextBox(textBoxAttr{
+	g.tui.AddTextBox(textBoxAttr{
 		Data:    users,
 		Fg:      fg,
 		Bd:      5,
@@ -65,9 +69,6 @@ func (g *gaWidget) gaRTActiveUser(widget Widget) error {
 		H:       3,
 		Size:    widget.Size,
 	})
-	if err != nil {
-		return err
-	}
 
 	return nil
 }
@@ -84,7 +85,7 @@ func (g *gaWidget) gaUsers(widget Widget) error {
 		endDate = widget.Options["end_date"]
 	}
 
-	rep, err := g.client.GetReport(g.viewID, startDate, endDate)
+	rep, err := g.client.GetUserReport(g.viewID, startDate, endDate)
 	if err != nil {
 		return err
 	}
@@ -114,6 +115,62 @@ func (g *gaWidget) gaUsers(widget Widget) error {
 		BarWidth:   6,
 		Bdlabel:    "Weekly users",
 		Size:       widget.Size,
+	})
+
+	return nil
+}
+
+func (g *gaWidget) getFirstPages(widget Widget, count int) error {
+	rep, err := g.client.GetTopContent(g.viewID)
+	if err != nil {
+		return err
+	}
+
+	var nbrPages int64 = 5
+	if _, ok := widget.Options["page_limit"]; ok {
+		nbrPages, err = strconv.ParseInt(widget.Options["page_limit"], 0, 0)
+		if err != nil {
+			return errors.Wrapf(err, "%s must be a number", widget.Options["page_limit"])
+		}
+	}
+
+	var pages []string
+	var u []int
+	for _, v := range rep.Reports {
+		for l := 0; l < len(v.Data.Rows); l++ {
+			p := v.Data.Rows[l].Dimensions[0]
+			pages = append(pages, p)
+			for m := 0; m < len(v.Data.Rows[l].Metrics); m++ {
+				value := v.Data.Rows[l].Metrics[m].Values[0]
+				if v, err := strconv.ParseInt(value, 0, 0); err == nil {
+					u = append(u, int(v))
+				}
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	table := [][]string{{"Page", "Page Views"}}
+	var pLen int64 = 20
+	for i := 0; i < int(nbrPages); i++ {
+		p := strings.Trim(pages[i], " ")
+		if _, ok := widget.Options["page_length"]; ok {
+			pLen, err = strconv.ParseInt(widget.Options["page_length"], 0, 0)
+		}
+		if err != nil {
+			return errors.Wrapf(err, "%s must be a number", widget.Options["page_length"])
+		}
+		if len(p) > int(pLen) {
+			p = p[:pLen]
+		}
+		table = append(table, []string{p, strconv.Itoa(u[i])})
+	}
+
+	g.tui.AddTable(tableAttr{
+		Data:    table,
+		BdLabel: "Most page viewed",
 	})
 
 	return nil

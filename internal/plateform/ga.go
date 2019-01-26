@@ -58,7 +58,7 @@ func NewGaClient(keyfile string) (*Client, error) {
 
 // GetReport queries the Analytics Reporting API V4 using the
 // Analytics Reporting API V4 service object.
-func (c *Client) GetReport(viewID string, startDate string, endDate string) (*ga.GetReportsResponse, error) {
+func (c *Client) GetUserReport(viewID string, startDate string, endDate string) (*ga.GetReportsResponse, error) {
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
@@ -100,4 +100,30 @@ func (c *Client) RealTimeUsers(viewID string) (string, error) {
 	}
 
 	return resp.TotalsForAllResults[metric], nil
+}
+
+// GetReport queries the Analytics Reporting API V4 using the
+// Analytics Reporting API V4 service object.
+func (c *Client) GetTopContent(viewID string) (*ga.GetReportsResponse, error) {
+	req := &ga.GetReportsRequest{
+		ReportRequests: []*ga.ReportRequest{
+			{
+				ViewId: viewID,
+				Metrics: []*ga.Metric{
+					{Expression: "ga:pageViews"},
+				},
+				Dimensions: []*ga.Dimension{
+					{Name: "ga:pagePath"},
+				},
+				OrderBys: []*ga.OrderBy{
+					{
+						FieldName: "ga:pageViews",
+						SortOrder: "DESCENDING",
+					},
+				},
+			},
+		},
+	}
+
+	return c.service.Reports.BatchGet(req).Do()
 }

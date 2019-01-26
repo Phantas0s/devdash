@@ -85,17 +85,12 @@ func (t termUI) validateRowSize() error {
 	return nil
 }
 
-func (t *termUI) Render() {
-	termui.Loop()
-}
-
 func (t *termUI) TextBox(
 	data string,
 	fg uint16,
 	bd uint16,
 	bdlabel string,
 	h int,
-	size int,
 ) {
 	textBox := termui.NewPar(data)
 
@@ -115,7 +110,7 @@ func (t *termUI) Text(text string, fg uint16, size int) {
 	t.body.AddRows(termui.NewCol(size, 0, pro))
 }
 
-func (t *termUI) BarChart(data []int, dimensions []string, barWidth int, bdLabel string, size int) {
+func (t *termUI) BarChart(data []int, dimensions []string, barWidth int, bdLabel string) {
 	bc := termui.NewBarChart()
 	bc.BorderLabel = bdLabel
 	bc.Data = data
@@ -131,9 +126,23 @@ func (t *termUI) BarChart(data []int, dimensions []string, barWidth int, bdLabel
 	t.widgets = append(t.widgets, bc)
 }
 
+func (t *termUI) Table(data [][]string, bdLabel string) {
+	ta := termui.NewTable()
+	ta.Rows = data
+	ta.BorderLabel = bdLabel
+	ta.FgColor = termui.ColorGreen
+	ta.SetSize()
+
+	t.widgets = append(t.widgets, ta)
+}
+
 // KQuit set a key to quit the application.
 func (termUI) KQuit(key string) {
 	termui.Handle(fmt.Sprintf("/sys/kbd/%s", key), func(termui.Event) {
 		termui.StopLoop()
 	})
+}
+
+func (t *termUI) Render() {
+	termui.Loop()
 }

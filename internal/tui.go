@@ -16,8 +16,9 @@ type renderer interface {
 
 type drawer interface {
 	Text(text string, fg uint16, size int)
-	TextBox(data string, fg uint16, bd uint16, bdlabel string, h int, size int)
-	BarChart(data []int, dimensions []string, barWidth int, bdLabel string, size int)
+	TextBox(data string, fg uint16, bd uint16, bdlabel string, h int)
+	BarChart(data []int, dimensions []string, barWidth int, bdLabel string)
+	Table(data [][]string, bdLabel string)
 	AddCol(size int)
 	AddRow() error
 }
@@ -33,6 +34,7 @@ type manager interface {
 	Init()
 }
 
+// Value objects
 type textBoxAttr struct {
 	Data    string
 	Fg      uint16
@@ -56,6 +58,11 @@ type barChartAttr struct {
 	Size       string
 }
 
+type tableAttr struct {
+	Data    [][]string
+	BdLabel string
+}
+
 func NewTUI(instance manager) *Tui {
 	return &Tui{
 		instance: instance,
@@ -66,29 +73,26 @@ type Tui struct {
 	instance manager
 }
 
-func (t *Tui) AddText(attr textAttr) error {
+func (t *Tui) AddText(attr textAttr) {
 	t.instance.Text(attr.Text, attr.Fg, 2)
-
-	return nil
 }
 
-func (t *Tui) AddTextBox(attr textBoxAttr) error {
+func (t *Tui) AddTextBox(attr textBoxAttr) {
 	t.instance.TextBox(
 		attr.Data,
 		attr.Fg,
 		attr.Bd,
 		attr.Bdlabel,
 		attr.H,
-		2,
 	)
-
-	return nil
 }
 
-func (t *Tui) AddBarChart(attr barChartAttr) error {
-	t.instance.BarChart(attr.Data, attr.Dimensions, attr.BarWidth, attr.Bdlabel, 2)
+func (t *Tui) AddBarChart(attr barChartAttr) {
+	t.instance.BarChart(attr.Data, attr.Dimensions, attr.BarWidth, attr.Bdlabel)
+}
 
-	return nil
+func (t *Tui) AddTable(attr tableAttr) {
+	t.instance.Table(attr.Data, attr.BdLabel)
 }
 
 func (t *Tui) AddKQuit(key string) {
