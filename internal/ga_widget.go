@@ -9,9 +9,10 @@ import (
 )
 
 const (
-	realtime = "ga.realtime"
-	users    = "ga.users"
-	pages    = "ga.pages"
+	realtime      = "ga.realtime"
+	users         = "ga.users"
+	pages         = "ga.pages"
+	new_returning = "ga.new_returning"
 )
 
 type gaWidget struct {
@@ -41,7 +42,9 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	case users:
 		err = g.gaUsers(widget)
 	case pages:
-		err = g.getFirstPages(widget, 3)
+		err = g.TopContents(widget)
+	case new_returning:
+		err = g.NewVsReturningSessions(widget)
 	default:
 		return errors.Errorf("can't find the widget %s", widget.Name)
 	}
@@ -85,7 +88,7 @@ func (g *gaWidget) gaUsers(widget Widget) error {
 		endDate = widget.Options["end_date"]
 	}
 
-	rep, err := g.client.GetUserReport(g.viewID, startDate, endDate)
+	rep, err := g.client.UserReport(g.viewID, startDate, endDate)
 	if err != nil {
 		return err
 	}
@@ -113,6 +116,7 @@ func (g *gaWidget) gaUsers(widget Widget) error {
 		Data:       u,
 		Dimensions: dates,
 		BarWidth:   6,
+		Bd:         5,
 		Bdlabel:    "Weekly users",
 		Size:       widget.Size,
 	})
@@ -120,8 +124,8 @@ func (g *gaWidget) gaUsers(widget Widget) error {
 	return nil
 }
 
-func (g *gaWidget) getFirstPages(widget Widget, count int) error {
-	rep, err := g.client.GetTopContent(g.viewID)
+func (g *gaWidget) TopContents(widget Widget) error {
+	rep, err := g.client.TopContents(g.viewID)
 	if err != nil {
 		return err
 	}
@@ -170,7 +174,58 @@ func (g *gaWidget) getFirstPages(widget Widget, count int) error {
 
 	g.tui.AddTable(tableAttr{
 		Data:    table,
+		Bd:      5,
 		BdLabel: "Most page viewed",
+	})
+
+	return nil
+}
+
+func (g *gaWidget) NewVsReturningSessions(widget Widget) error {
+	rep, err := g.client.NewVsReturningSessions(g.viewID)
+	if err != nil {
+		return err
+	}
+
+	var dim []string
+	var u []int
+	for _, v := range rep.Reports {
+		for l := 0; l < len(v.Data.Rows); l++ {
+			p := v.Data.Rows[l].Dimensions[0]
+			dim = append(dim, p)
+			for m := 0; m < len(v.Data.Rows[l].Metrics); m++ {
+				value := v.Data.Rows[l].Metrics[m].Values[0]
+				if v, err := strconv.ParseInt(value, 0, 0); err == nil {
+					u = append(u, int(v))
+				}
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	s := len(u) / 2
+	sessions := u[:s]
+	new := u[s:]
+
+	var data [8][]int
+
+	for i := 0; i < 8; i++ {
+		for j := 0; j < len(sessions); j++ {
+			data[i] = append(data[i], 0)
+		}
+	}
+
+	data[3] = sessions
+	data[4] = new
+
+	g.tui.AddStackedBarChart(stackedBarChartAttr{
+		Data:       data,
+		Dimensions: dim,
+		BarWidth:   6,
+		Bd:         5,
+		Bdlabel:    "Session vs New",
 	})
 
 	return nil

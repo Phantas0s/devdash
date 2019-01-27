@@ -17,8 +17,9 @@ type renderer interface {
 type drawer interface {
 	Text(text string, fg uint16, size int)
 	TextBox(data string, fg uint16, bd uint16, bdlabel string, h int)
-	BarChart(data []int, dimensions []string, barWidth int, bdLabel string)
-	Table(data [][]string, bdLabel string)
+	BarChart(data []int, dimensions []string, barWidth int, bd uint16, bdLabel string)
+	StackedBarChart(data [8][]int, dimensions []string, barWidth int, bd uint16, bdLabel string)
+	Table(data [][]string, bd uint16, bdLabel string)
 	AddCol(size int)
 	AddRow() error
 }
@@ -54,12 +55,22 @@ type barChartAttr struct {
 	Data       []int
 	Dimensions []string
 	BarWidth   int
+	Bd         uint16
 	Bdlabel    string
 	Size       string
 }
 
+type stackedBarChartAttr struct {
+	Data       [8][]int
+	Dimensions []string
+	BarWidth   int
+	Bd         uint16
+	Bdlabel    string
+}
+
 type tableAttr struct {
 	Data    [][]string
+	Bd      uint16
 	BdLabel string
 }
 
@@ -88,11 +99,15 @@ func (t *Tui) AddTextBox(attr textBoxAttr) {
 }
 
 func (t *Tui) AddBarChart(attr barChartAttr) {
-	t.instance.BarChart(attr.Data, attr.Dimensions, attr.BarWidth, attr.Bdlabel)
+	t.instance.BarChart(attr.Data, attr.Dimensions, attr.BarWidth, attr.Bd, attr.Bdlabel)
+}
+
+func (t *Tui) AddStackedBarChart(attr stackedBarChartAttr) {
+	t.instance.StackedBarChart(attr.Data, attr.Dimensions, attr.BarWidth, attr.Bd, attr.Bdlabel)
 }
 
 func (t *Tui) AddTable(attr tableAttr) {
-	t.instance.Table(attr.Data, attr.BdLabel)
+	t.instance.Table(attr.Data, attr.Bd, attr.BdLabel)
 }
 
 func (t *Tui) AddKQuit(key string) {
