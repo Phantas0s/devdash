@@ -51,8 +51,4 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/tatsushid/go-fastping"
-
-[[constraint]]
-  branch = "master"
   name = "github.com/sparrc/go-ping"

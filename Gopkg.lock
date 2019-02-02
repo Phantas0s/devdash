@@ -169,14 +169,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9f3a60def1a1eb5ac184e71dde43c6f99606f54d106db7c95f8b8338629a777b"
-  name = "github.com/tatsushid/go-fastping"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "d7bb493dee3e090e2ffb6914adddf17c1e7c026c"
-
-[[projects]]
-  branch = "master"
   digest = "1:2092dc9eaa13ef38d2bedabf5b580c7d45a98f9ec8c508e18f1d9c389f075f83"
   name = "golang.org/x/net"
   packages = [
@@ -278,7 +270,6 @@
     "github.com/pkg/errors",
     "github.com/sparrc/go-ping",
     "github.com/spf13/viper",
-    "github.com/tatsushid/go-fastping",
     "golang.org/x/oauth2/google",
     "golang.org/x/oauth2/jwt",
     "google.golang.org/api/analytics/v3",
