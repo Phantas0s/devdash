@@ -3,7 +3,7 @@ package plateform
 import (
 	"fmt"
 
-	"github.com/gizak/termui"
+	"github.com/Phantas0s/termui"
 	"github.com/pkg/errors"
 )
 
@@ -129,6 +129,7 @@ func (t *termUI) BarChart(
 	bc.BarColor = termui.ColorBlue
 	bc.NumColor = termui.ColorWhite
 	bc.BorderFg = termui.Attribute(bd)
+	bc.Buffer()
 
 	t.widgets = append(t.widgets, bc)
 }
@@ -144,12 +145,14 @@ func (t *termUI) StackedBarChart(
 	bc.BorderLabel = bdLabel
 	bc.Data = data
 	bc.BarWidth = barWidth
-	bc.DataLabels = dimensions
 	bc.Width = 200
 	bc.Height = 20
+	bc.BarGap = 0
+	bc.DataLabels = dimensions
 	bc.TextColor = termui.ColorGreen
 	bc.BorderFg = termui.Attribute(bd)
-	bc.SetMax(10)
+	bc.ShowScale = true
+	// bc.SetMax(10)
 
 	t.widgets = append(t.widgets, bc)
 }

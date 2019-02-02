@@ -40,7 +40,7 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	case realtime:
 		err = g.gaRTActiveUser(widget)
 	case users:
-		err = g.gaUsers(widget)
+		err = g.users(widget)
 	case pages:
 		err = g.TopContents(widget)
 	case new_returning:
@@ -76,8 +76,8 @@ func (g *gaWidget) gaRTActiveUser(widget Widget) error {
 	return nil
 }
 
-// gaUsers get the number of users the 7 last days on your website
-func (g *gaWidget) gaUsers(widget Widget) error {
+// users get the number of users the 7 last days on your website
+func (g *gaWidget) users(widget Widget) error {
 	startDate := "7daysAgo"
 	if _, ok := widget.Options["start_date"]; ok {
 		startDate = widget.Options["start_date"]
@@ -86,6 +86,11 @@ func (g *gaWidget) gaUsers(widget Widget) error {
 	endDate := "today"
 	if _, ok := widget.Options["end_date"]; ok {
 		endDate = widget.Options["end_date"]
+	}
+
+	title := "Weekly users"
+	if _, ok := widget.Options["title"]; ok {
+		title = widget.Options["title"]
 	}
 
 	rep, err := g.client.UserReport(g.viewID, startDate, endDate)
@@ -117,7 +122,7 @@ func (g *gaWidget) gaUsers(widget Widget) error {
 		Dimensions: dates,
 		BarWidth:   6,
 		Bd:         5,
-		Bdlabel:    "Weekly users",
+		Bdlabel:    title,
 		Size:       widget.Size,
 	})
 
@@ -187,12 +192,13 @@ func (g *gaWidget) NewVsReturningSessions(widget Widget) error {
 		return err
 	}
 
-	var dim []string
+	dateSeparator := "-"
+
+	var dates []string
 	var u []int
 	for _, v := range rep.Reports {
 		for l := 0; l < len(v.Data.Rows); l++ {
-			p := v.Data.Rows[l].Dimensions[0]
-			dim = append(dim, p)
+			dates = append(dates, v.Data.Rows[l].Dimensions[1]+dateSeparator+v.Data.Rows[l].Dimensions[2])
 			for m := 0; m < len(v.Data.Rows[l].Metrics); m++ {
 				value := v.Data.Rows[l].Metrics[m].Values[0]
 				if v, err := strconv.ParseInt(value, 0, 0); err == nil {
@@ -222,7 +228,7 @@ func (g *gaWidget) NewVsReturningSessions(widget Widget) error {
 
 	g.tui.AddStackedBarChart(stackedBarChartAttr{
 		Data:       data,
-		Dimensions: dim,
+		Dimensions: dates,
 		BarWidth:   6,
 		Bd:         5,
 		Bdlabel:    "Session vs New",
