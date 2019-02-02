@@ -79,9 +79,9 @@ func (p *project) Render(tui *Tui) (err error) {
 }
 
 func (p *project) addTitle(tui *Tui) {
-	tui.AddText(textAttr{
-		Text: p.name,
-		Fg:   5,
-		Size: "XL",
+	tui.AddProjectTitle(textAttr{
+		Text:       p.name,
+		Foreground: 5,
+		Size:       "XL",
 	})
 }

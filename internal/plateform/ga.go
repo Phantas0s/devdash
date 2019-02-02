@@ -13,6 +13,7 @@ import (
 )
 
 const gaPrefix = "ga:"
+const earliestDate = "2005-01-01"
 
 type Client struct {
 	config          *jwt.Config
@@ -58,7 +59,7 @@ func NewGaClient(keyfile string) (*Client, error) {
 
 // GetReport queries the Analytics Reporting API V4 using the
 // Analytics Reporting API V4 service object.
-func (c *Client) UserReport(viewID string, startDate string, endDate string) (*ga.GetReportsResponse, error) {
+func (c *Client) Users(viewID string, startDate string, endDate string) (*ga.GetReportsResponse, error) {
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
@@ -76,7 +77,7 @@ func (c *Client) UserReport(viewID string, startDate string, endDate string) (*g
 				OrderBys: []*ga.OrderBy{
 					{
 						FieldName: "ga:month",
-						SortOrder: "DESCENDING",
+						SortOrder: "ASCENDING",
 					},
 				},
 				IncludeEmptyRows: true,
@@ -102,13 +103,24 @@ func (c *Client) RealTimeUsers(viewID string) (string, error) {
 	return resp.TotalsForAllResults[metric], nil
 }
 
-// TopContents queries the Analytics Reporting API V4 using the
+// Pages queries the Analytics Reporting API V4 using the
 // Analytics Reporting API V4 service object.
-func (c *Client) TopContents(viewID string) (*ga.GetReportsResponse, error) {
+func (c *Client) Pages(viewID string, startDate string, endDate string, global bool) (*ga.GetReportsResponse, error) {
+
+	dateRange := []*ga.DateRange{
+		{StartDate: startDate, EndDate: endDate},
+	}
+	if global {
+		dateRange = []*ga.DateRange{
+			{StartDate: earliestDate, EndDate: endDate},
+		}
+	}
+
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
-				ViewId: viewID,
+				ViewId:     viewID,
+				DateRanges: dateRange,
 				Metrics: []*ga.Metric{
 					{Expression: "ga:pageViews"},
 				},
@@ -121,6 +133,7 @@ func (c *Client) TopContents(viewID string) (*ga.GetReportsResponse, error) {
 						SortOrder: "DESCENDING",
 					},
 				},
+				IncludeEmptyRows: true,
 			},
 		},
 	}
@@ -128,9 +141,9 @@ func (c *Client) TopContents(viewID string) (*ga.GetReportsResponse, error) {
 	return c.service.Reports.BatchGet(req).Do()
 }
 
-// TopContents queries the Analytics Reporting API V4 using the
+// NewVsReturning queries the Analytics Reporting API V4 using the
 // Analytics Reporting API V4 service object.
-func (c *Client) NewVsReturningSessions(viewID string, startDate string, endDate string) (*ga.GetReportsResponse, error) {
+func (c *Client) NewVsReturning(viewID string, startDate string, endDate string) (*ga.GetReportsResponse, error) {
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
@@ -146,6 +159,13 @@ func (c *Client) NewVsReturningSessions(viewID string, startDate string, endDate
 					{Name: "ga:month"},
 					{Name: "ga:day"},
 				},
+				OrderBys: []*ga.OrderBy{
+					{
+						FieldName: "ga:month",
+						SortOrder: "ASCENDING",
+					},
+				},
+				IncludeEmptyRows: true,
 			},
 		},
 	}
@@ -173,6 +193,7 @@ func (c *Client) TrafficSource(viewID string, startDate string, endDate string) 
 						SortOrder: "DESCENDING",
 					},
 				},
+				IncludeEmptyRows: true,
 			},
 		},
 	}

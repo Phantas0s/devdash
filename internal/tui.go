@@ -15,11 +15,11 @@ type renderer interface {
 }
 
 type drawer interface {
-	Text(text string, fg uint16, size int)
-	TextBox(data string, fg uint16, bd uint16, bdlabel string, h int)
-	BarChart(data []int, dimensions []string, barWidth int, bd uint16, bdLabel string)
-	StackedBarChart(data [8][]int, dimensions []string, barWidth int, bd uint16, bdLabel string)
-	Table(data [][]string, bd uint16, bdLabel string)
+	Text(text string, foreground uint16, size int)
+	TextBox(data string, foreground uint16, background uint16, title string, h int)
+	BarChart(data []int, dimensions []string, barWidth int, background uint16, backgroundLabel string)
+	StackedBarChart(data [8][]int, dimensions []string, barWidth int, background uint16, backgroundLabel string)
+	Table(data [][]string, background uint16, backgroundLabel string)
 	AddCol(size int)
 	AddRow() error
 }
@@ -37,41 +37,39 @@ type manager interface {
 
 // Value objects
 type textBoxAttr struct {
-	Data    string
-	Fg      uint16
-	Bd      uint16
-	Bdlabel string
-	H       int
-	Size    string
+	Data       string
+	Foreground uint16
+	Background uint16
+	Title      string
+	H          int
 }
 
 type textAttr struct {
-	Text string
-	Fg   uint16
-	Size string
+	Text       string
+	Foreground uint16
+	Size       string
 }
 
 type barChartAttr struct {
 	Data       []int
 	Dimensions []string
+	Background uint16
 	BarWidth   int
-	Bd         uint16
-	Bdlabel    string
-	Size       string
+	Title      string
 }
 
 type stackedBarChartAttr struct {
 	Data       [8][]int
 	Dimensions []string
+	Background uint16
 	BarWidth   int
-	Bd         uint16
-	Bdlabel    string
+	Title      string
 }
 
 type tableAttr struct {
-	Data    [][]string
-	Bd      uint16
-	BdLabel string
+	Data            [][]string
+	Background      uint16
+	BackgroundLabel string
 }
 
 func NewTUI(instance manager) *Tui {
@@ -84,30 +82,36 @@ type Tui struct {
 	instance manager
 }
 
-func (t *Tui) AddText(attr textAttr) {
-	t.instance.Text(attr.Text, attr.Fg, 2)
+func (t *Tui) AddProjectTitle(attr textAttr) error {
+	size, err := mapSize(attr.Size)
+	if err != nil {
+		return err
+	}
+	t.instance.Text(attr.Text, attr.Foreground, size)
+
+	return nil
 }
 
 func (t *Tui) AddTextBox(attr textBoxAttr) {
 	t.instance.TextBox(
 		attr.Data,
-		attr.Fg,
-		attr.Bd,
-		attr.Bdlabel,
+		attr.Foreground,
+		attr.Background,
+		attr.Title,
 		attr.H,
 	)
 }
 
 func (t *Tui) AddBarChart(attr barChartAttr) {
-	t.instance.BarChart(attr.Data, attr.Dimensions, attr.BarWidth, attr.Bd, attr.Bdlabel)
+	t.instance.BarChart(attr.Data, attr.Dimensions, attr.BarWidth, attr.Background, attr.Title)
 }
 
 func (t *Tui) AddStackedBarChart(attr stackedBarChartAttr) {
-	t.instance.StackedBarChart(attr.Data, attr.Dimensions, attr.BarWidth, attr.Bd, attr.Bdlabel)
+	t.instance.StackedBarChart(attr.Data, attr.Dimensions, attr.BarWidth, attr.Background, attr.Title)
 }
 
 func (t *Tui) AddTable(attr tableAttr) {
-	t.instance.Table(attr.Data, attr.Bd, attr.BdLabel)
+	t.instance.Table(attr.Data, attr.Background, attr.BackgroundLabel)
 }
 
 func (t *Tui) AddKQuit(key string) {
