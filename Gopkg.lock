@@ -10,6 +10,14 @@
   version = "v0.27.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:6ba6d8f52a0ea509e0073b27b13858a7f396382f6eab5f97f7570eb49f3ba165"
+  name = "github.com/cjbassi/drawille-go"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "27dc511fe6fd820bf8537298e1d447b450210b28"
+
+[[projects]]
   digest = "1:abeb38ade3f32a92943e5be54f55ed6d6e3b6602761d74b4aab4c9dd45c18abd"
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
@@ -18,12 +26,15 @@
   version = "v1.4.7"
 
 [[projects]]
-  digest = "1:0b98586be892040d424cdd4fb7e047f71ddfcdbfca59f975a4b4eb14b56ae33c"
+  branch = "master"
+  digest = "1:eabe64d852d1302e2f5cc58f6a322e3ebc7552cd02a808102ae377005f102bd1"
   name = "github.com/gizak/termui"
-  packages = ["."]
+  packages = [
+    ".",
+    "widgets",
+  ]
   pruneopts = "UT"
-  revision = "bf53c5cbea3f372f745e1d8e4660e29f73d41517"
-  version = "v2.3.0"
+  revision = "5ece2b7178ff236574c7e88078b42150f724ff70"
 
 [[projects]]
   digest = "1:97df918963298c287643883209a2c3f642e6593379f97ab400c2a2e219ab647d"
@@ -59,14 +70,6 @@
   pruneopts = "UT"
   revision = "c2353362d570a7bfa228149c62842019201cfb71"
   version = "v1.8.0"
-
-[[projects]]
-  branch = "master"
-  digest = "1:2eeeebccad4f052e6037527e86b8114c6bfd184a97f84d4449a5ea6ad202c216"
-  name = "github.com/maruel/panicparse"
-  packages = ["stack"]
-  pruneopts = "UT"
-  revision = "f20d4c4d746f810c9110e21928d4135e1f2a3efa"
 
 [[projects]]
   digest = "1:cdb899c199f907ac9fb50495ec71212c95cb5b0e0a8ee0800da0238036091033"
@@ -169,14 +172,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9f3a60def1a1eb5ac184e71dde43c6f99606f54d106db7c95f8b8338629a777b"
-  name = "github.com/tatsushid/go-fastping"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "d7bb493dee3e090e2ffb6914adddf17c1e7c026c"
-
-[[projects]]
-  branch = "master"
   digest = "1:2092dc9eaa13ef38d2bedabf5b580c7d45a98f9ec8c508e18f1d9c389f075f83"
   name = "golang.org/x/net"
   packages = [
@@ -275,10 +270,10 @@
   analyzer-version = 1
   input-imports = [
     "github.com/gizak/termui",
+    "github.com/gizak/termui/widgets",
     "github.com/pkg/errors",
     "github.com/sparrc/go-ping",
     "github.com/spf13/viper",
-    "github.com/tatsushid/go-fastping",
     "golang.org/x/oauth2/google",
     "golang.org/x/oauth2/jwt",
     "google.golang.org/api/analytics/v3",
