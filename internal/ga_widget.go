@@ -9,10 +9,11 @@ import (
 )
 
 const (
-	realtime      = "ga.realtime"
-	users         = "ga.users"
-	pages         = "ga.pages"
-	new_returning = "ga.new_returning"
+	realtime       = "ga.realtime"
+	users          = "ga.users"
+	pages          = "ga.pages"
+	new_returning  = "ga.new_returning"
+	traffic_source = "ga.traffic_source"
 )
 
 type gaWidget struct {
@@ -45,6 +46,8 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 		err = g.TopContents(widget)
 	case new_returning:
 		err = g.NewVsReturningSessions(widget)
+	case traffic_source:
+		err = g.trafficSource(widget)
 	default:
 		return errors.Errorf("can't find the widget %s", widget.Name)
 	}
@@ -78,17 +81,19 @@ func (g *gaWidget) gaRTActiveUser(widget Widget) error {
 
 // users get the number of users the 7 last days on your website
 func (g *gaWidget) users(widget Widget) error {
+	// defaults
+	title := "Users"
 	startDate := "7daysAgo"
+	endDate := "today"
+
 	if _, ok := widget.Options["start_date"]; ok {
 		startDate = widget.Options["start_date"]
 	}
 
-	endDate := "today"
 	if _, ok := widget.Options["end_date"]; ok {
 		endDate = widget.Options["end_date"]
 	}
 
-	title := "Weekly users"
 	if _, ok := widget.Options["title"]; ok {
 		title = widget.Options["title"]
 	}
@@ -187,7 +192,24 @@ func (g *gaWidget) TopContents(widget Widget) error {
 }
 
 func (g *gaWidget) NewVsReturningSessions(widget Widget) error {
-	rep, err := g.client.NewVsReturningSessions(g.viewID)
+	// defaults
+	title := "Sessions vs New"
+	startDate := "7daysAgo"
+	endDate := "today"
+
+	if _, ok := widget.Options["start_date"]; ok {
+		startDate = widget.Options["start_date"]
+	}
+
+	if _, ok := widget.Options["end_date"]; ok {
+		endDate = widget.Options["end_date"]
+	}
+
+	if _, ok := widget.Options["title"]; ok {
+		title = widget.Options["title"]
+	}
+
+	rep, err := g.client.NewVsReturningSessions(g.viewID, startDate, endDate)
 	if err != nil {
 		return err
 	}
@@ -231,7 +253,61 @@ func (g *gaWidget) NewVsReturningSessions(widget Widget) error {
 		Dimensions: dates,
 		BarWidth:   6,
 		Bd:         5,
-		Bdlabel:    "Session vs New",
+		Bdlabel:    title,
+	})
+
+	return nil
+}
+
+// users get the number of users the 7 last days on your website
+func (g *gaWidget) trafficSource(widget Widget) error {
+	// defaults
+	title := "Traffic"
+	startDate := "7daysAgo"
+	endDate := "today"
+
+	if _, ok := widget.Options["start_date"]; ok {
+		startDate = widget.Options["start_date"]
+	}
+
+	if _, ok := widget.Options["end_date"]; ok {
+		endDate = widget.Options["end_date"]
+	}
+
+	if _, ok := widget.Options["title"]; ok {
+		title = widget.Options["title"]
+	}
+
+	rep, err := g.client.TrafficSource(g.viewID, startDate, endDate)
+	if err != nil {
+		return err
+	}
+
+	// this will extract the different dimensions and data associated
+	var dim []string
+	var u []int
+	for _, v := range rep.Reports {
+		for l := 0; l < len(v.Data.Rows); l++ {
+			dim = append(dim, v.Data.Rows[l].Dimensions[0])
+			for m := 0; m < len(v.Data.Rows[l].Metrics); m++ {
+				value := v.Data.Rows[l].Metrics[m].Values[0]
+				if v, err := strconv.ParseInt(value, 0, 0); err == nil {
+					u = append(u, int(v))
+				}
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	g.tui.AddBarChart(barChartAttr{
+		Data:       u,
+		Dimensions: dim,
+		BarWidth:   6,
+		Bd:         5,
+		Bdlabel:    title,
+		Size:       widget.Size,
 	})
 
 	return nil

@@ -130,13 +130,13 @@ func (c *Client) TopContents(viewID string) (*ga.GetReportsResponse, error) {
 
 // TopContents queries the Analytics Reporting API V4 using the
 // Analytics Reporting API V4 service object.
-func (c *Client) NewVsReturningSessions(viewID string) (*ga.GetReportsResponse, error) {
+func (c *Client) NewVsReturningSessions(viewID string, startDate string, endDate string) (*ga.GetReportsResponse, error) {
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
 				ViewId: viewID,
 				DateRanges: []*ga.DateRange{
-					{StartDate: "7daysAgo", EndDate: "today"},
+					{StartDate: startDate, EndDate: endDate},
 				},
 				Metrics: []*ga.Metric{
 					{Expression: "ga:sessions"},
@@ -145,6 +145,33 @@ func (c *Client) NewVsReturningSessions(viewID string) (*ga.GetReportsResponse, 
 					{Name: "ga:userType"},
 					{Name: "ga:month"},
 					{Name: "ga:day"},
+				},
+			},
+		},
+	}
+
+	return c.service.Reports.BatchGet(req).Do()
+}
+
+func (c *Client) TrafficSource(viewID string, startDate string, endDate string) (*ga.GetReportsResponse, error) {
+	req := &ga.GetReportsRequest{
+		ReportRequests: []*ga.ReportRequest{
+			{
+				ViewId: viewID,
+				DateRanges: []*ga.DateRange{
+					{StartDate: startDate, EndDate: endDate},
+				},
+				Metrics: []*ga.Metric{
+					{Expression: "ga:sessions"},
+				},
+				Dimensions: []*ga.Dimension{
+					{Name: "ga:source"},
+				},
+				OrderBys: []*ga.OrderBy{
+					{
+						FieldName: "ga:sessions",
+						SortOrder: "DESCENDING",
+					},
 				},
 			},
 		},

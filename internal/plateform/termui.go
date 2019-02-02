@@ -145,7 +145,7 @@ func (t *termUI) StackedBarChart(
 	bc.BorderLabel = bdLabel
 	bc.Data = data
 	bc.BarWidth = barWidth
-	bc.Width = 200
+	bc.Width = 400
 	bc.Height = 20
 	bc.BarGap = 0
 	bc.DataLabels = dimensions
