@@ -37,12 +37,14 @@ func main() {
 	ticker := time.NewTicker(time.Duration(cfg.General.Refresh) * time.Minute)
 	go func() {
 		for range ticker.C {
-			cmd := exec.Command("clear") //Linux example, its tested
+			cmd := exec.Command("clear") // for linux...
 			cmd.Stdout = os.Stdout
-			cmd.Run()
+			err := cmd.Run()
+			if err != nil {
+				fmt.Println(err)
+			}
 
-			tui.Init()
-			err := run(cfg.Projects, tui)
+			err = run(cfg.Projects, tui)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -58,7 +60,7 @@ func run(projects []Project, tui *internal.Tui) (err error) {
 		if err != nil {
 			return err
 		}
-		project := internal.NewProject(p.Name, rows, sizes)
+		project := internal.NewProject(p.Name, p.TitleOptions, rows, sizes)
 
 		gaService := p.Services.GoogleAnalytics
 		if !gaService.empty() {

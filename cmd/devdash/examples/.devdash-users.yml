@@ -1,0 +1,23 @@
+general:
+  refresh: 1
+  keys:
+    quit: "C-c"
+
+projects:
+  - name: webtechno
+    services:
+      google_analytics:
+        keyfile: goanalytics-dace33d3cede.json
+        view_id: 89379071
+      monitor:
+        address: "https://www.web-techno.net"
+    widgets:
+      - row:
+          - col:
+              size: "S"
+              elements:
+                - name: ga.users
+                  options:
+                    start_date: "3daysAgo"
+                    end_date: "today"
+                    title: "my super title"

@@ -13,11 +13,12 @@ type service interface {
 type Widget struct {
 	Name    string            `mapstructures:"name"`
 	Size    string            `mapstructures:"size"`
-	Options map[string]string `mapstructure "options"`
+	Options map[string]string `mapstructure:"options"`
 }
 
 type project struct {
 	name          string
+	titleOptions  map[string]string
 	widgets       [][][]Widget
 	sizes         [][]string
 	gaWidget      service
@@ -26,13 +27,15 @@ type project struct {
 
 func NewProject(
 	name string,
+	titleOptions map[string]string,
 	widgets [][][]Widget,
 	sizes [][]string,
 ) *project {
 	return &project{
-		name:    name,
-		widgets: widgets,
-		sizes:   sizes,
+		name:         name,
+		titleOptions: titleOptions,
+		widgets:      widgets,
+		sizes:        sizes,
 	}
 }
 
@@ -45,7 +48,10 @@ func (p *project) WithMonitor(mon *monitorWidget) {
 }
 
 func (p *project) Render(tui *Tui) (err error) {
-	p.addTitle(tui)
+	err = p.addTitle(tui)
+	if err != nil {
+		return errors.Wrapf(err, "can't add project title %s", p.name)
+	}
 
 	for r, row := range p.widgets {
 		for c, col := range row {
@@ -57,31 +63,35 @@ func (p *project) Render(tui *Tui) (err error) {
 						return errors.Errorf("can't use the widget %s without the service GoogleAnalytics - please fix your configuration file.", w.Name)
 					}
 
-					err = p.gaWidget.CreateWidgets(w, tui)
+					if err = p.gaWidget.CreateWidgets(w, tui); err != nil {
+						return err
+					}
 				case "mon":
 					if p.monitorWidget == nil {
 						return errors.Errorf("can't use the widget %s without the service Monitor - please fix your configuration file.", w.Name)
 					}
 
-					err = p.monitorWidget.CreateWidgets(w, tui)
+					if err = p.monitorWidget.CreateWidgets(w, tui); err != nil {
+						return err
+					}
 				default:
 					return errors.Errorf("could not find the service for widget %s - wrong name - please verify your configuration file", w.Name)
 				}
 			}
 			if len(col) > 0 {
-				tui.AddCol(p.sizes[r][c])
+				if err = tui.AddCol(p.sizes[r][c]); err != nil {
+					return err
+				}
 			}
 		}
-		tui.AddRow()
+		if err := tui.AddRow(); err != nil {
+			return err
+		}
 	}
 
 	return
 }
 
-func (p *project) addTitle(tui *Tui) {
-	tui.AddProjectTitle(textAttr{
-		Text:       p.name,
-		Foreground: 5,
-		Size:       "XL",
-	})
+func (p *project) addTitle(tui *Tui) error {
+	return tui.AddProjectTitle(p.name, p.titleOptions)
 }

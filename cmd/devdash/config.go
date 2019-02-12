@@ -9,41 +9,40 @@ import (
 )
 
 const (
-	// services
-	ga = "ga"
 	// keys
 	kquit = "C-c"
 )
 
 type config struct {
-	General  General   `mapstructure "general"`
-	Projects []Project `mapstructure "projects"`
+	General  General   `mapstructure:"general"`
+	Projects []Project `mapstructure:"projects"`
 }
 
 type General struct {
-	Keys    map[string]string
-	Refresh int64 `mapstructure:"refresh"`
+	Keys    map[string]string `mapstructure:"keys"`
+	Refresh int64             `mapstructure:"refresh"`
 }
 
 type Project struct {
-	Name     string   `mapstructure:"name"`
-	Services Services `mapstructure "services"`
-	Widgets  []Row    `mapstructure "widgets"`
+	Name         string            `mapstructure:"name"`
+	Services     Services          `mapstructure:"services"`
+	Widgets      []Row             `mapstructure:"widgets"`
+	TitleOptions map[string]string `mapstructure:"title_options"`
 }
 
 // Row is constitued of columns
 type Row struct {
-	Row []Column `mapstructure "row"`
+	Row []Column `mapstructure: "row"`
 }
 
 // Col is constitued of widgets
 type Column struct {
-	Col []Widgets `mapstructure "col"`
+	Col []Widgets `mapstructure: "col"`
 }
 
 type Widgets struct {
-	Size     string            `json:"size"`
-	Elements []internal.Widget `json:"elements"`
+	Size     string            `mapstructure:"size"`
+	Elements []internal.Widget `mapstructure:"elements"`
 }
 
 type Services struct {
@@ -75,9 +74,9 @@ func (p Project) OrderWidgets() ([][][]internal.Widget, [][]string) {
 			for _, ws := range c.Col {
 				// keep sizes of columns and good order of widgets in a separate slice
 				sizes[ir] = append(sizes[ir], ws.Size)
-				for _, w := range ws.Elements {
-					rows[ir][ic] = append(rows[ir][ic], w) // add widgets to columns
-				}
+
+				// add widgets to columns
+				rows[ir][ic] = append(rows[ir][ic], ws.Elements...)
 			}
 		}
 	}

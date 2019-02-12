@@ -55,14 +55,14 @@ func (m *monitorWidget) pingWidget(widget Widget) error {
 	pinger.Run()                 // blocks until finished
 	stats := pinger.Statistics() // get send/receive/rtt stats
 
-	foreground := uint16(3)
+	foreground := green
 	if stats.PacketsRecv == 0 {
-		foreground = uint16(2)
+		foreground = red
 	}
 	m.tui.AddTextBox(textBoxAttr{
 		Data:       fmt.Sprintf("Sent: %d / Received: %d / Time: %d", stats.PacketsSent, stats.PacketsRecv, stats.AvgRtt),
 		Foreground: foreground,
-		Background: 5,
+		Background: blue,
 		Title:      "Ping:",
 		H:          3,
 	})
@@ -90,15 +90,15 @@ func (m *monitorWidget) availabilityWidget(widget Widget) error {
 		status = "offline"
 	}
 
-	foreground := uint16(3)
+	foreground := uint16(green)
 	if status == "offline" {
-		foreground = uint16(2)
+		foreground = uint16(red)
 	}
 
 	m.tui.AddTextBox(textBoxAttr{
-		Data:       fmt.Sprintf("Status: %s / Status code: %d", status, statusCode),
+		Data:       fmt.Sprintf("%s (%d)", status, statusCode),
 		Foreground: foreground,
-		Background: 5,
+		Background: blue,
 		Title:      "Availability:",
 		H:          3,
 	})

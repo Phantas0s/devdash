@@ -1,4 +1,4 @@
 vendor
-.devdash.yml
 goanalytics-*
-devdash/devdash
+cmd/devdash/devdash
+cmd/devdash/.devdash*

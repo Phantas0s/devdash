@@ -35,20 +35,6 @@ func NewTermUI() (*termUI, error) {
 	}, nil
 }
 
-func (t *termUI) Init() {
-	// set the basic properties
-	body := termui.NewGrid()
-	body.X = 0
-	body.Y = 0
-	body.BgColor = termui.ThemeAttr("bg")
-	body.Width = termui.TermWidth()
-
-	t.body = body
-	t.widgets = []termui.GridBufferer{}
-	t.col = []*termui.Row{}
-	t.row = []*termui.Row{}
-}
-
 func (termUI) Close() {
 	termui.Close()
 }
@@ -102,10 +88,21 @@ func (t *termUI) TextBox(
 	t.widgets = append(t.widgets, textBox)
 }
 
-func (t *termUI) Text(text string, fg uint16, size int) {
-	pro := termui.NewPar(text)
-	pro.Border = false
-	pro.TextFgColor = termui.Attribute(fg)
+func (t *termUI) Title(
+	title string,
+	textColor uint16,
+	borderColor uint16,
+	bold bool,
+	height int,
+	size int,
+) {
+	pro := termui.NewPar(title)
+	pro.TextFgColor = termui.Attribute(textColor)
+	if bold {
+		pro.TextFgColor = termui.Attribute(textColor) | termui.AttrBold
+	}
+	pro.BorderFg = termui.Attribute(borderColor)
+	pro.Height = height
 
 	t.body.AddRows(termui.NewCol(size, 0, pro))
 }
@@ -113,22 +110,26 @@ func (t *termUI) Text(text string, fg uint16, size int) {
 func (t *termUI) BarChart(
 	data []int,
 	dimensions []string,
-	barWidth int,
+	title string,
 	bd uint16,
-	bdLabel string,
+	fg uint16,
+	nc uint16,
+	height int,
+	gap int,
+	barWidth int,
+	barColor uint16,
 ) {
 	bc := termui.NewBarChart()
-	bc.BorderLabel = bdLabel
+	bc.BorderLabel = title
 	bc.Data = data
-	bc.BarWidth = barWidth
-	bc.BarGap = 0
+	bc.BarGap = gap
 	bc.DataLabels = dimensions
-	bc.Width = 200
-	bc.Height = 10
-	bc.TextColor = termui.ColorGreen
-	bc.BarColor = termui.ColorBlue
-	bc.NumColor = termui.ColorWhite
+	bc.Height = height
+	bc.TextColor = termui.Attribute(fg)
+	bc.BarColor = termui.Attribute(barColor)
+	bc.NumColor = termui.Attribute(nc)
 	bc.BorderFg = termui.Attribute(bd)
+	bc.BarWidth = barWidth
 	bc.Buffer()
 
 	t.widgets = append(t.widgets, bc)
@@ -137,21 +138,25 @@ func (t *termUI) BarChart(
 func (t *termUI) StackedBarChart(
 	data [8][]int,
 	dimensions []string,
-	barWidth int,
+	title string,
 	bd uint16,
-	bdLabel string,
+	fg uint16,
+	nc uint16,
+	height int,
+	gap int,
+	barWidth int,
 ) {
 	bc := termui.NewMBarChart()
-	bc.BorderLabel = bdLabel
+	bc.BorderLabel = title
 	bc.Data = data
 	bc.BarWidth = barWidth
-	bc.Width = 400
-	bc.Height = 20
-	bc.BarGap = 0
+	bc.Height = height
+	bc.BarGap = gap
 	bc.DataLabels = dimensions
-	bc.TextColor = termui.ColorGreen
+	bc.TextColor = termui.Attribute(fg)
 	bc.BorderFg = termui.Attribute(bd)
-	bc.ShowScale = true
+	bc.NumColor = [8]termui.Attribute{termui.Attribute(nc)}
+	// bc.ShowScale = true
 	// bc.SetMax(10)
 
 	t.widgets = append(t.widgets, bc)
@@ -159,13 +164,14 @@ func (t *termUI) StackedBarChart(
 
 func (t *termUI) Table(
 	data [][]string,
+	title string,
 	bd uint16,
-	bdLabel string,
+	fg uint16,
 ) {
 	ta := termui.NewTable()
 	ta.Rows = data
-	ta.BorderLabel = bdLabel
-	ta.FgColor = termui.ColorGreen
+	ta.BorderLabel = title
+	ta.FgColor = termui.Attribute(fg)
 	ta.BorderFg = termui.Attribute(bd)
 	ta.SetSize()
 

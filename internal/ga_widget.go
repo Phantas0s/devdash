@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -9,11 +10,20 @@ import (
 )
 
 const (
+	// widget config names
 	realtime       = "ga.realtime"
 	users          = "ga.users"
 	pages          = "ga.pages"
 	new_returning  = "ga.new_returning"
 	traffic_source = "ga.traffic_source"
+
+	// option config names
+	optionTitle     = "title"
+	optionStartDate = "start_date"
+	optionEndDate   = "end_date"
+	optionLength    = "length"
+	optionLimit     = "limit"
+	optionGlobal    = "global"
 )
 
 type gaWidget struct {
@@ -45,7 +55,7 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	case pages:
 		err = g.pages(widget)
 	case new_returning:
-		err = g.newVsReturning(widget)
+		err = g.ReturningVsNew(widget)
 	case traffic_source:
 		err = g.trafficSource(widget)
 	default:
@@ -57,10 +67,10 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 
 // GaRTActiveUser get the real time active users from Google Analytics
 func (g *gaWidget) realTimeUser(widget Widget) error {
-	title := " Real time users : "
+	title := " Real time users "
 
-	if _, ok := widget.Options["title"]; ok {
-		title = widget.Options["title"]
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
 	}
 
 	users, err := g.client.RealTimeUsers(g.viewID)
@@ -68,15 +78,15 @@ func (g *gaWidget) realTimeUser(widget Widget) error {
 		return err
 	}
 
-	foreground := uint16(3)
+	foreground := green
 	if users == "0" {
-		foreground = uint16(2)
+		foreground = red
 	}
 
 	g.tui.AddTextBox(textBoxAttr{
 		Data:       users,
 		Foreground: foreground,
-		Background: 5,
+		Background: blue,
 		Title:      title,
 		H:          3,
 	})
@@ -87,53 +97,27 @@ func (g *gaWidget) realTimeUser(widget Widget) error {
 // users get the number of users the 7 last days on your website
 func (g *gaWidget) users(widget Widget) error {
 	// defaults
-	title := "Users"
 	startDate := "7daysAgo"
+	if _, ok := widget.Options[optionStartDate]; ok {
+		startDate = widget.Options[optionStartDate]
+	}
+
 	endDate := "today"
-
-	if _, ok := widget.Options["start_date"]; ok {
-		startDate = widget.Options["start_date"]
+	if _, ok := widget.Options[optionEndDate]; ok {
+		endDate = widget.Options[optionEndDate]
 	}
 
-	if _, ok := widget.Options["end_date"]; ok {
-		endDate = widget.Options["end_date"]
+	title := fmt.Sprintf(" Users from %s to %s ", startDate, endDate)
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
 	}
 
-	if _, ok := widget.Options["title"]; ok {
-		title = widget.Options["title"]
-	}
-
-	rep, err := g.client.Users(g.viewID, startDate, endDate)
+	dim, val, err := g.client.Users(g.viewID, startDate, endDate)
 	if err != nil {
 		return err
 	}
 
-	// this will extract the different dimensions and data associated
-	var dates []string
-	var u []int
-	dateSeparator := "-"
-	for _, v := range rep.Reports {
-		for l := 0; l < len(v.Data.Rows); l++ {
-			dates = append(dates, v.Data.Rows[l].Dimensions[0]+dateSeparator+v.Data.Rows[l].Dimensions[1])
-			for m := 0; m < len(v.Data.Rows[l].Metrics); m++ {
-				value := v.Data.Rows[l].Metrics[m].Values[0]
-				if v, err := strconv.ParseInt(value, 0, 0); err == nil {
-					u = append(u, int(v))
-				}
-				if err != nil {
-					return err
-				}
-			}
-		}
-	}
-
-	g.tui.AddBarChart(barChartAttr{
-		Data:       u,
-		Dimensions: dates,
-		BarWidth:   6,
-		Background: 5,
-		Title:      title,
-	})
+	g.tui.AddBarChart(val, dim, title, widget.Options)
 
 	return nil
 }
@@ -142,63 +126,47 @@ func (g *gaWidget) pages(widget Widget) (err error) {
 	// defaults
 	var nbrPages int64 = 5
 	var pLen int64 = 20
+
 	title := "Most page viewed"
-	global := false
 	startDate := "7daysAgo"
 	endDate := "today"
 
-	if _, ok := widget.Options["title"]; ok {
-		title = widget.Options["title"]
+	global := false
+
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
 	}
 
-	if _, ok := widget.Options["page_limit"]; ok {
-		nbrPages, err = strconv.ParseInt(widget.Options["page_limit"], 0, 0)
+	if _, ok := widget.Options[optionLimit]; ok {
+		nbrPages, err = strconv.ParseInt(widget.Options[optionLimit], 0, 0)
 		if err != nil {
-			return errors.Wrapf(err, "%s must be a number", widget.Options["page_limit"])
+			return errors.Wrapf(err, "%s must be a number", widget.Options[optionLimit])
 		}
 	}
 
-	if _, ok := widget.Options["global"]; ok {
-		global, err = strconv.ParseBool(widget.Options["global"])
+	if _, ok := widget.Options[optionGlobal]; ok {
+		global, err = strconv.ParseBool(widget.Options[optionGlobal])
 		if err != nil {
-			return errors.Wrapf(err, "could not parse string %s to bool", widget.Options["global"])
+			return errors.Wrapf(err, "could not parse string %s to bool", widget.Options[optionGlobal])
 		}
 	}
 
-	if _, ok := widget.Options["start_date"]; ok {
-		startDate = widget.Options["start_date"]
+	if _, ok := widget.Options[optionStartDate]; ok {
+		startDate = widget.Options[optionStartDate]
 	}
 
-	if _, ok := widget.Options["end_date"]; ok {
-		endDate = widget.Options["end_date"]
+	if _, ok := widget.Options[optionEndDate]; ok {
+		endDate = widget.Options[optionEndDate]
 	}
 
-	rep, err := g.client.Pages(g.viewID, startDate, endDate, global)
+	dim, val, err := g.client.Pages(g.viewID, startDate, endDate, global)
 	if err != nil {
 		return err
 	}
 
-	var pages []string
-	var u []int
-	for _, v := range rep.Reports {
-		for l := 0; l < len(v.Data.Rows); l++ {
-			p := v.Data.Rows[l].Dimensions[0]
-			pages = append(pages, p)
-			for m := 0; m < len(v.Data.Rows[l].Metrics); m++ {
-				value := v.Data.Rows[l].Metrics[m].Values[0]
-				if v, err := strconv.ParseInt(value, 0, 0); err == nil {
-					u = append(u, int(v))
-				}
-				if err != nil {
-					return err
-				}
-			}
-		}
-	}
-
 	table := [][]string{{"Page", "Page Views"}}
 	for i := 0; i < int(nbrPages); i++ {
-		p := strings.Trim(pages[i], " ")
+		p := strings.Trim(dim[i], " ")
 		if _, ok := widget.Options["page_length"]; ok {
 			pLen, err = strconv.ParseInt(widget.Options["page_length"], 0, 0)
 		}
@@ -208,82 +176,67 @@ func (g *gaWidget) pages(widget Widget) (err error) {
 		if len(p) > int(pLen) {
 			p = p[:pLen]
 		}
-		table = append(table, []string{p, strconv.Itoa(u[i])})
+		table = append(table, []string{p, strconv.Itoa(val[i])})
 	}
 
-	g.tui.AddTable(tableAttr{
-		Data:            table,
-		Background:      5,
-		BackgroundLabel: title,
-	})
+	g.tui.AddTable(table, title, widget.Options)
 
 	return nil
 }
 
-func (g *gaWidget) newVsReturning(widget Widget) error {
+func (g *gaWidget) ReturningVsNew(widget Widget) error {
 	// defaults
-	title := "Sessions vs New"
 	startDate := "7daysAgo"
+	if _, ok := widget.Options[optionStartDate]; ok {
+		startDate = widget.Options[optionStartDate]
+	}
 	endDate := "today"
-
-	if _, ok := widget.Options["start_date"]; ok {
-		startDate = widget.Options["start_date"]
+	if _, ok := widget.Options[optionEndDate]; ok {
+		endDate = widget.Options[optionEndDate]
 	}
 
-	if _, ok := widget.Options["end_date"]; ok {
-		endDate = widget.Options["end_date"]
-	}
-
-	if _, ok := widget.Options["title"]; ok {
-		title = widget.Options["title"]
-	}
-
-	rep, err := g.client.NewVsReturning(g.viewID, startDate, endDate)
+	// this should return new and ret instead of a unique slice val...
+	dim, val, err := g.client.ReturningVsNew(g.viewID, startDate, endDate)
 	if err != nil {
 		return err
 	}
 
-	dateSeparator := "-"
-
-	var dates []string
-	var u []int
-	for _, v := range rep.Reports {
-		for l := 0; l < len(v.Data.Rows); l++ {
-			dates = append(dates, v.Data.Rows[l].Dimensions[1]+dateSeparator+v.Data.Rows[l].Dimensions[2])
-			for m := 0; m < len(v.Data.Rows[l].Metrics); m++ {
-				value := v.Data.Rows[l].Metrics[m].Values[0]
-				if v, err := strconv.ParseInt(value, 0, 0); err == nil {
-					u = append(u, int(v))
-				}
-				if err != nil {
-					return err
-				}
-			}
-		}
-	}
-
-	s := len(u) / 2
-	sessions := u[:s]
-	new := u[s:]
+	s := len(val) / 2
+	ret := val[:s]
+	new := val[s:]
 
 	var data [8][]int
-
+	// need to fill data with []int containing 0
 	for i := 0; i < 8; i++ {
-		for j := 0; j < len(sessions); j++ {
+		for j := 0; j < len(ret); j++ {
 			data[i] = append(data[i], 0)
 		}
 	}
 
-	data[3] = sessions
-	data[4] = new
+	firstColor := green
+	if _, ok := widget.Options[optionFirstColor]; ok {
+		firstColor = colorLookUp[widget.Options[optionFirstColor]]
+	}
+	data[firstColor] = new
 
-	g.tui.AddStackedBarChart(stackedBarChartAttr{
-		Data:       data,
-		Dimensions: dates,
-		BarWidth:   6,
-		Background: 5,
-		Title:      title,
-	})
+	secondColor := yellow
+	if _, ok := widget.Options[optionSecondColor]; ok {
+		secondColor = colorLookUp[widget.Options[optionSecondColor]]
+	}
+	data[secondColor] = ret
+
+	title := fmt.Sprintf(
+		" Sessions (%s) vs Returning (%s) from %s to %s ",
+		colorStr(firstColor),
+		colorStr(secondColor),
+		startDate,
+		endDate,
+	)
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	g.tui.AddStackedBarChart(data, dim, title, widget.Options)
 
 	return nil
 }
@@ -291,52 +244,34 @@ func (g *gaWidget) newVsReturning(widget Widget) error {
 // users get the number of users the 7 last days on your website
 func (g *gaWidget) trafficSource(widget Widget) error {
 	// defaults
-	var nbrSources int64 = 5
-	var pLen int64 = 20
-	title := "Traffic"
+
 	startDate := "7daysAgo"
+	if _, ok := widget.Options[optionStartDate]; ok {
+		startDate = widget.Options[optionStartDate]
+	}
+
 	endDate := "today"
-
-	if _, ok := widget.Options["start_date"]; ok {
-		startDate = widget.Options["start_date"]
+	if _, ok := widget.Options[optionEndDate]; ok {
+		endDate = widget.Options[optionEndDate]
 	}
 
-	if _, ok := widget.Options["end_date"]; ok {
-		endDate = widget.Options["end_date"]
+	title := fmt.Sprintf(" Traffic from %s to %s ", startDate, endDate)
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
 	}
 
-	if _, ok := widget.Options["title"]; ok {
-		title = widget.Options["title"]
-	}
-
-	rep, err := g.client.TrafficSource(g.viewID, startDate, endDate)
+	pages, src, err := g.client.TrafficSource(g.viewID, startDate, endDate)
 	if err != nil {
 		return err
 	}
 
-	var pages []string
-	var u []int
-	for _, v := range rep.Reports {
-		for l := 0; l < len(v.Data.Rows); l++ {
-			p := v.Data.Rows[l].Dimensions[0]
-			pages = append(pages, p)
-			for m := 0; m < len(v.Data.Rows[l].Metrics); m++ {
-				value := v.Data.Rows[l].Metrics[m].Values[0]
-				if v, err := strconv.ParseInt(value, 0, 0); err == nil {
-					u = append(u, int(v))
-				}
-				if err != nil {
-					return err
-				}
-			}
-		}
-	}
-
+	var nbrSources int64 = 5
+	var pLen int64 = 20
 	table := [][]string{{"Page", "Page Views"}}
 	for i := 0; i < int(nbrSources); i++ {
 		p := strings.Trim(pages[i], " ")
-		if _, ok := widget.Options["page_length"]; ok {
-			pLen, err = strconv.ParseInt(widget.Options["page_length"], 0, 0)
+		if _, ok := widget.Options[optionLength]; ok {
+			pLen, err = strconv.ParseInt(widget.Options[optionLength], 0, 0)
 		}
 		if err != nil {
 			return errors.Wrapf(err, "%s must be a number", widget.Options["page_length"])
@@ -344,13 +279,9 @@ func (g *gaWidget) trafficSource(widget Widget) error {
 		if len(p) > int(pLen) {
 			p = p[:pLen]
 		}
-		table = append(table, []string{p, strconv.Itoa(u[i])})
+		table = append(table, []string{p, strconv.Itoa(src[i])})
 	}
 
-	g.tui.AddTable(tableAttr{
-		Data:            table,
-		Background:      5,
-		BackgroundLabel: title,
-	})
+	g.tui.AddTable(table, title, widget.Options)
 	return nil
 }

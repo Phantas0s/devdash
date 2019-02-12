@@ -33,6 +33,10 @@ func Test_OrderWidgets(t *testing.T) {
 											internal.Widget{
 												Name: "row_1_col_1_widget1",
 												Size: "XL",
+												Options: map[string]string{
+													"start_date": "7daysAgo",
+													"end_date":   "today",
+												},
 											},
 										},
 									},
@@ -77,6 +81,10 @@ func Test_OrderWidgets(t *testing.T) {
 						internal.Widget{
 							Name: "row_1_col_1_widget1",
 							Size: "XL",
+							Options: map[string]string{
+								"start_date": "7daysAgo",
+								"end_date":   "today",
+							},
 						},
 						internal.Widget{
 							Name: "row_1_col_1_widget2",

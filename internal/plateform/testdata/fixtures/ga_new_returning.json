@@ -1,0 +1,495 @@
+{
+    "reports": [
+        {
+            "columnHeader": {
+                "dimensions": [
+                    "ga:userType",
+                    "ga:month",
+                    "ga:day"
+                ],
+                "metricHeader": {
+                    "metricHeaderEntries": [
+                        {
+                            "name": "ga:sessions",
+                            "type": "INTEGER"
+                        }
+                    ]
+                }
+            },
+            "data": {
+                "maximums": [
+                    {
+                        "values": [
+                            "364"
+                        ]
+                    }
+                ],
+                "minimums": [
+                    {
+                        "values": [
+                            "35"
+                        ]
+                    }
+                ],
+                "rowCount": 32,
+                "rows": [
+                    {
+                        "dimensions": [
+                            "New Visitor",
+                            "01",
+                            "26"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "141"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "New Visitor",
+                            "01",
+                            "27"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "126"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "New Visitor",
+                            "01",
+                            "28"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "302"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "New Visitor",
+                            "01",
+                            "29"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "364"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "New Visitor",
+                            "01",
+                            "30"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "326"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "New Visitor",
+                            "01",
+                            "31"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "329"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "Returning Visitor",
+                            "01",
+                            "26"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "58"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "Returning Visitor",
+                            "01",
+                            "27"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "40"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "Returning Visitor",
+                            "01",
+                            "28"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "72"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "Returning Visitor",
+                            "01",
+                            "29"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "95"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "Returning Visitor",
+                            "01",
+                            "30"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "96"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "Returning Visitor",
+                            "01",
+                            "31"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "93"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "New Visitor",
+                            "02",
+                            "01"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "269"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "New Visitor",
+                            "02",
+                            "02"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "176"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "New Visitor",
+                            "02",
+                            "03"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "120"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "New Visitor",
+                            "02",
+                            "04"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "291"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "New Visitor",
+                            "02",
+                            "05"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "316"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "New Visitor",
+                            "02",
+                            "06"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "364"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "New Visitor",
+                            "02",
+                            "07"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "326"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "New Visitor",
+                            "02",
+                            "08"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "273"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "New Visitor",
+                            "02",
+                            "09"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "164"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "New Visitor",
+                            "02",
+                            "10"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "105"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "Returning Visitor",
+                            "02",
+                            "01"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "66"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "Returning Visitor",
+                            "02",
+                            "02"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "35"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "Returning Visitor",
+                            "02",
+                            "03"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "45"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "Returning Visitor",
+                            "02",
+                            "04"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "86"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "Returning Visitor",
+                            "02",
+                            "05"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "78"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "Returning Visitor",
+                            "02",
+                            "06"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "83"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "Returning Visitor",
+                            "02",
+                            "07"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "86"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "Returning Visitor",
+                            "02",
+                            "08"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "80"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "Returning Visitor",
+                            "02",
+                            "09"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "44"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "Returning Visitor",
+                            "02",
+                            "10"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "39"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "totals": [
+                    {
+                        "values": [
+                            "5088"
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

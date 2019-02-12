@@ -1,13 +1,75 @@
 // This package is an abstraction for any Terminal UI you want to use.
-// It is not necessary since I don't need it and add complexity. It is kind of an
-// experiment how to use interface effectively.
 package internal
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
 )
+
+// 8 colors
+const (
+	defaultC uint16 = iota
+	black
+	red
+	green
+	yellow
+	blue
+	magenta
+	cyan
+	white
+
+	optionSize = "size"
+
+	optionBorderColor = "border_color"
+	optionTextColor   = "text_color"
+	optionNumColor    = "num_color"
+
+	optionBold = "bold"
+
+	optionFirstColor  = "first_color"
+	optionSecondColor = "second_color"
+
+	optionHeight = "height"
+
+	optionBarGap   = "bar_gap"
+	optionBarWidth = "bar_width"
+	optionBarColor = "bar_color"
+)
+
+// map config size to ui size
+var sizeLookup = map[string]int{
+	"xs":  2,
+	"s":   4,
+	"m":   6,
+	"l":   8,
+	"xl":  10,
+	"xxl": 12,
+}
+
+// map config color to ui color
+var colorLookUp = map[string]uint16{
+	"black":   black,
+	"red":     red,
+	"green":   green,
+	"yellow":  yellow,
+	"blue":    blue,
+	"magenta": magenta,
+	"cyan":    cyan,
+	"white":   white,
+}
+
+// colorStr is used to map a color name to an ui color
+func colorStr(value uint16) (key string) {
+	for k, v := range colorLookUp {
+		if v == value {
+			key = k
+			return
+		}
+	}
+	return
+}
 
 type renderer interface {
 	Render()
@@ -15,24 +77,64 @@ type renderer interface {
 }
 
 type drawer interface {
-	Text(text string, foreground uint16, size int)
-	TextBox(data string, foreground uint16, background uint16, title string, h int)
-	BarChart(data []int, dimensions []string, barWidth int, background uint16, backgroundLabel string)
-	StackedBarChart(data [8][]int, dimensions []string, barWidth int, background uint16, backgroundLabel string)
-	Table(data [][]string, background uint16, backgroundLabel string)
+	Title(
+		title string,
+		textColor uint16,
+		borderColor uint16,
+		bold bool,
+		height int,
+		size int,
+	)
+	TextBox(
+		data string,
+		foreground uint16,
+		background uint16,
+		title string,
+		h int,
+	)
+	BarChart(
+		data []int,
+		dimensions []string,
+		title string,
+		bd uint16,
+		fg uint16,
+		nc uint16,
+		height int,
+		gap int,
+		barWidth int,
+		barColor uint16,
+	)
+
+	StackedBarChart(
+		data [8][]int,
+		dimensions []string,
+		title string,
+		bd uint16,
+		fg uint16,
+		nc uint16,
+		height int,
+		gap int,
+		barWidth int,
+	)
+
+	Table(
+		data [][]string,
+		bdLabel string,
+		bd uint16,
+		fg uint16,
+	)
 	AddCol(size int)
 	AddRow() error
 }
 
-type kManager interface {
+type keyManager interface {
 	KQuit(key string)
 }
 
 type manager interface {
-	kManager
+	keyManager
 	renderer
 	drawer
-	Init()
 }
 
 // Value objects
@@ -50,26 +152,26 @@ type textAttr struct {
 	Size       string
 }
 
-type barChartAttr struct {
-	Data       []int
-	Dimensions []string
-	Background uint16
-	BarWidth   int
-	Title      string
+func (t *Tui) AddCol(size string) error {
+	s, err := MapSize(size)
+	if err != nil {
+		return err
+	}
+	t.instance.AddCol(s)
+
+	return nil
 }
 
-type stackedBarChartAttr struct {
-	Data       [8][]int
-	Dimensions []string
-	Background uint16
-	BarWidth   int
-	Title      string
+func (t *Tui) AddRow() error {
+	return t.instance.AddRow()
 }
 
-type tableAttr struct {
-	Data            [][]string
-	Background      uint16
-	BackgroundLabel string
+func (t *Tui) Render() {
+	t.instance.Render()
+}
+
+func (t *Tui) Close() {
+	t.instance.Close()
 }
 
 func NewTUI(instance manager) *Tui {
@@ -82,12 +184,57 @@ type Tui struct {
 	instance manager
 }
 
-func (t *Tui) AddProjectTitle(attr textAttr) error {
-	size, err := mapSize(attr.Size)
+func MapSize(size string) (int, error) {
+	s := strings.ToLower(size)
+	if size, ok := sizeLookup[s]; ok {
+		return size, nil
+	}
+
+	return 0, errors.Errorf("size %s doesn't exists - please verify your configuration file", s)
+}
+
+func (t *Tui) AddProjectTitle(title string, options map[string]string) (err error) {
+	size := "XXL"
+	if _, ok := options[optionSize]; ok {
+		size = options[optionSize]
+	}
+
+	textColor := blue
+	if _, ok := options[optionTextColor]; ok {
+		textColor = colorLookUp[options[optionTextColor]]
+	}
+
+	borderColor := blue
+	if _, ok := options[optionBorderColor]; ok {
+		borderColor = colorLookUp[options[optionBorderColor]]
+	}
+
+	bold := true
+	if _, ok := options[optionBold]; ok {
+		bold, err = strconv.ParseBool(options[optionBold])
+		if err != nil {
+			return errors.Wrapf(err, "can't convert %s to bool - please verify your configuration (correct values: true or false)", options[optionBold])
+		}
+	}
+
+	var height int64 = 3
+	if _, ok := options[optionHeight]; ok {
+		height, _ = strconv.ParseInt(options[optionHeight], 0, 0)
+	}
+
+	s, err := MapSize(size)
 	if err != nil {
 		return err
 	}
-	t.instance.Text(attr.Text, attr.Foreground, size)
+
+	t.instance.Title(
+		title,
+		textColor,
+		borderColor,
+		bold,
+		int(height),
+		s,
+	)
 
 	return nil
 }
@@ -102,64 +249,133 @@ func (t *Tui) AddTextBox(attr textBoxAttr) {
 	)
 }
 
-func (t *Tui) AddBarChart(attr barChartAttr) {
-	t.instance.BarChart(attr.Data, attr.Dimensions, attr.BarWidth, attr.Background, attr.Title)
+func (t *Tui) AddBarChart(
+	data []int,
+	dimensions []string,
+	title string,
+	options map[string]string,
+) {
+	// defaults
+	borderColor := blue
+	if _, ok := options[optionBorderColor]; ok {
+		borderColor = colorLookUp[options[optionBorderColor]]
+	}
+
+	textColor := blue
+	if _, ok := options[optionTextColor]; ok {
+		textColor = colorLookUp[options[optionTextColor]]
+	}
+
+	numColor := white
+	if _, ok := options[optionNumColor]; ok {
+		numColor = colorLookUp[options[optionNumColor]]
+	}
+
+	var height int64 = 10
+	if _, ok := options[optionHeight]; ok {
+		height, _ = strconv.ParseInt(options[optionHeight], 0, 0)
+	}
+
+	var gap int64 = 0
+	if _, ok := options[optionBarGap]; ok {
+		gap, _ = strconv.ParseInt(options[optionBarGap], 0, 0)
+	}
+
+	var barWidth int64 = 6
+	if _, ok := options[optionBarWidth]; ok {
+		barWidth, _ = strconv.ParseInt(options[optionBarWidth], 0, 0)
+	}
+
+	var barColor = blue
+	if _, ok := options[optionBarColor]; ok {
+		barColor = colorLookUp[options[optionBarColor]]
+	}
+
+	t.instance.BarChart(
+		data,
+		dimensions,
+		title,
+		borderColor,
+		textColor,
+		numColor,
+		int(height),
+		int(gap),
+		int(barWidth),
+		barColor,
+	)
 }
 
-func (t *Tui) AddStackedBarChart(attr stackedBarChartAttr) {
-	t.instance.StackedBarChart(attr.Data, attr.Dimensions, attr.BarWidth, attr.Background, attr.Title)
+func (t *Tui) AddStackedBarChart(
+	data [8][]int,
+	dimensions []string,
+	title string,
+	options map[string]string,
+) {
+	// defaults
+	borderColor := blue
+	if _, ok := options[optionBorderColor]; ok {
+		borderColor = colorLookUp[options[optionBorderColor]]
+	}
+
+	textColor := blue
+	if _, ok := options[optionTextColor]; ok {
+		textColor = colorLookUp[options[optionTextColor]]
+	}
+
+	numColor := white
+	if _, ok := options[optionNumColor]; ok {
+		numColor = colorLookUp[options[optionNumColor]]
+	}
+
+	var height int64 = 10
+	if _, ok := options[optionHeight]; ok {
+		height, _ = strconv.ParseInt(options[optionHeight], 0, 0)
+	}
+
+	var gap int64 = 0
+	if _, ok := options[optionBarGap]; ok {
+		gap, _ = strconv.ParseInt(options[optionBarGap], 0, 0)
+	}
+
+	var barWidth int64 = 6
+	if _, ok := options[optionBarWidth]; ok {
+		barWidth, _ = strconv.ParseInt(options[optionBarWidth], 0, 0)
+	}
+
+	t.instance.StackedBarChart(
+		data,
+		dimensions,
+		title,
+		borderColor,
+		textColor,
+		numColor,
+		int(height),
+		int(gap),
+		int(barWidth),
+	)
 }
 
-func (t *Tui) AddTable(attr tableAttr) {
-	t.instance.Table(attr.Data, attr.Background, attr.BackgroundLabel)
+func (t *Tui) AddTable(data [][]string, title string, options map[string]string) {
+	// defaults
+
+	borderColor := blue
+	if _, ok := options[optionBorderColor]; ok {
+		borderColor = colorLookUp[options[optionBorderColor]]
+	}
+
+	textColor := blue
+	if _, ok := options[optionTextColor]; ok {
+		textColor = colorLookUp[options[optionTextColor]]
+	}
+
+	t.instance.Table(
+		data,
+		title,
+		borderColor,
+		textColor,
+	)
 }
 
 func (t *Tui) AddKQuit(key string) {
 	t.instance.KQuit(key)
-}
-
-func (t *Tui) Render() {
-	t.instance.Render()
-}
-
-func (t *Tui) Close() {
-	t.instance.Close()
-}
-
-func mapSize(size string) (int, error) {
-	s := strings.ToLower(size)
-	switch s {
-	case "xs":
-		return 2, nil
-	case "s":
-		return 4, nil
-	case "m":
-		return 6, nil
-	case "l":
-		return 8, nil
-	case "xl":
-		return 10, nil
-	case "xxl":
-		return 12, nil
-	default:
-		return 0, errors.Errorf("could not find size %s", s)
-	}
-}
-
-func (t *Tui) AddCol(size string) error {
-	s, err := mapSize(size)
-	if err != nil {
-		return err
-	}
-	t.instance.AddCol(s)
-
-	return nil
-}
-
-func (t *Tui) AddRow() {
-	t.instance.AddRow()
-}
-
-func (t *Tui) Init() {
-	t.instance.Init()
 }
