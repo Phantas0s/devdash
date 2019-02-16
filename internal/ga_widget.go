@@ -24,6 +24,7 @@ const (
 	optionLength    = "length"
 	optionLimit     = "limit"
 	optionGlobal    = "global"
+	optionMetrics   = "metrics"
 )
 
 type gaWidget struct {
@@ -124,7 +125,7 @@ func (g *gaWidget) users(widget Widget) error {
 
 func (g *gaWidget) pages(widget Widget) (err error) {
 	// defaults
-	var nbrPages int64 = 5
+	var elLimit int64 = 5
 	var pLen int64 = 20
 
 	title := "Most page viewed"
@@ -138,7 +139,7 @@ func (g *gaWidget) pages(widget Widget) (err error) {
 	}
 
 	if _, ok := widget.Options[optionLimit]; ok {
-		nbrPages, err = strconv.ParseInt(widget.Options[optionLimit], 0, 0)
+		elLimit, err = strconv.ParseInt(widget.Options[optionLimit], 0, 0)
 		if err != nil {
 			return errors.Wrapf(err, "%s must be a number", widget.Options[optionLimit])
 		}
@@ -159,13 +160,27 @@ func (g *gaWidget) pages(widget Widget) (err error) {
 		endDate = widget.Options[optionEndDate]
 	}
 
-	dim, val, err := g.client.Pages(g.viewID, startDate, endDate, global)
+	metrics := []string{"views", "entrances", "unique_views"}
+	if _, ok := widget.Options[optionMetrics]; ok {
+		if len(widget.Options[optionMetrics]) > 0 {
+			metrics = strings.Split(widget.Options[optionMetrics], ",")
+		}
+	}
+
+	headers, dim, val, err := g.client.Pages(g.viewID, startDate, endDate, global, metrics)
 	if err != nil {
 		return err
 	}
 
-	table := [][]string{{"Page", "Page Views"}}
-	for i := 0; i < int(nbrPages); i++ {
+	if int(elLimit) > len(dim) {
+		elLimit = int64(len(dim))
+	}
+
+	// total of pages + one row for headers
+	table := make([][]string, elLimit+1)
+	table[0] = headers
+
+	for i := 0; i < int(elLimit); i++ {
 		p := strings.Trim(dim[i], " ")
 		if _, ok := widget.Options["page_length"]; ok {
 			pLen, err = strconv.ParseInt(widget.Options["page_length"], 0, 0)
@@ -176,7 +191,12 @@ func (g *gaWidget) pages(widget Widget) (err error) {
 		if len(p) > int(pLen) {
 			p = p[:pLen]
 		}
-		table = append(table, []string{p, strconv.Itoa(val[i])})
+
+		// first row after headers
+		table[i+1] = []string{p}
+		for _, v := range val[i] {
+			table[i+1] = append(table[i+1], strconv.Itoa(v))
+		}
 	}
 
 	g.tui.AddTable(table, title, widget.Options)

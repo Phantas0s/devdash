@@ -10,12 +10,12 @@
   version = "v0.27.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:4a427a96959c5687d42daa808972583fa4e0f431dcd29cef909076601bf7a9d8"
+  digest = "1:0b98586be892040d424cdd4fb7e047f71ddfcdbfca59f975a4b4eb14b56ae33c"
   name = "github.com/Phantas0s/termui"
   packages = ["."]
   pruneopts = "UT"
-  revision = "4bd47e9379ae8dd9ce48ea9ecde7835726a1a312"
+  revision = "bf53c5cbea3f372f745e1d8e4660e29f73d41517"
+  version = "v2.3.0"
 
 [[projects]]
   digest = "1:abeb38ade3f32a92943e5be54f55ed6d6e3b6602761d74b4aab4c9dd45c18abd"

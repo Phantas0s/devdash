@@ -6,6 +6,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+var debug bool = false
+
 type service interface {
 	CreateWidgets(widget Widget, tui *Tui) (err error)
 }
@@ -47,7 +49,9 @@ func (p *project) WithMonitor(mon *monitorWidget) {
 	p.monitorWidget = mon
 }
 
-func (p *project) Render(tui *Tui) (err error) {
+func (p *project) Render(tui *Tui, d bool) (err error) {
+	debug = d
+
 	err = p.addTitle(tui)
 	if err != nil {
 		return errors.Wrapf(err, "can't add project title %s", p.name)
@@ -84,8 +88,9 @@ func (p *project) Render(tui *Tui) (err error) {
 				}
 			}
 		}
-		if err := tui.AddRow(); err != nil {
-			return err
+		tui.AddRow()
+		if !debug {
+			tui.Render()
 		}
 	}
 

@@ -12,14 +12,18 @@ import (
 	"github.com/Phantas0s/devdash/internal/plateform"
 )
 
+// debug mode
+var debug *bool
+
 func main() {
 	file := flag.String("config", ".devdash.yml", "The config file")
+	debug = flag.Bool("debug", false, "Debug mode")
 	flag.Parse()
 
 	data, _ := ioutil.ReadFile(*file)
 	cfg := mapConfig(data)
 
-	termui, err := plateform.NewTermUI()
+	termui, err := plateform.NewTermUI(*debug)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -34,7 +38,7 @@ func main() {
 		fmt.Println(err)
 	}
 
-	ticker := time.NewTicker(time.Duration(cfg.General.Refresh) * time.Minute)
+	ticker := time.NewTicker(time.Duration(cfg.General.Refresh) * time.Second)
 	go func() {
 		for range ticker.C {
 			cmd := exec.Command("clear") // for linux...
@@ -43,6 +47,7 @@ func main() {
 			if err != nil {
 				fmt.Println(err)
 			}
+			cmd.Wait()
 
 			err = run(cfg.Projects, tui)
 			if err != nil {
@@ -51,7 +56,7 @@ func main() {
 		}
 	}()
 
-	tui.Render()
+	tui.Loop()
 }
 
 func run(projects []Project, tui *internal.Tui) (err error) {
@@ -80,7 +85,7 @@ func run(projects []Project, tui *internal.Tui) (err error) {
 			project.WithMonitor(monWidget)
 		}
 
-		err = project.Render(tui)
+		err = project.Render(tui, *debug)
 		if err != nil {
 			return err
 		}

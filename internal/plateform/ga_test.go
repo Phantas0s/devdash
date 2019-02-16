@@ -151,6 +151,7 @@ func Test_FormatNewReturning(t *testing.T) {
 		})
 	}
 }
+
 func ReadFixtureFile(file string, t *testing.T) (data []byte) {
 	data, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -158,4 +159,70 @@ func ReadFixtureFile(file string, t *testing.T) (data []byte) {
 	}
 
 	return data
+}
+
+func Test_MapGaMetrics(t *testing.T) {
+	testCases := []struct {
+		name     string
+		m        []string
+		expected []*ga.Metric
+	}{
+		{
+			name: "happy case",
+			m: []string{
+				"views",
+				"entrances",
+				"unique_views",
+			},
+			expected: []*ga.Metric{
+				{Expression: "ga:pageViews"},
+				{Expression: "ga:entrances"},
+				{Expression: "ga:uniquePageviews"},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual := MapGaMetrics(tc.m)
+			if !reflect.DeepEqual(tc.expected, actual) {
+				t.Errorf("Expected %v, actual %v", tc.expected, actual)
+			}
+		})
+	}
+}
+
+func Test_MapGaHeaders(t *testing.T) {
+	testCases := []struct {
+		name     string
+		m        []string
+		expected []string
+		el       string
+	}{
+		{
+			name: "happy case",
+			el:   "Pages",
+			expected: []string{
+				"Pages",
+				"Views",
+				"Entrances",
+				"Unique Views",
+			},
+			m: []string{
+				"views",
+				"entrances",
+				"unique_views",
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual := MapGaHeaders(tc.el, tc.m)
+
+			if !reflect.DeepEqual(actual, tc.expected) {
+				t.Errorf("Expected %v, actual %v", tc.expected, actual)
+			}
+		})
+	}
 }

@@ -2,7 +2,6 @@ package plateform
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -17,6 +16,18 @@ import (
 
 const gaPrefix = "ga:"
 const earliestDate = "2005-01-01"
+
+var mapMetrics = map[string]string{
+	"views":        "ga:pageViews",
+	"entrances":    "ga:entrances",
+	"unique_views": "ga:uniquePageviews",
+}
+
+var mapHeader = map[string]string{
+	"views":        "Views",
+	"entrances":    "Entrances",
+	"unique_views": "Unique Views",
+}
 
 type Client struct {
 	config          *jwt.Config
@@ -157,7 +168,13 @@ func (c *Client) avgTimeOnPage(viewID string, startDate string, endDate string, 
 
 // Pages queries the Analytics Reporting API V4 using the
 // Analytics Reporting API V4 service object.
-func (c *Client) Pages(viewID string, startDate string, endDate string, global bool) (dim []string, u []int, err error) {
+func (c *Client) Pages(
+	viewID string,
+	startDate string,
+	endDate string,
+	global bool,
+	metrics []string,
+) (headers []string, dim []string, u [][]int, err error) {
 
 	dateRange := []*ga.DateRange{
 		{StartDate: startDate, EndDate: endDate},
@@ -168,14 +185,13 @@ func (c *Client) Pages(viewID string, startDate string, endDate string, global b
 		}
 	}
 
+	m := MapGaMetrics(metrics)
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
 				ViewId:     viewID,
 				DateRanges: dateRange,
-				Metrics: []*ga.Metric{
-					{Expression: "ga:pageViews"},
-				},
+				Metrics:    m,
 				Dimensions: []*ga.Dimension{
 					{Name: "ga:pagePath"},
 				},
@@ -192,7 +208,7 @@ func (c *Client) Pages(viewID string, startDate string, endDate string, global b
 
 	resp, err := c.service.Reports.BatchGet(req).Do()
 	if err != nil {
-		return nil, nil, errors.Wrapf(
+		return nil, nil, nil, errors.Wrapf(
 			err,
 			"can't get pages data from google analytics with start data %s / end_date %s",
 			startDate,
@@ -204,7 +220,9 @@ func (c *Client) Pages(viewID string, startDate string, endDate string, global b
 		return dim[0]
 	}
 
-	return format(resp.Reports, formater)
+	headers = MapGaHeaders("Pages", metrics)
+	dim, u, err = formatPages(resp.Reports, formater)
+	return
 }
 
 // NewVsReturning queries the Analytics Reporting API V4 using the
@@ -315,6 +333,30 @@ func format(reps []*ga.Report, dimFormater func(dim []string) string) (dim []str
 	return dim, u, nil
 }
 
+func formatPages(reps []*ga.Report, dimFormater func(dim []string) string) (dim []string, u [][]int, err error) {
+	for _, v := range reps {
+		for l := 0; l < len(v.Data.Rows); l++ {
+			dim = append(dim, dimFormater(v.Data.Rows[l].Dimensions))
+
+			for m := 0; m < len(v.Data.Rows[l].Metrics); m++ {
+				var g []int
+				for p := 0; p < len(v.Data.Rows[l].Metrics[m].Values); p++ {
+
+					var vu int64
+					value := v.Data.Rows[l].Metrics[m].Values[p]
+					if vu, err = strconv.ParseInt(value, 0, 0); err != nil {
+						return nil, nil, err
+					}
+					g = append(g, int(vu))
+				}
+				u = append(u, g)
+			}
+		}
+	}
+
+	return dim, u, nil
+}
+
 func formatReturningNew(reps []*ga.Report, dimFormater func(dim []string) string) (dim []string, u []int, err error) {
 	var new []int
 	var ret []int
@@ -346,7 +388,23 @@ func formatReturningNew(reps []*ga.Report, dimFormater func(dim []string) string
 	return dim, u, nil
 }
 
-func debug(rep *ga.Report) {
-	test, _ := json.Marshal(rep)
-	fmt.Println(string(test))
+func MapGaMetrics(m []string) []*ga.Metric {
+	gam := make([]*ga.Metric, len(m))
+
+	for k, v := range m {
+		gam[k] = &ga.Metric{Expression: mapMetrics[v]}
+	}
+
+	return gam
+}
+
+func MapGaHeaders(el string, metrics []string) []string {
+	h := make([]string, len(metrics)+1)
+	h[0] = el
+
+	for k, v := range metrics {
+		h[k+1] = mapHeader[v]
+	}
+
+	return h
 }

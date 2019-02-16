@@ -7,6 +7,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+var debug bool = false
+
 const maxRowSize = 12
 
 type termUI struct {
@@ -17,7 +19,9 @@ type termUI struct {
 }
 
 // NewTermUI returns a new Terminal Interface object with a given output mode.
-func NewTermUI() (*termUI, error) {
+func NewTermUI(d bool) (*termUI, error) {
+	debug = d
+
 	if err := termui.Init(); err != nil {
 		return nil, err
 	}
@@ -28,6 +32,8 @@ func NewTermUI() (*termUI, error) {
 	body.Y = 0
 	body.BgColor = termui.ThemeAttr("bg")
 	body.Width = termui.TermWidth()
+
+	debugPrint(body)
 
 	return &termUI{
 		body: body,
@@ -44,16 +50,9 @@ func (t *termUI) AddCol(size int) {
 	t.widgets = []termui.GridBufferer{}
 }
 
-func (t *termUI) AddRow() error {
+func (t *termUI) AddRow() {
 	t.body.AddRows(termui.NewRow(t.col...))
 	t.body.Align()
-	termui.Render(t.body)
-
-	// clean the internal row
-	t.row = []*termui.Row{}
-	t.col = []*termui.Row{}
-
-	return nil
 }
 
 func (t termUI) validateRowSize() error {
@@ -185,6 +184,24 @@ func (termUI) KQuit(key string) {
 	})
 }
 
-func (t *termUI) Render() {
+func (t *termUI) Loop() {
 	termui.Loop()
+}
+
+func (t *termUI) Render() {
+	termui.Render(t.body)
+	// delete every widget for the row rendered.
+	t.clean()
+}
+
+// Clean the internal widget for a row after
+func (t *termUI) clean() {
+	t.row = []*termui.Row{}
+	t.col = []*termui.Row{}
+}
+
+func debugPrint(v interface{}) {
+	if debug {
+		fmt.Println(v)
+	}
 }

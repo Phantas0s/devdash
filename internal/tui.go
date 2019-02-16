@@ -124,17 +124,22 @@ type drawer interface {
 		fg uint16,
 	)
 	AddCol(size int)
-	AddRow() error
+	AddRow()
 }
 
 type keyManager interface {
 	KQuit(key string)
 }
 
+type looper interface {
+	Loop()
+}
+
 type manager interface {
 	keyManager
 	renderer
 	drawer
+	looper
 }
 
 // Value objects
@@ -144,12 +149,6 @@ type textBoxAttr struct {
 	Background uint16
 	Title      string
 	H          int
-}
-
-type textAttr struct {
-	Text       string
-	Foreground uint16
-	Size       string
 }
 
 func (t *Tui) AddCol(size string) error {
@@ -162,8 +161,8 @@ func (t *Tui) AddCol(size string) error {
 	return nil
 }
 
-func (t *Tui) AddRow() error {
-	return t.instance.AddRow()
+func (t *Tui) AddRow() {
+	t.instance.AddRow()
 }
 
 func (t *Tui) Render() {
@@ -378,4 +377,8 @@ func (t *Tui) AddTable(data [][]string, title string, options map[string]string)
 
 func (t *Tui) AddKQuit(key string) {
 	t.instance.KQuit(key)
+}
+
+func (t *Tui) Loop() {
+	t.instance.Loop()
 }
