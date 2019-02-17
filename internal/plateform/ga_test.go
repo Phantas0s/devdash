@@ -203,13 +203,13 @@ func Test_mapDimension(t *testing.T) {
 	}{
 		{
 			name:     "alias",
-			d:        "pages",
-			expected: "ga:pages",
+			d:        "page_path",
+			expected: "ga:pagePath",
 		},
 		{
 			name:     "ga name",
-			d:        "ga:pages",
-			expected: "ga:pages",
+			d:        "ga:pagePath",
+			expected: "ga:pagePath",
 		},
 	}
 
