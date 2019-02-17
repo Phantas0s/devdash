@@ -191,13 +191,20 @@ func (t *termUI) Loop() {
 func (t *termUI) Render() {
 	termui.Render(t.body)
 	// delete every widget for the row rendered.
-	t.clean()
+	t.removeWidgets()
 }
 
-// Clean the internal widget for a row after
-func (t *termUI) clean() {
+func (t *termUI) removeWidgets() {
 	t.row = []*termui.Row{}
 	t.col = []*termui.Row{}
+}
+
+func (t *termUI) Clean() {
+	t.body = termui.NewGrid()
+	t.body.X = 0
+	t.body.Y = 0
+	t.body.BgColor = termui.ThemeAttr("bg")
+	t.body.Width = termui.TermWidth()
 }
 
 func debugPrint(v interface{}) {

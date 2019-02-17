@@ -74,6 +74,7 @@ func colorStr(value uint16) (key string) {
 type renderer interface {
 	Render()
 	Close()
+	Clean()
 }
 
 type drawer interface {
@@ -381,4 +382,8 @@ func (t *Tui) AddKQuit(key string) {
 
 func (t *Tui) Loop() {
 	t.instance.Loop()
+}
+
+func (t *Tui) Clean() {
+	t.instance.Clean()
 }
