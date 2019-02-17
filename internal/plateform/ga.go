@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2/google"
@@ -15,18 +16,27 @@ import (
 )
 
 const gaPrefix = "ga:"
+
+// earliest date google analytics accept for date ranges
 const earliestDate = "2005-01-01"
 
 var mapMetrics = map[string]string{
-	"views":        "ga:pageViews",
-	"entrances":    "ga:entrances",
-	"unique_views": "ga:uniquePageviews",
+	"sessions":          "ga:sessions",
+	"page_views":        "ga:pageViews",
+	"entrances":         "ga:entrances",
+	"unique_page_views": "ga:uniquePageviews",
 }
 
 var mapHeader = map[string]string{
-	"views":        "Views",
-	"entrances":    "Entrances",
-	"unique_views": "Unique Views",
+	"sessions":          "Sessions",
+	"page_views":        "Page Views",
+	"entrances":         "Entrances",
+	"unique_page_views": "Unique Page Views",
+}
+
+var mapOrder = map[string]string{
+	"asc":  "ASCENDING",
+	"desc": "DESCENDING",
 }
 
 type Client struct {
@@ -131,7 +141,6 @@ func (c *Client) RealTimeUsers(viewID string) (string, error) {
 }
 
 func (c *Client) avgTimeOnPage(viewID string, startDate string, endDate string, global bool) (*ga.GetReportsResponse, error) {
-
 	dateRange := []*ga.DateRange{
 		{StartDate: startDate, EndDate: endDate},
 	}
@@ -174,6 +183,7 @@ func (c *Client) Pages(
 	endDate string,
 	global bool,
 	metrics []string,
+	orders []string,
 ) (headers []string, dim []string, u [][]int, err error) {
 
 	dateRange := []*ga.DateRange{
@@ -185,22 +195,16 @@ func (c *Client) Pages(
 		}
 	}
 
-	m := MapGaMetrics(metrics)
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
 				ViewId:     viewID,
 				DateRanges: dateRange,
-				Metrics:    m,
+				Metrics:    MapGaMetrics(metrics),
 				Dimensions: []*ga.Dimension{
 					{Name: "ga:pagePath"},
 				},
-				OrderBys: []*ga.OrderBy{
-					{
-						FieldName: "ga:pageViews",
-						SortOrder: "DESCENDING",
-					},
-				},
+				OrderBys:         MapGaOrderBy(orders),
 				IncludeEmptyRows: true,
 			},
 		},
@@ -221,8 +225,59 @@ func (c *Client) Pages(
 	}
 
 	headers = MapGaHeaders("Pages", metrics)
-	dim, u, err = formatPages(resp.Reports, formater)
+	dim, u, err = formatMultipleExpr(resp.Reports, formater)
 	return
+}
+
+func (c *Client) TrafficSource(
+	viewID string,
+	startDate string,
+	endDate string,
+	global bool,
+	metrics []string,
+	orders []string,
+) (headers []string, dim []string, u [][]int, err error) {
+	dateRange := []*ga.DateRange{
+		{StartDate: startDate, EndDate: endDate},
+	}
+	if global {
+		dateRange = []*ga.DateRange{
+			{StartDate: earliestDate, EndDate: endDate},
+		}
+	}
+
+	req := &ga.GetReportsRequest{
+		ReportRequests: []*ga.ReportRequest{
+			{
+				ViewId:     viewID,
+				DateRanges: dateRange,
+				Metrics:    MapGaMetrics(metrics),
+				Dimensions: []*ga.Dimension{
+					{Name: "ga:source"},
+				},
+				OrderBys:         MapGaOrderBy(orders),
+				IncludeEmptyRows: true,
+			},
+		},
+	}
+
+	resp, err := c.service.Reports.BatchGet(req).Do()
+	if err != nil {
+		return nil, nil, nil, errors.Wrapf(
+			err,
+			"can't get traffic source data from google analytics with start data %s / end_date %s",
+			startDate,
+			endDate,
+		)
+	}
+
+	formater := func(dim []string) string {
+		return dim[0]
+	}
+
+	headers = MapGaHeaders("Sources", metrics)
+	dim, u, err = formatMultipleExpr(resp.Reports, formater)
+	return headers, dim, u, err
 }
 
 // NewVsReturning queries the Analytics Reporting API V4 using the
@@ -271,48 +326,6 @@ func (c *Client) ReturningVsNew(viewID string, startDate string, endDate string)
 	return formatReturningNew(resp.Reports, formater)
 }
 
-func (c *Client) TrafficSource(viewID string, startDate string, endDate string) (dim []string, u []int, err error) {
-	req := &ga.GetReportsRequest{
-		ReportRequests: []*ga.ReportRequest{
-			{
-				ViewId: viewID,
-				DateRanges: []*ga.DateRange{
-					{StartDate: startDate, EndDate: endDate},
-				},
-				Metrics: []*ga.Metric{
-					{Expression: "ga:sessions"},
-				},
-				Dimensions: []*ga.Dimension{
-					{Name: "ga:source"},
-				},
-				OrderBys: []*ga.OrderBy{
-					{
-						FieldName: "ga:sessions",
-						SortOrder: "DESCENDING",
-					},
-				},
-				IncludeEmptyRows: true,
-			},
-		},
-	}
-
-	resp, err := c.service.Reports.BatchGet(req).Do()
-	if err != nil {
-		return nil, nil, errors.Wrapf(
-			err,
-			"can't get traffic source data from google analytics with start data %s / end_date %s",
-			startDate,
-			endDate,
-		)
-	}
-
-	formater := func(dim []string) string {
-		return dim[0]
-	}
-
-	return format(resp.Reports, formater)
-}
-
 func format(reps []*ga.Report, dimFormater func(dim []string) string) (dim []string, u []int, err error) {
 	for _, v := range reps {
 		for l := 0; l < len(v.Data.Rows); l++ {
@@ -333,7 +346,7 @@ func format(reps []*ga.Report, dimFormater func(dim []string) string) (dim []str
 	return dim, u, nil
 }
 
-func formatPages(reps []*ga.Report, dimFormater func(dim []string) string) (dim []string, u [][]int, err error) {
+func formatMultipleExpr(reps []*ga.Report, dimFormater func(dim []string) string) (dim []string, u [][]int, err error) {
 	for _, v := range reps {
 		for l := 0; l < len(v.Data.Rows); l++ {
 			dim = append(dim, dimFormater(v.Data.Rows[l].Dimensions))
@@ -392,7 +405,32 @@ func MapGaMetrics(m []string) []*ga.Metric {
 	gam := make([]*ga.Metric, len(m))
 
 	for k, v := range m {
-		gam[k] = &ga.Metric{Expression: mapMetrics[v]}
+		gam[k] = &ga.Metric{Expression: strings.TrimSpace(mapMetrics[v])}
+	}
+
+	return gam
+}
+
+func MapGaOrderBy(o []string) []*ga.OrderBy {
+	gam := make([]*ga.OrderBy, len(o))
+
+	for k, v := range o {
+		s := strings.Split(v, " ")
+
+		// default
+		field := "sessions"
+		order := "desc"
+
+		if len(s) == 1 {
+			field = s[0]
+		}
+
+		if len(s) > 1 {
+			field = s[0]
+			order = strings.ToLower(s[1])
+		}
+
+		gam[k] = &ga.OrderBy{FieldName: mapMetrics[field], SortOrder: mapOrder[order]}
 	}
 
 	return gam

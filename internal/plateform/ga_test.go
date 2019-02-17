@@ -56,6 +56,7 @@ func Test_Format(t *testing.T) {
 	}
 }
 
+// TODO simplify the test (less data)... but keep this two month period
 func Test_FormatNewReturning(t *testing.T) {
 	testCases := []struct {
 		name        string
@@ -170,11 +171,13 @@ func Test_MapGaMetrics(t *testing.T) {
 		{
 			name: "happy case",
 			m: []string{
-				"views",
+				"sessions",
+				"page_views",
 				"entrances",
-				"unique_views",
+				"unique_page_views",
 			},
 			expected: []*ga.Metric{
+				{Expression: "ga:sessions"},
 				{Expression: "ga:pageViews"},
 				{Expression: "ga:entrances"},
 				{Expression: "ga:uniquePageviews"},
@@ -204,14 +207,16 @@ func Test_MapGaHeaders(t *testing.T) {
 			el:   "Pages",
 			expected: []string{
 				"Pages",
-				"Views",
+				"Sessions",
+				"Page Views",
 				"Entrances",
-				"Unique Views",
+				"Unique Page Views",
 			},
 			m: []string{
-				"views",
+				"sessions",
+				"page_views",
 				"entrances",
-				"unique_views",
+				"unique_page_views",
 			},
 		},
 	}
@@ -221,6 +226,46 @@ func Test_MapGaHeaders(t *testing.T) {
 			actual := MapGaHeaders(tc.el, tc.m)
 
 			if !reflect.DeepEqual(actual, tc.expected) {
+				t.Errorf("Expected %v, actual %v", tc.expected, actual)
+			}
+		})
+	}
+}
+
+func Test_MapGaOrderBy(t *testing.T) {
+	testCases := []struct {
+		name     string
+		m        []string
+		expected []*ga.OrderBy
+	}{
+		{
+			name: "happy case",
+			m: []string{
+				"sessions asc",
+				"page_views desc",
+				"unique_page_views",
+			},
+			expected: []*ga.OrderBy{
+				&ga.OrderBy{
+					FieldName: "ga:sessions",
+					SortOrder: "ASCENDING",
+				},
+				&ga.OrderBy{
+					FieldName: "ga:pageViews",
+					SortOrder: "DESCENDING",
+				},
+				&ga.OrderBy{
+					FieldName: "ga:uniquePageviews",
+					SortOrder: "DESCENDING",
+				},
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual := MapGaOrderBy(tc.m)
+			if !reflect.DeepEqual(tc.expected, actual) {
 				t.Errorf("Expected %v, actual %v", tc.expected, actual)
 			}
 		})

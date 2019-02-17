@@ -21,10 +21,11 @@ const (
 	optionTitle     = "title"
 	optionStartDate = "start_date"
 	optionEndDate   = "end_date"
-	optionLength    = "length"
 	optionLimit     = "limit"
 	optionGlobal    = "global"
 	optionMetrics   = "metrics"
+	optionCharLimit = "character_limit"
+	optionOrder     = "order"
 )
 
 type gaWidget struct {
@@ -160,14 +161,21 @@ func (g *gaWidget) pages(widget Widget) (err error) {
 		endDate = widget.Options[optionEndDate]
 	}
 
-	metrics := []string{"views", "entrances", "unique_views"}
+	metrics := []string{"sessions", "page_views", "entrances", "unique_page_views"}
 	if _, ok := widget.Options[optionMetrics]; ok {
 		if len(widget.Options[optionMetrics]) > 0 {
 			metrics = strings.Split(widget.Options[optionMetrics], ",")
 		}
 	}
 
-	headers, dim, val, err := g.client.Pages(g.viewID, startDate, endDate, global, metrics)
+	orders := []string{metrics[0] + " desc"}
+	if _, ok := widget.Options[optionOrder]; ok {
+		if len(widget.Options[optionOrder]) > 0 {
+			orders = strings.Split(widget.Options[optionOrder], ",")
+		}
+	}
+
+	headers, dim, val, err := g.client.Pages(g.viewID, startDate, endDate, global, metrics, orders)
 	if err != nil {
 		return err
 	}
@@ -182,11 +190,93 @@ func (g *gaWidget) pages(widget Widget) (err error) {
 
 	for i := 0; i < int(elLimit); i++ {
 		p := strings.Trim(dim[i], " ")
-		if _, ok := widget.Options["page_length"]; ok {
-			pLen, err = strconv.ParseInt(widget.Options["page_length"], 0, 0)
+		if _, ok := widget.Options[optionCharLimit]; ok {
+			pLen, err = strconv.ParseInt(widget.Options[optionCharLimit], 0, 0)
 		}
 		if err != nil {
-			return errors.Wrapf(err, "%s must be a number", widget.Options["page_length"])
+			return errors.Wrapf(err, "%s must be a number", widget.Options[optionCharLimit])
+		}
+		if len(p) > int(pLen) {
+			p = p[:pLen]
+		}
+
+		// first row after headers
+		table[i+1] = []string{p}
+		for _, v := range val[i] {
+			table[i+1] = append(table[i+1], strconv.Itoa(v))
+		}
+	}
+
+	g.tui.AddTable(table, title, widget.Options)
+
+	return nil
+}
+
+func (g *gaWidget) trafficSource(widget Widget) (err error) {
+	// defaults
+	var elLimit int64 = 5
+	var pLen int64 = 20
+
+	startDate := "7daysAgo"
+	if _, ok := widget.Options[optionStartDate]; ok {
+		startDate = widget.Options[optionStartDate]
+	}
+
+	endDate := "today"
+	if _, ok := widget.Options[optionEndDate]; ok {
+		endDate = widget.Options[optionEndDate]
+	}
+
+	title := fmt.Sprintf(" Traffic from %s to %s ", startDate, endDate)
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	if _, ok := widget.Options[optionLimit]; ok {
+		elLimit, err = strconv.ParseInt(widget.Options[optionLimit], 0, 0)
+		if err != nil {
+			return errors.Wrapf(err, "%s must be a number", widget.Options[optionLimit])
+		}
+	}
+
+	metrics := []string{"sessions", "page_views", "entrances", "unique_page_views"}
+	if _, ok := widget.Options[optionMetrics]; ok {
+		if len(widget.Options[optionMetrics]) > 0 {
+			metrics = strings.Split(widget.Options[optionMetrics], ",")
+		}
+	}
+
+	orders := []string{metrics[0] + " desc"}
+	if _, ok := widget.Options[optionOrder]; ok {
+		if len(widget.Options[optionOrder]) > 0 {
+			orders = strings.Split(widget.Options[optionOrder], ",")
+		}
+	}
+
+	global := false
+	if _, ok := widget.Options[optionGlobal]; ok {
+		global, err = strconv.ParseBool(widget.Options[optionGlobal])
+		if err != nil {
+			return errors.Wrapf(err, "could not parse string %s to bool", widget.Options[optionGlobal])
+		}
+	}
+
+	headers, dim, val, err := g.client.TrafficSource(g.viewID, startDate, endDate, global, metrics, orders)
+	if err != nil {
+		return err
+	}
+
+	// total of elements + one row for headers
+	table := make([][]string, elLimit+1)
+	table[0] = headers
+
+	for i := 0; i < int(elLimit); i++ {
+		p := strings.Trim(dim[i], " ")
+		if _, ok := widget.Options[optionCharLimit]; ok {
+			pLen, err = strconv.ParseInt(widget.Options[optionCharLimit], 0, 0)
+		}
+		if err != nil {
+			return errors.Wrapf(err, "%s must be a number", widget.Options[optionCharLimit])
 		}
 		if len(p) > int(pLen) {
 			p = p[:pLen]
@@ -258,50 +348,5 @@ func (g *gaWidget) ReturningVsNew(widget Widget) error {
 
 	g.tui.AddStackedBarChart(data, dim, title, widget.Options)
 
-	return nil
-}
-
-// users get the number of users the 7 last days on your website
-func (g *gaWidget) trafficSource(widget Widget) error {
-	// defaults
-
-	startDate := "7daysAgo"
-	if _, ok := widget.Options[optionStartDate]; ok {
-		startDate = widget.Options[optionStartDate]
-	}
-
-	endDate := "today"
-	if _, ok := widget.Options[optionEndDate]; ok {
-		endDate = widget.Options[optionEndDate]
-	}
-
-	title := fmt.Sprintf(" Traffic from %s to %s ", startDate, endDate)
-	if _, ok := widget.Options[optionTitle]; ok {
-		title = widget.Options[optionTitle]
-	}
-
-	pages, src, err := g.client.TrafficSource(g.viewID, startDate, endDate)
-	if err != nil {
-		return err
-	}
-
-	var nbrSources int64 = 5
-	var pLen int64 = 20
-	table := [][]string{{"Page", "Page Views"}}
-	for i := 0; i < int(nbrSources); i++ {
-		p := strings.Trim(pages[i], " ")
-		if _, ok := widget.Options[optionLength]; ok {
-			pLen, err = strconv.ParseInt(widget.Options[optionLength], 0, 0)
-		}
-		if err != nil {
-			return errors.Wrapf(err, "%s must be a number", widget.Options["page_length"])
-		}
-		if len(p) > int(pLen) {
-			p = p[:pLen]
-		}
-		table = append(table, []string{p, strconv.Itoa(src[i])})
-	}
-
-	g.tui.AddTable(table, title, widget.Options)
 	return nil
 }
