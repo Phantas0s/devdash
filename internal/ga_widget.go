@@ -12,10 +12,13 @@ import (
 const (
 	// widget config names
 	realtime       = "ga.realtime"
+	sessions       = "ga.sessions"
 	users          = "ga.users"
+	bar_metric     = "ga.bar_metric"
 	pages          = "ga.pages"
 	new_returning  = "ga.new_returning"
 	traffic_source = "ga.traffic_source"
+	total_metric   = "ga.total_metric"
 
 	// option config names
 	optionTitle     = "title"
@@ -24,6 +27,8 @@ const (
 	optionLimit     = "limit"
 	optionGlobal    = "global"
 	optionMetrics   = "metrics"
+	optionMetric    = "metric"
+	optionDimension = "dimension"
 	optionCharLimit = "character_limit"
 	optionOrder     = "order"
 )
@@ -52,14 +57,20 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	switch widget.Name {
 	case realtime:
 		err = g.realTimeUser(widget)
+	case total_metric:
+		err = g.totalMetric(widget)
+	case sessions:
+		err = g.barMetric(widget)
 	case users:
 		err = g.users(widget)
+	case bar_metric:
+		err = g.barMetric(widget)
 	case pages:
-		err = g.pages(widget)
-	case new_returning:
-		err = g.ReturningVsNew(widget)
+		err = g.table(widget)
 	case traffic_source:
 		err = g.trafficSource(widget)
+	case new_returning:
+		err = g.ReturningVsNew(widget)
 	default:
 		return errors.Errorf("can't find the widget %s", widget.Name)
 	}
@@ -67,10 +78,54 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	return
 }
 
+func (g *gaWidget) totalMetric(widget Widget) (err error) {
+	metric := "sessions"
+	if _, ok := widget.Options[optionMetric]; ok {
+		if len(widget.Options[optionMetric]) > 0 {
+			metric = widget.Options[optionMetric]
+		}
+	}
+
+	startDate := "7daysAgo"
+	if _, ok := widget.Options[optionStartDate]; ok {
+		startDate = widget.Options[optionStartDate]
+	}
+
+	endDate := "today"
+	if _, ok := widget.Options[optionEndDate]; ok {
+		endDate = widget.Options[optionEndDate]
+	}
+
+	title := fmt.Sprintf("Total %s from %s to %s", metric, startDate, endDate)
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	global := false
+	if _, ok := widget.Options[optionGlobal]; ok {
+		global, err = strconv.ParseBool(widget.Options[optionGlobal])
+		if err != nil {
+			return errors.Wrapf(err, "could not parse string %s to bool", widget.Options[optionGlobal])
+		}
+	}
+
+	users, err := g.client.SimpleMetric(g.viewID, metric, startDate, endDate, global)
+	if err != nil {
+		return err
+	}
+
+	g.tui.AddTextBox(
+		users,
+		title,
+		widget.Options,
+	)
+
+	return nil
+}
+
 // GaRTActiveUser get the real time active users from Google Analytics
 func (g *gaWidget) realTimeUser(widget Widget) error {
 	title := " Real time users "
-
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}
@@ -80,24 +135,27 @@ func (g *gaWidget) realTimeUser(widget Widget) error {
 		return err
 	}
 
-	foreground := green
-	if users == "0" {
-		foreground = red
-	}
-
-	g.tui.AddTextBox(textBoxAttr{
-		Data:       users,
-		Foreground: foreground,
-		Background: blue,
-		Title:      title,
-		H:          3,
-	})
+	g.tui.AddTextBox(
+		users,
+		title,
+		widget.Options,
+	)
 
 	return nil
 }
 
+func (g *gaWidget) users(widget Widget) (err error) {
+	if widget.Options == nil {
+		widget.Options = map[string]string{"metric": "users"}
+	} else {
+		widget.Options["metric"] = "users"
+	}
+
+	return g.barMetric(widget)
+}
+
 // users get the number of users the 7 last days on your website
-func (g *gaWidget) users(widget Widget) error {
+func (g *gaWidget) barMetric(widget Widget) error {
 	// defaults
 	startDate := "7daysAgo"
 	if _, ok := widget.Options[optionStartDate]; ok {
@@ -114,7 +172,12 @@ func (g *gaWidget) users(widget Widget) error {
 		title = widget.Options[optionTitle]
 	}
 
-	dim, val, err := g.client.Users(g.viewID, startDate, endDate)
+	metric := "sessions"
+	if _, ok := widget.Options[optionMetric]; ok {
+		metric = widget.Options[optionMetric]
+	}
+
+	dim, val, err := g.client.BarMetric(g.viewID, startDate, endDate, metric)
 	if err != nil {
 		return err
 	}
@@ -124,17 +187,12 @@ func (g *gaWidget) users(widget Widget) error {
 	return nil
 }
 
-func (g *gaWidget) pages(widget Widget) (err error) {
+func (g *gaWidget) table(widget Widget) (err error) {
 	// defaults
 	var elLimit int64 = 5
 	var pLen int64 = 20
 
 	title := "Most page viewed"
-	startDate := "7daysAgo"
-	endDate := "today"
-
-	global := false
-
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}
@@ -146,6 +204,7 @@ func (g *gaWidget) pages(widget Widget) (err error) {
 		}
 	}
 
+	global := false
 	if _, ok := widget.Options[optionGlobal]; ok {
 		global, err = strconv.ParseBool(widget.Options[optionGlobal])
 		if err != nil {
@@ -153,12 +212,21 @@ func (g *gaWidget) pages(widget Widget) (err error) {
 		}
 	}
 
+	startDate := "7daysAgo"
 	if _, ok := widget.Options[optionStartDate]; ok {
 		startDate = widget.Options[optionStartDate]
 	}
 
+	endDate := "today"
 	if _, ok := widget.Options[optionEndDate]; ok {
 		endDate = widget.Options[optionEndDate]
+	}
+
+	dimension := "page_path"
+	if _, ok := widget.Options[optionDimension]; ok {
+		if len(widget.Options[optionDimension]) > 0 {
+			dimension = widget.Options[optionDimension]
+		}
 	}
 
 	metrics := []string{"sessions", "page_views", "entrances", "unique_page_views"}
@@ -175,7 +243,15 @@ func (g *gaWidget) pages(widget Widget) (err error) {
 		}
 	}
 
-	headers, dim, val, err := g.client.Pages(g.viewID, startDate, endDate, global, metrics, orders)
+	headers, dim, val, err := g.client.Table(
+		g.viewID,
+		startDate,
+		endDate,
+		global,
+		metrics,
+		dimension,
+		orders,
+	)
 	if err != nil {
 		return err
 	}
@@ -202,9 +278,7 @@ func (g *gaWidget) pages(widget Widget) (err error) {
 
 		// first row after headers
 		table[i+1] = []string{p}
-		for _, v := range val[i] {
-			table[i+1] = append(table[i+1], strconv.Itoa(v))
-		}
+		table[i+1] = append(table[i+1], val[i]...)
 	}
 
 	g.tui.AddTable(table, title, widget.Options)
@@ -213,85 +287,13 @@ func (g *gaWidget) pages(widget Widget) (err error) {
 }
 
 func (g *gaWidget) trafficSource(widget Widget) (err error) {
-	// defaults
-	var elLimit int64 = 5
-	var pLen int64 = 20
-
-	startDate := "7daysAgo"
-	if _, ok := widget.Options[optionStartDate]; ok {
-		startDate = widget.Options[optionStartDate]
+	if widget.Options == nil {
+		widget.Options = map[string]string{"dimension": "traffic_source"}
+	} else {
+		widget.Options["dimension"] = "traffic_source"
 	}
 
-	endDate := "today"
-	if _, ok := widget.Options[optionEndDate]; ok {
-		endDate = widget.Options[optionEndDate]
-	}
-
-	title := fmt.Sprintf(" Traffic from %s to %s ", startDate, endDate)
-	if _, ok := widget.Options[optionTitle]; ok {
-		title = widget.Options[optionTitle]
-	}
-
-	if _, ok := widget.Options[optionLimit]; ok {
-		elLimit, err = strconv.ParseInt(widget.Options[optionLimit], 0, 0)
-		if err != nil {
-			return errors.Wrapf(err, "%s must be a number", widget.Options[optionLimit])
-		}
-	}
-
-	metrics := []string{"sessions", "page_views", "entrances", "unique_page_views"}
-	if _, ok := widget.Options[optionMetrics]; ok {
-		if len(widget.Options[optionMetrics]) > 0 {
-			metrics = strings.Split(widget.Options[optionMetrics], ",")
-		}
-	}
-
-	orders := []string{metrics[0] + " desc"}
-	if _, ok := widget.Options[optionOrder]; ok {
-		if len(widget.Options[optionOrder]) > 0 {
-			orders = strings.Split(widget.Options[optionOrder], ",")
-		}
-	}
-
-	global := false
-	if _, ok := widget.Options[optionGlobal]; ok {
-		global, err = strconv.ParseBool(widget.Options[optionGlobal])
-		if err != nil {
-			return errors.Wrapf(err, "could not parse string %s to bool", widget.Options[optionGlobal])
-		}
-	}
-
-	headers, dim, val, err := g.client.TrafficSource(g.viewID, startDate, endDate, global, metrics, orders)
-	if err != nil {
-		return err
-	}
-
-	// total of elements + one row for headers
-	table := make([][]string, elLimit+1)
-	table[0] = headers
-
-	for i := 0; i < int(elLimit); i++ {
-		p := strings.Trim(dim[i], " ")
-		if _, ok := widget.Options[optionCharLimit]; ok {
-			pLen, err = strconv.ParseInt(widget.Options[optionCharLimit], 0, 0)
-		}
-		if err != nil {
-			return errors.Wrapf(err, "%s must be a number", widget.Options[optionCharLimit])
-		}
-		if len(p) > int(pLen) {
-			p = p[:pLen]
-		}
-
-		// first row after headers
-		table[i+1] = []string{p}
-		for _, v := range val[i] {
-			table[i+1] = append(table[i+1], strconv.Itoa(v))
-		}
-	}
-
-	g.tui.AddTable(table, title, widget.Options)
-
-	return nil
+	return g.table(widget)
 }
 
 func (g *gaWidget) ReturningVsNew(widget Widget) error {

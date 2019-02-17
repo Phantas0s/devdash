@@ -88,10 +88,10 @@ type drawer interface {
 	)
 	TextBox(
 		data string,
-		foreground uint16,
-		background uint16,
+		textColor uint16,
+		borderColor uint16,
 		title string,
-		h int,
+		height int,
 	)
 	BarChart(
 		data []int,
@@ -141,15 +141,6 @@ type manager interface {
 	renderer
 	drawer
 	looper
-}
-
-// Value objects
-type textBoxAttr struct {
-	Data       string
-	Foreground uint16
-	Background uint16
-	Title      string
-	H          int
 }
 
 func (t *Tui) AddCol(size string) error {
@@ -239,14 +230,35 @@ func (t *Tui) AddProjectTitle(title string, options map[string]string) (err erro
 	return nil
 }
 
-func (t *Tui) AddTextBox(attr textBoxAttr) {
+func (t *Tui) AddTextBox(
+	data string,
+	title string,
+	options map[string]string,
+) {
+	// defaults
+	borderColor := blue
+	if _, ok := options[optionBorderColor]; ok {
+		borderColor = colorLookUp[options[optionBorderColor]]
+	}
+
+	textColor := blue
+	if _, ok := options[optionTextColor]; ok {
+		textColor = colorLookUp[options[optionTextColor]]
+	}
+
+	var height int64 = 3
+	if _, ok := options[optionHeight]; ok {
+		height, _ = strconv.ParseInt(options[optionHeight], 0, 0)
+	}
+
 	t.instance.TextBox(
-		attr.Data,
-		attr.Foreground,
-		attr.Background,
-		attr.Title,
-		attr.H,
+		data,
+		textColor,
+		borderColor,
+		title,
+		int(height),
 	)
+
 }
 
 func (t *Tui) AddBarChart(

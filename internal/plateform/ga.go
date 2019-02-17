@@ -20,21 +20,27 @@ const gaPrefix = "ga:"
 // earliest date google analytics accept for date ranges
 const earliestDate = "2005-01-01"
 
-var mapMetrics = map[string]string{
+var mappingMetrics = map[string]string{
 	"sessions":          "ga:sessions",
 	"page_views":        "ga:pageViews",
 	"entrances":         "ga:entrances",
 	"unique_page_views": "ga:uniquePageviews",
+	"users":             "ga:users",
 }
 
-var mapHeader = map[string]string{
+var mappingDimensions = map[string]string{
+	"page_path":      "ga:pagePath",
+	"traffic_source": "ga:source",
+}
+
+var mappingHeader = map[string]string{
 	"sessions":          "Sessions",
 	"page_views":        "Page Views",
 	"entrances":         "Entrances",
 	"unique_page_views": "Unique Page Views",
 }
 
-var mapOrder = map[string]string{
+var mappingOrder = map[string]string{
 	"asc":  "ASCENDING",
 	"desc": "DESCENDING",
 }
@@ -80,9 +86,12 @@ func NewGaClient(keyfile string) (*Client, error) {
 	return client, nil
 }
 
-// GetReport queries the Analytics Reporting API V4 using the
-// Analytics Reporting API V4 service object.
-func (c *Client) Users(viewID string, startDate string, endDate string) ([]string, []int, error) {
+func (c *Client) SimpleMetric(
+	viewID string,
+	metric, startDate string,
+	endDate string,
+	global bool,
+) (string, error) {
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
@@ -91,7 +100,36 @@ func (c *Client) Users(viewID string, startDate string, endDate string) ([]strin
 					{StartDate: startDate, EndDate: endDate},
 				},
 				Metrics: []*ga.Metric{
-					{Expression: "ga:users"},
+					{Expression: mapMetric(metric)},
+				},
+				IncludeEmptyRows: true,
+			},
+		},
+	}
+
+	resp, err := c.service.Reports.BatchGet(req).Do()
+	if err != nil {
+		return "", errors.Wrapf(
+			err,
+			"can't get total metric data from google analytics with start data %s / end_date %s",
+			startDate,
+			endDate,
+		)
+	}
+
+	return resp.Reports[0].Data.Rows[0].Metrics[0].Values[0], nil
+}
+
+func (c *Client) BarMetric(viewID string, startDate string, endDate string, metric string) ([]string, []int, error) {
+	req := &ga.GetReportsRequest{
+		ReportRequests: []*ga.ReportRequest{
+			{
+				ViewId: viewID,
+				DateRanges: []*ga.DateRange{
+					{StartDate: startDate, EndDate: endDate},
+				},
+				Metrics: []*ga.Metric{
+					{Expression: mapMetric(metric)},
 				},
 				Dimensions: []*ga.Dimension{
 					{Name: "ga:month"},
@@ -177,14 +215,15 @@ func (c *Client) avgTimeOnPage(viewID string, startDate string, endDate string, 
 
 // Pages queries the Analytics Reporting API V4 using the
 // Analytics Reporting API V4 service object.
-func (c *Client) Pages(
+func (c *Client) Table(
 	viewID string,
 	startDate string,
 	endDate string,
 	global bool,
 	metrics []string,
+	dimension string,
 	orders []string,
-) (headers []string, dim []string, u [][]int, err error) {
+) (headers []string, dim []string, u [][]string, err error) {
 
 	dateRange := []*ga.DateRange{
 		{StartDate: startDate, EndDate: endDate},
@@ -200,11 +239,11 @@ func (c *Client) Pages(
 			{
 				ViewId:     viewID,
 				DateRanges: dateRange,
-				Metrics:    MapGaMetrics(metrics),
+				Metrics:    mapMetrics(metrics),
 				Dimensions: []*ga.Dimension{
-					{Name: "ga:pagePath"},
+					{Name: mapDimension(dimension)},
 				},
-				OrderBys:         MapGaOrderBy(orders),
+				OrderBys:         mapOrderBy(orders),
 				IncludeEmptyRows: true,
 			},
 		},
@@ -224,60 +263,9 @@ func (c *Client) Pages(
 		return dim[0]
 	}
 
-	headers = MapGaHeaders("Pages", metrics)
-	dim, u, err = formatMultipleExpr(resp.Reports, formater)
+	headers = mapHeaders("Pages", metrics)
+	dim, u, err = formatTable(resp.Reports, formater)
 	return
-}
-
-func (c *Client) TrafficSource(
-	viewID string,
-	startDate string,
-	endDate string,
-	global bool,
-	metrics []string,
-	orders []string,
-) (headers []string, dim []string, u [][]int, err error) {
-	dateRange := []*ga.DateRange{
-		{StartDate: startDate, EndDate: endDate},
-	}
-	if global {
-		dateRange = []*ga.DateRange{
-			{StartDate: earliestDate, EndDate: endDate},
-		}
-	}
-
-	req := &ga.GetReportsRequest{
-		ReportRequests: []*ga.ReportRequest{
-			{
-				ViewId:     viewID,
-				DateRanges: dateRange,
-				Metrics:    MapGaMetrics(metrics),
-				Dimensions: []*ga.Dimension{
-					{Name: "ga:source"},
-				},
-				OrderBys:         MapGaOrderBy(orders),
-				IncludeEmptyRows: true,
-			},
-		},
-	}
-
-	resp, err := c.service.Reports.BatchGet(req).Do()
-	if err != nil {
-		return nil, nil, nil, errors.Wrapf(
-			err,
-			"can't get traffic source data from google analytics with start data %s / end_date %s",
-			startDate,
-			endDate,
-		)
-	}
-
-	formater := func(dim []string) string {
-		return dim[0]
-	}
-
-	headers = MapGaHeaders("Sources", metrics)
-	dim, u, err = formatMultipleExpr(resp.Reports, formater)
-	return headers, dim, u, err
 }
 
 // NewVsReturning queries the Analytics Reporting API V4 using the
@@ -346,21 +334,18 @@ func format(reps []*ga.Report, dimFormater func(dim []string) string) (dim []str
 	return dim, u, nil
 }
 
-func formatMultipleExpr(reps []*ga.Report, dimFormater func(dim []string) string) (dim []string, u [][]int, err error) {
+func formatTable(
+	reps []*ga.Report,
+	dimFormater func(dim []string) string,
+) (dim []string, u [][]string, err error) {
 	for _, v := range reps {
 		for l := 0; l < len(v.Data.Rows); l++ {
 			dim = append(dim, dimFormater(v.Data.Rows[l].Dimensions))
 
 			for m := 0; m < len(v.Data.Rows[l].Metrics); m++ {
-				var g []int
+				var g []string
 				for p := 0; p < len(v.Data.Rows[l].Metrics[m].Values); p++ {
-
-					var vu int64
-					value := v.Data.Rows[l].Metrics[m].Values[p]
-					if vu, err = strconv.ParseInt(value, 0, 0); err != nil {
-						return nil, nil, err
-					}
-					g = append(g, int(vu))
+					g = append(g, v.Data.Rows[l].Metrics[m].Values[p])
 				}
 				u = append(u, g)
 			}
@@ -370,7 +355,10 @@ func formatMultipleExpr(reps []*ga.Report, dimFormater func(dim []string) string
 	return dim, u, nil
 }
 
-func formatReturningNew(reps []*ga.Report, dimFormater func(dim []string) string) (dim []string, u []int, err error) {
+func formatReturningNew(
+	reps []*ga.Report,
+	dimFormater func(dim []string) string,
+) (dim []string, u []int, err error) {
 	var new []int
 	var ret []int
 	for _, v := range reps {
@@ -401,17 +389,37 @@ func formatReturningNew(reps []*ga.Report, dimFormater func(dim []string) string
 	return dim, u, nil
 }
 
-func MapGaMetrics(m []string) []*ga.Metric {
+func mapMetrics(m []string) []*ga.Metric {
 	gam := make([]*ga.Metric, len(m))
 
 	for k, v := range m {
-		gam[k] = &ga.Metric{Expression: strings.TrimSpace(mapMetrics[v])}
+		gam[k] = &ga.Metric{Expression: strings.TrimSpace(mapMetric(v))}
 	}
 
 	return gam
 }
 
-func MapGaOrderBy(o []string) []*ga.OrderBy {
+// mapMetric will first try to search an alias for a google analytics metric,
+// send the option to GoogleAnalytics otherwise
+func mapMetric(metric string) string {
+	m, ok := mappingMetrics[metric]
+	if !ok {
+		return strings.TrimSpace(metric)
+	}
+
+	return strings.TrimSpace(m)
+}
+
+func mapDimension(dim string) string {
+	d, ok := mappingDimensions[dim]
+	if !ok {
+		return strings.TrimSpace(dim)
+	}
+
+	return strings.TrimSpace(d)
+}
+
+func mapOrderBy(o []string) []*ga.OrderBy {
 	gam := make([]*ga.OrderBy, len(o))
 
 	for k, v := range o {
@@ -430,18 +438,31 @@ func MapGaOrderBy(o []string) []*ga.OrderBy {
 			order = strings.ToLower(s[1])
 		}
 
-		gam[k] = &ga.OrderBy{FieldName: mapMetrics[field], SortOrder: mapOrder[order]}
+		gam[k] = &ga.OrderBy{
+			FieldName: strings.TrimSpace(mapMetric(field)),
+			SortOrder: strings.TrimSpace(mappingOrder[order]),
+		}
 	}
 
 	return gam
 }
 
-func MapGaHeaders(el string, metrics []string) []string {
+func mapHeaders(el string, metrics []string) []string {
 	h := make([]string, len(metrics)+1)
 	h[0] = el
 
 	for k, v := range metrics {
-		h[k+1] = mapHeader[v]
+		head, ok := mappingHeader[v]
+		if !ok {
+			if strings.Contains(v, "ga:") {
+				v = strings.Split(v, "ga:")[1]
+			}
+
+			// TODO separate camelcase to a cleaner result for header
+			h[k+1] = strings.TrimSpace(v)
+			continue
+		}
+		h[k+1] = strings.TrimSpace(head)
 	}
 
 	return h

@@ -162,7 +162,7 @@ func ReadFixtureFile(file string, t *testing.T) (data []byte) {
 	return data
 }
 
-func Test_MapGaMetrics(t *testing.T) {
+func Test_mapMetrics(t *testing.T) {
 	testCases := []struct {
 		name     string
 		m        []string
@@ -187,7 +187,7 @@ func Test_MapGaMetrics(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			actual := MapGaMetrics(tc.m)
+			actual := mapMetrics(tc.m)
 			if !reflect.DeepEqual(tc.expected, actual) {
 				t.Errorf("Expected %v, actual %v", tc.expected, actual)
 			}
@@ -195,7 +195,35 @@ func Test_MapGaMetrics(t *testing.T) {
 	}
 }
 
-func Test_MapGaHeaders(t *testing.T) {
+func Test_mapDimension(t *testing.T) {
+	testCases := []struct {
+		name     string
+		d        string
+		expected string
+	}{
+		{
+			name:     "alias",
+			d:        "pages",
+			expected: "ga:pages",
+		},
+		{
+			name:     "ga name",
+			d:        "ga:pages",
+			expected: "ga:pages",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual := mapDimension(tc.d)
+			if !reflect.DeepEqual(tc.expected, actual) {
+				t.Errorf("Expected %v, actual %v", tc.expected, actual)
+			}
+		})
+	}
+}
+
+func Test_mapHeaders(t *testing.T) {
 	testCases := []struct {
 		name     string
 		m        []string
@@ -211,19 +239,23 @@ func Test_MapGaHeaders(t *testing.T) {
 				"Page Views",
 				"Entrances",
 				"Unique Page Views",
+				"someRandomExpr",
+				"hey",
 			},
 			m: []string{
 				"sessions",
 				"page_views",
 				"entrances",
 				"unique_page_views",
+				"ga:someRandomExpr",
+				" hey",
 			},
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			actual := MapGaHeaders(tc.el, tc.m)
+			actual := mapHeaders(tc.el, tc.m)
 
 			if !reflect.DeepEqual(actual, tc.expected) {
 				t.Errorf("Expected %v, actual %v", tc.expected, actual)
@@ -232,7 +264,7 @@ func Test_MapGaHeaders(t *testing.T) {
 	}
 }
 
-func Test_MapGaOrderBy(t *testing.T) {
+func Test_mapOrderBy(t *testing.T) {
 	testCases := []struct {
 		name     string
 		m        []string
@@ -244,6 +276,7 @@ func Test_MapGaOrderBy(t *testing.T) {
 				"sessions asc",
 				"page_views desc",
 				"unique_page_views",
+				"ga:uniquePageviews",
 			},
 			expected: []*ga.OrderBy{
 				&ga.OrderBy{
@@ -258,13 +291,17 @@ func Test_MapGaOrderBy(t *testing.T) {
 					FieldName: "ga:uniquePageviews",
 					SortOrder: "DESCENDING",
 				},
+				&ga.OrderBy{
+					FieldName: "ga:uniquePageviews",
+					SortOrder: "DESCENDING",
+				},
 			},
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			actual := MapGaOrderBy(tc.m)
+			actual := mapOrderBy(tc.m)
 			if !reflect.DeepEqual(tc.expected, actual) {
 				t.Errorf("Expected %v, actual %v", tc.expected, actual)
 			}

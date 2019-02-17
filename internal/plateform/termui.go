@@ -72,17 +72,17 @@ func (t termUI) validateRowSize() error {
 
 func (t *termUI) TextBox(
 	data string,
-	fg uint16,
-	bd uint16,
-	bdlabel string,
-	h int,
+	textColor uint16,
+	borderColor uint16,
+	title string,
+	height int,
 ) {
 	textBox := termui.NewPar(data)
 
-	textBox.TextFgColor = termui.Attribute(fg)
-	textBox.BorderFg = termui.Attribute(bd)
-	textBox.BorderLabel = bdlabel
-	textBox.Height = h
+	textBox.TextFgColor = termui.Attribute(textColor)
+	textBox.BorderFg = termui.Attribute(borderColor)
+	textBox.BorderLabel = title
+	textBox.Height = height
 
 	t.widgets = append(t.widgets, textBox)
 }
