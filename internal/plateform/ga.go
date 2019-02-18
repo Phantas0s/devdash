@@ -18,7 +18,11 @@ import (
 const gaPrefix = "ga:"
 
 // earliest date google analytics accept for date ranges
-const earliestDate = "2005-01-01"
+const (
+	earliestDate     = "2005-01-01"
+	newVisitor       = "New Visitor"
+	returningVisitor = "Returning Visitor"
+)
 
 var mappingMetrics = map[string]string{
 	"sessions":          "ga:sessions",
@@ -270,7 +274,7 @@ func (c *Client) Table(
 
 // NewVsReturning queries the Analytics Reporting API V4 using the
 // Analytics Reporting API V4 service object.
-func (c *Client) ReturningVsNew(viewID string, startDate string, endDate string) (dim []string, u []int, err error) {
+func (c *Client) NewVsReturning(viewID string, startDate string, endDate string) (dim []string, u []int, err error) {
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
@@ -311,7 +315,7 @@ func (c *Client) ReturningVsNew(viewID string, startDate string, endDate string)
 		return dim[1] + "-" + dim[2]
 	}
 
-	return formatReturningNew(resp.Reports, formater)
+	return formatNewReturning(resp.Reports, formater)
 }
 
 func format(reps []*ga.Report, dimFormater func(dim []string) string) (dim []string, u []int, err error) {
@@ -355,7 +359,7 @@ func formatTable(
 	return dim, u, nil
 }
 
-func formatReturningNew(
+func formatNewReturning(
 	reps []*ga.Report,
 	dimFormater func(dim []string) string,
 ) (dim []string, u []int, err error) {
@@ -363,7 +367,7 @@ func formatReturningNew(
 	var ret []int
 	for _, v := range reps {
 		for l := 0; l < len(v.Data.Rows); l++ {
-			if v.Data.Rows[l].Dimensions[0] == "New Visitor" {
+			if v.Data.Rows[l].Dimensions[0] == newVisitor {
 				dim = append(dim, dimFormater(v.Data.Rows[l].Dimensions))
 			}
 
@@ -374,7 +378,7 @@ func formatReturningNew(
 				if vu, err = strconv.ParseInt(value, 0, 0); err != nil {
 					return nil, nil, err
 				}
-				if v.Data.Rows[l].Dimensions[0] == "New Visitor" {
+				if v.Data.Rows[l].Dimensions[0] == newVisitor {
 					new = append(new, int(vu))
 				} else {
 					ret = append(ret, int(vu))

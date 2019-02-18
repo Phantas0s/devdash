@@ -40,6 +40,7 @@ const (
 
 // map config size to ui size
 var sizeLookup = map[string]int{
+	"xxs": 1,
 	"xs":  2,
 	"s":   4,
 	"m":   6,
@@ -50,6 +51,7 @@ var sizeLookup = map[string]int{
 
 // map config color to ui color
 var colorLookUp = map[string]uint16{
+	"default": defaultC,
 	"black":   black,
 	"red":     red,
 	"green":   green,
@@ -273,12 +275,12 @@ func (t *Tui) AddBarChart(
 		borderColor = colorLookUp[options[optionBorderColor]]
 	}
 
-	textColor := blue
+	textColor := defaultC
 	if _, ok := options[optionTextColor]; ok {
 		textColor = colorLookUp[options[optionTextColor]]
 	}
 
-	numColor := white
+	numColor := black
 	if _, ok := options[optionNumColor]; ok {
 		numColor = colorLookUp[options[optionNumColor]]
 	}
@@ -329,12 +331,12 @@ func (t *Tui) AddStackedBarChart(
 		borderColor = colorLookUp[options[optionBorderColor]]
 	}
 
-	textColor := blue
+	textColor := defaultC
 	if _, ok := options[optionTextColor]; ok {
 		textColor = colorLookUp[options[optionTextColor]]
 	}
 
-	numColor := white
+	numColor := black
 	if _, ok := options[optionNumColor]; ok {
 		numColor = colorLookUp[options[optionNumColor]]
 	}

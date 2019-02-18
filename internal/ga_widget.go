@@ -70,7 +70,7 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	case traffic_source:
 		err = g.trafficSource(widget)
 	case new_returning:
-		err = g.ReturningVsNew(widget)
+		err = g.NewVsReturning(widget)
 	default:
 		return errors.Errorf("can't find the widget %s", widget.Name)
 	}
@@ -296,7 +296,7 @@ func (g *gaWidget) trafficSource(widget Widget) (err error) {
 	return g.table(widget)
 }
 
-func (g *gaWidget) ReturningVsNew(widget Widget) error {
+func (g *gaWidget) NewVsReturning(widget Widget) error {
 	// defaults
 	startDate := "7daysAgo"
 	if _, ok := widget.Options[optionStartDate]; ok {
@@ -308,7 +308,7 @@ func (g *gaWidget) ReturningVsNew(widget Widget) error {
 	}
 
 	// this should return new and ret instead of a unique slice val...
-	dim, val, err := g.client.ReturningVsNew(g.viewID, startDate, endDate)
+	dim, val, err := g.client.NewVsReturning(g.viewID, startDate, endDate)
 	if err != nil {
 		return err
 	}
@@ -325,17 +325,17 @@ func (g *gaWidget) ReturningVsNew(widget Widget) error {
 		}
 	}
 
-	firstColor := green
+	firstColor := blue
 	if _, ok := widget.Options[optionFirstColor]; ok {
 		firstColor = colorLookUp[widget.Options[optionFirstColor]]
 	}
-	data[firstColor] = new
+	data[firstColor-1] = new
 
-	secondColor := yellow
+	secondColor := green
 	if _, ok := widget.Options[optionSecondColor]; ok {
 		secondColor = colorLookUp[widget.Options[optionSecondColor]]
 	}
-	data[secondColor] = ret
+	data[secondColor-1] = ret
 
 	title := fmt.Sprintf(
 		" Sessions (%s) vs Returning (%s) from %s to %s ",

@@ -136,7 +136,7 @@ func Test_FormatNewReturning(t *testing.T) {
 			}
 			fmt.Println(ret)
 
-			dim, val, err := formatReturningNew(ret.Reports, tc.formater)
+			dim, val, err := formatNewReturning(ret.Reports, tc.formater)
 			if (err != nil) != tc.wantErr {
 				t.Errorf("Error '%v' even if wantErr is %t", err, tc.wantErr)
 				return
