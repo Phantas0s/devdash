@@ -19,12 +19,12 @@ type Widget struct {
 }
 
 type project struct {
-	name          string            `json:"name"`
-	titleOptions  map[string]string `json:"options"`
-	widgets       [][][]Widget      `json:"widgets"`
-	sizes         [][]string        `json:"sizes"`
-	gaWidget      service           `json:"ga_widget"`
-	monitorWidget service           `json:"monitor_widget"`
+	name          string
+	titleOptions  map[string]string
+	widgets       [][][]Widget
+	sizes         [][]string
+	gaWidget      service
+	monitorWidget service
 }
 
 func NewProject(

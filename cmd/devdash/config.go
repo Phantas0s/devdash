@@ -27,7 +27,7 @@ type Project struct {
 	Name         string            `mapstructure:"name"`
 	Services     Services          `mapstructure:"services"`
 	Widgets      []Row             `mapstructure:"widgets"`
-	TitleOptions map[string]string `mapstructure:"title_options"`
+	TitleOptions map[string]string `mapstructure:"options"`
 }
 
 // Row is constitued of columns
