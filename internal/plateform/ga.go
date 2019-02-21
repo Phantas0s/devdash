@@ -227,6 +227,7 @@ func (c *Client) Table(
 	metrics []string,
 	dimension string,
 	orders []string,
+	firstHeader string,
 ) (headers []string, dim []string, u [][]string, err error) {
 
 	dateRange := []*ga.DateRange{
@@ -267,7 +268,7 @@ func (c *Client) Table(
 		return dim[0]
 	}
 
-	headers = mapHeaders("Pages", metrics)
+	headers = mapHeaders(firstHeader, metrics)
 	dim, u, err = formatTable(resp.Reports, formater)
 	return
 }

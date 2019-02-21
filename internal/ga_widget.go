@@ -66,7 +66,7 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	case bar_metric:
 		err = g.barMetric(widget)
 	case pages:
-		err = g.table(widget)
+		err = g.table(widget, "Page")
 	case traffic_source:
 		err = g.trafficSource(widget)
 	case new_returning:
@@ -187,7 +187,7 @@ func (g *gaWidget) barMetric(widget Widget) error {
 	return nil
 }
 
-func (g *gaWidget) table(widget Widget) (err error) {
+func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 	// defaults
 	var elLimit int64 = 5
 	var pLen int64 = 20
@@ -251,6 +251,7 @@ func (g *gaWidget) table(widget Widget) (err error) {
 		metrics,
 		dimension,
 		orders,
+		firstHeader,
 	)
 	if err != nil {
 		return err
@@ -293,7 +294,7 @@ func (g *gaWidget) trafficSource(widget Widget) (err error) {
 		widget.Options["dimension"] = "traffic_source"
 	}
 
-	return g.table(widget)
+	return g.table(widget, "Source")
 }
 
 func (g *gaWidget) NewVsReturning(widget Widget) error {
