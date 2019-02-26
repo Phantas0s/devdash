@@ -25,6 +25,7 @@ type project struct {
 	sizes         [][]string
 	gaWidget      service
 	monitorWidget service
+	gscWidget     service
 }
 
 func NewProject(
@@ -47,6 +48,10 @@ func (p *project) WithGa(ga *gaWidget) {
 
 func (p *project) WithMonitor(mon *monitorWidget) {
 	p.monitorWidget = mon
+}
+
+func (p *project) WithGoogleSearchConsole(gsc *gscWidget) {
+	p.gscWidget = gsc
 }
 
 func (p *project) Render(tui *Tui, d bool) (err error) {
@@ -76,6 +81,14 @@ func (p *project) Render(tui *Tui, d bool) (err error) {
 					}
 
 					if err = p.monitorWidget.CreateWidgets(w, tui); err != nil {
+						return err
+					}
+				case "gsc":
+					if p.gscWidget == nil {
+						return errors.Errorf("can't use the widget %s without the service Search - please fix your configuration file.", w.Name)
+					}
+
+					if err = p.gscWidget.CreateWidgets(w, tui); err != nil {
 						return err
 					}
 				default:

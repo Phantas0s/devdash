@@ -41,12 +41,12 @@ func (m *monitorWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 }
 
 func (m *monitorWidget) pingWidget(widget Widget) error {
-	url, err := url.Parse(m.address)
+	URL, err := url.Parse(m.address)
 	if err != nil {
 		return err
 	}
 
-	pinger, err := goping.NewPinger(url.Host)
+	pinger, err := goping.NewPinger(URL.Host)
 	if err != nil {
 		return err
 	}

@@ -19,9 +19,8 @@ const gaPrefix = "ga:"
 
 // earliest date google analytics accept for date ranges
 const (
-	earliestDate     = "2005-01-01"
-	newVisitor       = "New Visitor"
-	returningVisitor = "Returning Visitor"
+	earliestDate = "2005-01-01"
+	newVisitor   = "New Visitor"
 )
 
 var mappingMetrics = map[string]string{
@@ -49,50 +48,52 @@ var mappingOrder = map[string]string{
 	"desc": "DESCENDING",
 }
 
-type Client struct {
+type Analytics struct {
 	config          *jwt.Config
 	client          *http.Client
 	servicev3       *gav3.Service
-	service         *ga.Service
 	realtimeService *gav3.DataRealtimeService
+	service         *ga.Service
 }
 
 // New takes a keyfile for authentication and
 // returns a new Google Analytics Reporting Client struct.
-func NewGaClient(keyfile string) (*Client, error) {
+func NewAnalyticsClient(keyfile string) (*Analytics, error) {
 	data, err := ioutil.ReadFile(keyfile)
 	if err != nil {
 		return nil, fmt.Errorf("reading keyfile %q failed: %v", keyfile, err)
 	}
 
-	client := &Client{}
+	an := &Analytics{}
 
-	client.config, err = google.JWTConfigFromJSON(data, ga.AnalyticsReadonlyScope)
+	an.config, err = google.JWTConfigFromJSON(data, ga.AnalyticsReadonlyScope)
 	if err != nil {
 		return nil, fmt.Errorf("creating JWT config from json keyfile %q failed: %v", keyfile, err)
 	}
 
-	client.client = client.config.Client(context.Background())
+	an.client = an.config.Client(context.Background())
 
 	// analytics reporting v4 service
-	client.service, err = ga.New(client.client)
+	an.service, err = ga.New(an.client)
 	if err != nil {
 		return nil, fmt.Errorf("creating the analytics reporting service v4 object failed: %v", err)
 	}
 
 	// analytics reporting v3 service object.
-	client.servicev3, err = gav3.New(client.client)
+	an.servicev3, err = gav3.New(an.client)
 	if err != nil {
 		return nil, fmt.Errorf("creating the analytics reporting service v3 object failed: %v", err)
 	}
-	client.realtimeService = gav3.NewDataRealtimeService(client.servicev3)
+	an.realtimeService = gav3.NewDataRealtimeService(an.servicev3)
 
-	return client, nil
+	return an, nil
+
 }
 
-func (c *Client) SimpleMetric(
-	viewID string,
-	metric, startDate string,
+func (c *Analytics) SimpleMetric(
+	viewID,
+	metric,
+	startDate,
 	endDate string,
 	global bool,
 ) (string, error) {
@@ -124,7 +125,7 @@ func (c *Client) SimpleMetric(
 	return resp.Reports[0].Data.Rows[0].Metrics[0].Values[0], nil
 }
 
-func (c *Client) BarMetric(viewID string, startDate string, endDate string, metric string) ([]string, []int, error) {
+func (c *Analytics) BarMetric(viewID string, startDate string, endDate string, metric string) ([]string, []int, error) {
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
@@ -171,7 +172,7 @@ func (c *Client) BarMetric(viewID string, startDate string, endDate string, metr
 // Analytics Reporting API V3 service object.
 // It returns the Analytics Realtime Reporting API V3 response
 // for how many active users are currently on the site.
-func (c *Client) RealTimeUsers(viewID string) (string, error) {
+func (c *Analytics) RealTimeUsers(viewID string) (string, error) {
 	metric := "rt:activeUsers"
 
 	resp, err := c.realtimeService.Get(gaPrefix+viewID, metric).Do()
@@ -182,44 +183,9 @@ func (c *Client) RealTimeUsers(viewID string) (string, error) {
 	return resp.TotalsForAllResults[metric], nil
 }
 
-func (c *Client) avgTimeOnPage(viewID string, startDate string, endDate string, global bool) (*ga.GetReportsResponse, error) {
-	dateRange := []*ga.DateRange{
-		{StartDate: startDate, EndDate: endDate},
-	}
-	if global {
-		dateRange = []*ga.DateRange{
-			{StartDate: earliestDate, EndDate: endDate},
-		}
-	}
-
-	req := &ga.GetReportsRequest{
-		ReportRequests: []*ga.ReportRequest{
-			{
-				ViewId:     viewID,
-				DateRanges: dateRange,
-				Metrics: []*ga.Metric{
-					{Expression: "ga:avgTimeOnPage"},
-				},
-				Dimensions: []*ga.Dimension{
-					{Name: "ga:pagePath"},
-				},
-				OrderBys: []*ga.OrderBy{
-					{
-						FieldName: "ga:pageViews",
-						SortOrder: "DESCENDING",
-					},
-				},
-				IncludeEmptyRows: true,
-			},
-		},
-	}
-
-	return c.service.Reports.BatchGet(req).Do()
-}
-
-// Pages queries the Analytics Reporting API V4 using the
+// Table queries the Analytics Reporting API V4 using the
 // Analytics Reporting API V4 service object.
-func (c *Client) Table(
+func (c *Analytics) Table(
 	viewID string,
 	startDate string,
 	endDate string,
@@ -269,13 +235,13 @@ func (c *Client) Table(
 	}
 
 	headers = mapHeaders(firstHeader, metrics)
-	dim, u, err = formatTable(resp.Reports, formater)
+	dim, u = formatTable(resp.Reports, formater)
 	return
 }
 
 // NewVsReturning queries the Analytics Reporting API V4 using the
 // Analytics Reporting API V4 service object.
-func (c *Client) NewVsReturning(viewID string, startDate string, endDate string) (dim []string, u []int, err error) {
+func (c *Analytics) NewVsReturning(viewID string, startDate string, endDate string) (dim []string, u []int, err error) {
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
@@ -342,7 +308,7 @@ func format(reps []*ga.Report, dimFormater func(dim []string) string) (dim []str
 func formatTable(
 	reps []*ga.Report,
 	dimFormater func(dim []string) string,
-) (dim []string, u [][]string, err error) {
+) (dim []string, u [][]string) {
 	for _, v := range reps {
 		for l := 0; l < len(v.Data.Rows); l++ {
 			dim = append(dim, dimFormater(v.Data.Rows[l].Dimensions))
@@ -357,7 +323,7 @@ func formatTable(
 		}
 	}
 
-	return dim, u, nil
+	return dim, u
 }
 
 func formatNewReturning(

@@ -68,6 +68,15 @@ func run(projects []Project, tui *internal.Tui) (err error) {
 			project.WithGa(gaWidget)
 		}
 
+		gscService := p.Services.GoogleSearchConsole
+		if !gscService.empty() {
+			gscWidget, err := internal.NewGscWidget(gscService.Keyfile, gscService.ViewID, gscService.Address)
+			if err != nil {
+				return err
+			}
+			project.WithGoogleSearchConsole(gscWidget)
+		}
+
 		monService := p.Services.Monitor
 		if !monService.empty() {
 			monWidget, err := internal.NewMonitorWidget(monService.Address)

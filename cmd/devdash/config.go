@@ -27,17 +27,17 @@ type Project struct {
 	Name         string            `mapstructure:"name"`
 	Services     Services          `mapstructure:"services"`
 	Widgets      []Row             `mapstructure:"widgets"`
-	TitleOptions map[string]string `mapstructure:"options"`
+	TitleOptions map[string]string `mapstructure:"title_options"`
 }
 
 // Row is constitued of columns
 type Row struct {
-	Row []Column `mapstructure: "row"`
+	Row []Column `mapstructure:"row"`
 }
 
 // Col is constitued of widgets
 type Column struct {
-	Col []Widgets `mapstructure: "col"`
+	Col []Widgets `mapstructure:"col"`
 }
 
 type Widgets struct {
@@ -46,13 +46,20 @@ type Widgets struct {
 }
 
 type Services struct {
-	GoogleAnalytics GoogleAnalytics `mapstructure:"google_analytics"`
-	Monitor         Monitor         `mapstructure:"monitor"`
+	GoogleAnalytics     GoogleAnalytics `mapstructure:"google_analytics"`
+	Monitor             Monitor         `mapstructure:"monitor"`
+	GoogleSearchConsole SearchConsole   `mapstructure:"google_search_console"`
 }
 
 type GoogleAnalytics struct {
 	Keyfile string `mapstructure:"keyfile"`
 	ViewID  string `mapstructure:"view_id"`
+}
+
+type SearchConsole struct {
+	Keyfile string `mapstructure:"keyfile"`
+	ViewID  string `mapstructure:"view_id"`
+	Address string `mapstructure:"address"`
 }
 
 type Monitor struct {
@@ -90,6 +97,9 @@ func (g GoogleAnalytics) empty() bool {
 
 func (m Monitor) empty() bool {
 	return m == Monitor{}
+}
+func (s SearchConsole) empty() bool {
+	return s == SearchConsole{}
 }
 
 func mapConfig(data []byte) config {

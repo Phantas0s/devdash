@@ -21,33 +21,34 @@ const (
 	total_metric   = "ga.total_metric"
 
 	// option config names
-	optionTitle     = "title"
-	optionStartDate = "start_date"
-	optionEndDate   = "end_date"
-	optionLimit     = "limit"
-	optionGlobal    = "global"
-	optionMetrics   = "metrics"
-	optionMetric    = "metric"
-	optionDimension = "dimension"
-	optionCharLimit = "character_limit"
-	optionOrder     = "order"
+	optionTitle      = "title"
+	optionTitleColor = "title_color"
+	optionStartDate  = "start_date"
+	optionEndDate    = "end_date"
+	optionLimit      = "limit"
+	optionGlobal     = "global"
+	optionMetrics    = "metrics"
+	optionMetric     = "metric"
+	optionDimension  = "dimension"
+	optionCharLimit  = "character_limit"
+	optionOrder      = "order"
 )
 
 type gaWidget struct {
-	tui    *Tui
-	client *plateform.Client
-	viewID string
+	tui       *Tui
+	analytics *plateform.Analytics
+	viewID    string
 }
 
 func NewGaWidget(keyfile string, viewID string) (*gaWidget, error) {
-	client, err := plateform.NewGaClient(keyfile)
+	an, err := plateform.NewAnalyticsClient(keyfile)
 	if err != nil {
 		return nil, err
 	}
 
 	return &gaWidget{
-		client: client,
-		viewID: viewID,
+		analytics: an,
+		viewID:    viewID,
 	}, nil
 }
 
@@ -109,7 +110,7 @@ func (g *gaWidget) totalMetric(widget Widget) (err error) {
 		}
 	}
 
-	users, err := g.client.SimpleMetric(g.viewID, metric, startDate, endDate, global)
+	users, err := g.analytics.SimpleMetric(g.viewID, metric, startDate, endDate, global)
 	if err != nil {
 		return err
 	}
@@ -130,7 +131,7 @@ func (g *gaWidget) realTimeUser(widget Widget) error {
 		title = widget.Options[optionTitle]
 	}
 
-	users, err := g.client.RealTimeUsers(g.viewID)
+	users, err := g.analytics.RealTimeUsers(g.viewID)
 	if err != nil {
 		return err
 	}
@@ -146,9 +147,9 @@ func (g *gaWidget) realTimeUser(widget Widget) error {
 
 func (g *gaWidget) users(widget Widget) (err error) {
 	if widget.Options == nil {
-		widget.Options = map[string]string{"metric": "users"}
+		widget.Options = map[string]string{optionMetric: "users"}
 	} else {
-		widget.Options["metric"] = "users"
+		widget.Options[optionMetric] = "users"
 	}
 
 	return g.barMetric(widget)
@@ -177,7 +178,7 @@ func (g *gaWidget) barMetric(widget Widget) error {
 		metric = widget.Options[optionMetric]
 	}
 
-	dim, val, err := g.client.BarMetric(g.viewID, startDate, endDate, metric)
+	dim, val, err := g.analytics.BarMetric(g.viewID, startDate, endDate, metric)
 	if err != nil {
 		return err
 	}
@@ -192,7 +193,7 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 	var elLimit int64 = 5
 	var pLen int64 = 20
 
-	title := "Most page viewed"
+	title := fmt.Sprintf("%s", firstHeader)
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}
@@ -243,7 +244,7 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 		}
 	}
 
-	headers, dim, val, err := g.client.Table(
+	headers, dim, val, err := g.analytics.Table(
 		g.viewID,
 		startDate,
 		endDate,
@@ -309,7 +310,7 @@ func (g *gaWidget) NewVsReturning(widget Widget) error {
 	}
 
 	// this should return new and ret instead of a unique slice val...
-	dim, val, err := g.client.NewVsReturning(g.viewID, startDate, endDate)
+	dim, val, err := g.analytics.NewVsReturning(g.viewID, startDate, endDate)
 	if err != nil {
 		return err
 	}

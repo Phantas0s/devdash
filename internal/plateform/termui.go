@@ -4,12 +4,9 @@ import (
 	"fmt"
 
 	"github.com/Phantas0s/termui"
-	"github.com/pkg/errors"
 )
 
 var debug bool = false
-
-const maxRowSize = 12
 
 type termUI struct {
 	body    *termui.Grid
@@ -55,26 +52,12 @@ func (t *termUI) AddRow() {
 	t.body.Align()
 }
 
-func (t termUI) validateRowSize() error {
-	var ts int
-	for _, r := range t.row {
-		for _, c := range r.Cols {
-			ts += c.Offset
-		}
-	}
-
-	if ts > maxRowSize {
-		return errors.Errorf("could not create row: size %d too big", ts)
-	}
-
-	return nil
-}
-
 func (t *termUI) TextBox(
 	data string,
 	textColor uint16,
 	borderColor uint16,
 	title string,
+	titleColor uint16,
 	height int,
 ) {
 	textBox := termui.NewPar(data)
@@ -82,6 +65,7 @@ func (t *termUI) TextBox(
 	textBox.TextFgColor = termui.Attribute(textColor)
 	textBox.BorderFg = termui.Attribute(borderColor)
 	textBox.BorderLabel = title
+	textBox.BorderLabelFg = termui.Attribute(titleColor)
 	textBox.Height = height
 
 	t.widgets = append(t.widgets, textBox)

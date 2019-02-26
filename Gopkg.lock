@@ -186,7 +186,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1540fd815845f20e31cb95c3b6f7f0f0c8880c3d053845ba4a4a609539446bf6"
+  digest = "1:6ca682cc9faff447b8992389e20fd11e5e7366ba66768b2d0e2c12235fd3dec2"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
@@ -196,15 +196,15 @@
     "jwt",
   ]
   pruneopts = "UT"
-  revision = "3e8b2be1363542a95c52ea0796d4a40dacfb5b95"
+  revision = "9b3c75971fc92dd27c6436a37c05c831498658f1"
 
 [[projects]]
   branch = "master"
-  digest = "1:8207c052fb873f83c61a5aa16f6add5feb9881eda2112b56f69fd3b9e7f55c3f"
+  digest = "1:d0e9a312c4610a508569ab25e54d34600b1a96d19b1866ece104ffdf1c1b9d2c"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "153ac476189d567564fda94622d7a8c0fb338f6b"
+  revision = "cd391775e71e684db52b63df9affd58269495083"
 
 [[projects]]
   digest = "1:8029e9743749d4be5bc9f7d42ea1659471767860f0cdc34d37c3111bd308a295"
@@ -223,7 +223,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:6a2c2a8373efc9510bdc96d108348ae035cc018db9aceeca5d27e97348986f7e"
+  digest = "1:324f0fd4916c66cad5b5c5ca13b8de246212fb5b823880ea76a829c1e35ff697"
   name = "google.golang.org/api"
   packages = [
     "analytics/v3",
@@ -231,9 +231,10 @@
     "gensupport",
     "googleapi",
     "googleapi/internal/uritemplates",
+    "webmasters/v3",
   ]
   pruneopts = "UT"
-  revision = "77d02fa16783d31ba92e59fc0a888a45635f433e"
+  revision = "8a550ba84cafabe9b2262c41303f31e5a4626318"
 
 [[projects]]
   digest = "1:fa026a5c59bd2df343ec4a3538e6288dcf4e2ec5281d743ae82c120affe6926a"
@@ -274,6 +275,7 @@
     "golang.org/x/oauth2/jwt",
     "google.golang.org/api/analytics/v3",
     "google.golang.org/api/analyticsreporting/v4",
+    "google.golang.org/api/webmasters/v3",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

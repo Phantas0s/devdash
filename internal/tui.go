@@ -93,6 +93,7 @@ type drawer interface {
 		textColor uint16,
 		borderColor uint16,
 		title string,
+		titleColor uint16,
 		height int,
 	)
 	BarChart(
@@ -248,6 +249,11 @@ func (t *Tui) AddTextBox(
 		textColor = colorLookUp[options[optionTextColor]]
 	}
 
+	titleColor := green
+	if _, ok := options[optionTitleColor]; ok {
+		titleColor = colorLookUp[options[optionTitleColor]]
+	}
+
 	var height int64 = 3
 	if _, ok := options[optionHeight]; ok {
 		height, _ = strconv.ParseInt(options[optionHeight], 0, 0)
@@ -258,6 +264,7 @@ func (t *Tui) AddTextBox(
 		textColor,
 		borderColor,
 		title,
+		titleColor,
 		int(height),
 	)
 
