@@ -69,10 +69,10 @@ func (s *gscWidget) table(widget Widget) (err error) {
 	}
 
 	var elLimit int64 = 5
-	if _, ok := widget.Options[optionLimit]; ok {
-		elLimit, err = strconv.ParseInt(widget.Options[optionLimit], 0, 0)
+	if _, ok := widget.Options[optionRowLimit]; ok {
+		elLimit, err = strconv.ParseInt(widget.Options[optionRowLimit], 0, 0)
 		if err != nil {
-			return errors.Wrapf(err, "%s must be a number", widget.Options[optionLimit])
+			return errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
 		}
 	}
 

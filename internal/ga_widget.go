@@ -21,17 +21,18 @@ const (
 	total_metric   = "ga.total_metric"
 
 	// option config names
-	optionTitle      = "title"
-	optionTitleColor = "title_color"
-	optionStartDate  = "start_date"
-	optionEndDate    = "end_date"
-	optionLimit      = "limit"
-	optionGlobal     = "global"
-	optionMetrics    = "metrics"
-	optionMetric     = "metric"
-	optionDimension  = "dimension"
-	optionCharLimit  = "character_limit"
-	optionOrder      = "order"
+	optionTitle       = "title"
+	optionTitleColor  = "title_color"
+	optionStartDate   = "start_date"
+	optionEndDate     = "end_date"
+	optionRowLimit    = "limit_row"
+	optionGlobal      = "global"
+	optionMetrics     = "metrics"
+	optionMetric      = "metric"
+	optionDimension   = "dimension"
+	optionCharLimit   = "character_limit"
+	optionOrder       = "order"
+	optionMustContain = "must_contain"
 )
 
 type gaWidget struct {
@@ -190,19 +191,11 @@ func (g *gaWidget) barMetric(widget Widget) error {
 
 func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 	// defaults
-	var elLimit int64 = 5
 	var pLen int64 = 20
 
 	title := fmt.Sprintf("%s", firstHeader)
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
-	}
-
-	if _, ok := widget.Options[optionLimit]; ok {
-		elLimit, err = strconv.ParseInt(widget.Options[optionLimit], 0, 0)
-		if err != nil {
-			return errors.Wrapf(err, "%s must be a number", widget.Options[optionLimit])
-		}
 	}
 
 	global := false
@@ -258,15 +251,33 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 		return err
 	}
 
-	if int(elLimit) > len(dim) {
-		elLimit = int64(len(dim))
+	mustContain := ""
+	if _, ok := widget.Options[optionMustContain]; ok {
+		if len(widget.Options[optionMustContain]) > 0 {
+			mustContain = widget.Options[optionMustContain]
+		}
+	}
+
+	var rowLimit int64 = 5
+	if _, ok := widget.Options[optionRowLimit]; ok {
+		rowLimit, err = strconv.ParseInt(widget.Options[optionRowLimit], 0, 0)
+		if err != nil {
+			return errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
+		}
+	}
+	if int(rowLimit) > len(dim) {
+		rowLimit = int64(len(dim))
 	}
 
 	// total of pages + one row for headers
-	table := make([][]string, elLimit+1)
+	table := make([][]string, rowLimit+1)
 	table[0] = headers
 
-	for i := 0; i < int(elLimit); i++ {
+	for i := 0; i < int(rowLimit); i++ {
+		if mustContain != "" && !strings.Contains(dim[i], mustContain) {
+			continue
+		}
+
 		p := strings.Trim(dim[i], " ")
 		if _, ok := widget.Options[optionCharLimit]; ok {
 			pLen, err = strconv.ParseInt(widget.Options[optionCharLimit], 0, 0)
@@ -283,7 +294,15 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 		table[i+1] = append(table[i+1], val[i]...)
 	}
 
-	g.tui.AddTable(table, title, widget.Options)
+	// Filter out every empty columns because of mustContain conditional
+	finalTable := [][]string{}
+	for _, v := range table {
+		if v != nil {
+			finalTable = append(finalTable, v)
+		}
+	}
+
+	g.tui.AddTable(finalTable, title, widget.Options)
 
 	return nil
 }
