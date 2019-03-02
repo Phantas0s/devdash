@@ -58,6 +58,8 @@ func (s *gscWidget) pages(widget Widget) error {
 	return s.table(widget)
 }
 
+// table of the result of a Google Search Console query.
+// If no metric provided, default "query" with no filters.
 func (s *gscWidget) table(widget Widget) (err error) {
 	startDate, endDate := totime.NPrevMonth(1)
 	if _, ok := widget.Options[optionStartDate]; ok {

@@ -55,6 +55,7 @@ func (w *SearchConsole) Pages(
 	address string,
 	dimension string,
 ) ([][]string, error) {
+
 	req := &sc.SearchAnalyticsQueryRequest{
 		StartDate:  startDate,
 		EndDate:    endDate,

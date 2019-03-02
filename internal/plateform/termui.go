@@ -139,7 +139,7 @@ func (t *termUI) StackedBarChart(
 	bc.TextColor = termui.Attribute(fg)
 	bc.BorderFg = termui.Attribute(bd)
 	bc.NumColor = [8]termui.Attribute{termui.Attribute(nc)}
-	bc.ShowScale = true
+	// bc.ShowScale = true
 	// bc.SetMax(10)
 
 	t.widgets = append(t.widgets, bc)
