@@ -47,20 +47,25 @@ func NewSearchConsoleClient(keyfile string) (*SearchConsole, error) {
 	return web, nil
 }
 
-func (w *SearchConsole) Pages(
+func (w *SearchConsole) Table(
 	viewID string,
 	startDate string,
 	endDate string,
 	limit int64,
 	address string,
 	dimension string,
+	filters string,
 ) ([][]string, error) {
-
 	req := &sc.SearchAnalyticsQueryRequest{
 		StartDate:  startDate,
 		EndDate:    endDate,
 		Dimensions: []string{dimension},
-		RowLimit:   limit,
+		DimensionFilterGroups: []*sc.ApiDimensionFilterGroup{
+			{
+				Filters: filtersFromString(filters, dimension),
+			},
+		},
+		RowLimit: limit,
 	}
 
 	resp, err := w.service.Searchanalytics.Query(address, req).Do()
@@ -69,6 +74,36 @@ func (w *SearchConsole) Pages(
 	}
 
 	return formatSearchTable(resp.Rows, dimension), nil
+}
+
+func filtersFromString(filters string, dimension string) []*sc.ApiDimensionFilter {
+	fg := []*sc.ApiDimensionFilter{}
+	if filters != "" {
+		f := strings.Split(filters, ",")
+		for _, v := range f {
+			v = strings.TrimSpace(v)
+			dim := dimension
+			if strings.Contains(v, " ") {
+				t := strings.Split(v, " ")
+				dim = t[0]
+				v = t[1]
+			}
+
+			operator := "contains"
+			if string(v[0]) == "-" {
+				operator = "notContains"
+				v = v[1:]
+			}
+
+			fg = append(fg, &sc.ApiDimensionFilter{
+				Dimension:  dim,
+				Expression: v,
+				Operator:   operator,
+			})
+		}
+	}
+
+	return fg
 }
 
 func formatSearchTable(rows []*sc.ApiDataRow, dimension string) [][]string {

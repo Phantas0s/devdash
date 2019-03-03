@@ -8,6 +8,42 @@ import (
 
 var debug bool = false
 
+const (
+	// widget config names
+	realtime       = "ga.realtime"
+	sessions       = "ga.sessions"
+	users          = "ga.users"
+	bar_metric     = "ga.bar_metric"
+	pages          = "ga.pages"
+	new_returning  = "ga.new_returning"
+	traffic_source = "ga.traffic_source"
+	total_metric   = "ga.total_metric"
+
+	// option config names
+	optionTitle      = "title"
+	optionTitleColor = "title_color"
+
+	// time
+	optionStartDate = "start_date"
+	optionEndDate   = "end_date"
+	optionGlobal    = "global"
+
+	// For tables
+	optionRowLimit  = "limit_row"
+	optionCharLimit = "character_limit"
+
+	// Metrics wanted
+	optionDimension = "dimension"
+	optionMetrics   = "metrics"
+	optionMetric    = "metric"
+
+	optionOrder = "order"
+
+	// filtering
+	optionMustContain = "must_contain"
+	optionFilters     = "filters"
+)
+
 type service interface {
 	CreateWidgets(widget Widget, tui *Tui) (err error)
 }

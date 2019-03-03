@@ -9,32 +9,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const (
-	// widget config names
-	realtime       = "ga.realtime"
-	sessions       = "ga.sessions"
-	users          = "ga.users"
-	bar_metric     = "ga.bar_metric"
-	pages          = "ga.pages"
-	new_returning  = "ga.new_returning"
-	traffic_source = "ga.traffic_source"
-	total_metric   = "ga.total_metric"
-
-	// option config names
-	optionTitle       = "title"
-	optionTitleColor  = "title_color"
-	optionStartDate   = "start_date"
-	optionEndDate     = "end_date"
-	optionRowLimit    = "limit_row"
-	optionGlobal      = "global"
-	optionMetrics     = "metrics"
-	optionMetric      = "metric"
-	optionDimension   = "dimension"
-	optionCharLimit   = "character_limit"
-	optionOrder       = "order"
-	optionMustContain = "must_contain"
-)
-
 type gaWidget struct {
 	tui       *Tui
 	analytics *plateform.Analytics

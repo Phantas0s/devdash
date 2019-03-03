@@ -3,6 +3,7 @@ package internal
 import (
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/Phantas0s/devdash/internal/plateform"
 	"github.com/Phantas0s/devdash/totime"
@@ -61,7 +62,10 @@ func (s *gscWidget) pages(widget Widget) error {
 // table of the result of a Google Search Console query.
 // If no metric provided, default "query" with no filters.
 func (s *gscWidget) table(widget Widget) (err error) {
-	startDate, endDate := totime.NPrevMonth(1)
+	st, en := totime.PrevMonths(time.Now(), 0)
+	startDate := st.Format("2006-01-02")
+	endDate := en.Format("2006-01-02")
+
 	if _, ok := widget.Options[optionStartDate]; ok {
 		startDate = widget.Options[optionStartDate]
 	}
@@ -97,13 +101,19 @@ func (s *gscWidget) table(widget Widget) (err error) {
 		metric = widget.Options[optionMetric]
 	}
 
-	table, err := s.client.Pages(
+	filters := ""
+	if _, ok := widget.Options[optionFilters]; ok {
+		filters = widget.Options[optionFilters]
+	}
+
+	table, err := s.client.Table(
 		s.viewID,
 		startDate,
 		endDate,
 		elLimit,
 		s.address,
 		metric,
+		filters,
 	)
 	if err != nil {
 		return err
