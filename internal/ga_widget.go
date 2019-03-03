@@ -4,9 +4,24 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/Phantas0s/devdash/internal/plateform"
 	"github.com/pkg/errors"
+)
+
+const (
+	// widget config names
+	realtime      = "ga.realtime"
+	sessions      = "ga.sessions"
+	users         = "ga.users"
+	barMetric     = "ga.bar_metric"
+	pages         = "ga.pages"
+	newReturning  = "ga.new_returning"
+	trafficSource = "ga.traffic_source"
+	totalMetric   = "ga.total_metric"
+
+	gaTimeFormat = "2006-01-02"
 )
 
 type gaWidget struct {
@@ -33,19 +48,19 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	switch widget.Name {
 	case realtime:
 		err = g.realTimeUser(widget)
-	case total_metric:
+	case totalMetric:
 		err = g.totalMetric(widget)
 	case sessions:
 		err = g.barMetric(widget)
 	case users:
 		err = g.users(widget)
-	case bar_metric:
+	case barMetric:
 		err = g.barMetric(widget)
 	case pages:
 		err = g.table(widget, "Page")
-	case traffic_source:
+	case trafficSource:
 		err = g.trafficSource(widget)
-	case new_returning:
+	case newReturning:
 		err = g.NewVsReturning(widget)
 	default:
 		return errors.Errorf("can't find the widget %s", widget.Name)
@@ -62,7 +77,7 @@ func (g *gaWidget) totalMetric(widget Widget) (err error) {
 		}
 	}
 
-	startDate := "7daysAgo"
+	startDate := "7_days_ago"
 	if _, ok := widget.Options[optionStartDate]; ok {
 		startDate = widget.Options[optionStartDate]
 	}
@@ -72,7 +87,12 @@ func (g *gaWidget) totalMetric(widget Widget) (err error) {
 		endDate = widget.Options[optionEndDate]
 	}
 
-	title := fmt.Sprintf("Total %s from %s to %s", metric, startDate, endDate)
+	sd, ed, err := ConvertDates(time.Now(), startDate, endDate)
+	if err != nil {
+		return err
+	}
+
+	title := fmt.Sprintf("Total %s from %s to %s", metric, sd.Format(gaTimeFormat), ed.Format(gaTimeFormat))
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}
@@ -85,7 +105,7 @@ func (g *gaWidget) totalMetric(widget Widget) (err error) {
 		}
 	}
 
-	users, err := g.analytics.SimpleMetric(g.viewID, metric, startDate, endDate, global)
+	users, err := g.analytics.SimpleMetric(g.viewID, metric, sd.Format(gaTimeFormat), ed.Format(gaTimeFormat), global)
 	if err != nil {
 		return err
 	}
@@ -133,17 +153,23 @@ func (g *gaWidget) users(widget Widget) (err error) {
 // users get the number of users the 7 last days on your website
 func (g *gaWidget) barMetric(widget Widget) error {
 	// defaults
-	startDate := "7daysAgo"
+
+	sd := "7_days_ago"
 	if _, ok := widget.Options[optionStartDate]; ok {
-		startDate = widget.Options[optionStartDate]
+		sd = widget.Options[optionStartDate]
 	}
 
-	endDate := "today"
+	ed := "today"
 	if _, ok := widget.Options[optionEndDate]; ok {
-		endDate = widget.Options[optionEndDate]
+		ed = widget.Options[optionEndDate]
 	}
 
-	title := fmt.Sprintf(" Users from %s to %s ", startDate, endDate)
+	startDate, endDate, err := ConvertDates(time.Now(), sd, ed)
+	if err != nil {
+		return err
+	}
+
+	title := fmt.Sprintf(" Users from %s to %s ", startDate.Format(gaTimeFormat), endDate.Format(gaTimeFormat))
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}
@@ -153,7 +179,7 @@ func (g *gaWidget) barMetric(widget Widget) error {
 		metric = widget.Options[optionMetric]
 	}
 
-	dim, val, err := g.analytics.BarMetric(g.viewID, startDate, endDate, metric)
+	dim, val, err := g.analytics.BarMetric(g.viewID, startDate.Format(gaTimeFormat), endDate.Format(gaTimeFormat), metric)
 	if err != nil {
 		return err
 	}
@@ -167,27 +193,12 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 	// defaults
 	var pLen int64 = 20
 
-	title := fmt.Sprintf("%s", firstHeader)
-	if _, ok := widget.Options[optionTitle]; ok {
-		title = widget.Options[optionTitle]
-	}
-
 	global := false
 	if _, ok := widget.Options[optionGlobal]; ok {
 		global, err = strconv.ParseBool(widget.Options[optionGlobal])
 		if err != nil {
 			return errors.Wrapf(err, "could not parse string %s to bool", widget.Options[optionGlobal])
 		}
-	}
-
-	startDate := "7daysAgo"
-	if _, ok := widget.Options[optionStartDate]; ok {
-		startDate = widget.Options[optionStartDate]
-	}
-
-	endDate := "today"
-	if _, ok := widget.Options[optionEndDate]; ok {
-		endDate = widget.Options[optionEndDate]
 	}
 
 	dimension := "page_path"
@@ -211,10 +222,30 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 		}
 	}
 
+	sd := "7_days_ago"
+	if _, ok := widget.Options[optionStartDate]; ok {
+		sd = widget.Options[optionStartDate]
+	}
+
+	ed := "today"
+	if _, ok := widget.Options[optionEndDate]; ok {
+		ed = widget.Options[optionEndDate]
+	}
+
+	startDate, endDate, err := ConvertDates(time.Now(), sd, ed)
+	if err != nil {
+		return err
+	}
+
+	title := fmt.Sprintf("%s from %s to %s", firstHeader, startDate.Format(gaTimeFormat), endDate.Format(gaTimeFormat))
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
 	headers, dim, val, err := g.analytics.Table(
 		g.viewID,
-		startDate,
-		endDate,
+		startDate.Format(gaTimeFormat),
+		endDate.Format(gaTimeFormat),
 		global,
 		metrics,
 		dimension,
@@ -293,17 +324,23 @@ func (g *gaWidget) trafficSource(widget Widget) (err error) {
 
 func (g *gaWidget) NewVsReturning(widget Widget) error {
 	// defaults
-	startDate := "7daysAgo"
+	sd := "7_days_ago"
 	if _, ok := widget.Options[optionStartDate]; ok {
-		startDate = widget.Options[optionStartDate]
+		sd = widget.Options[optionStartDate]
 	}
-	endDate := "today"
+
+	ed := "today"
 	if _, ok := widget.Options[optionEndDate]; ok {
-		endDate = widget.Options[optionEndDate]
+		ed = widget.Options[optionEndDate]
+	}
+
+	startDate, endDate, err := ConvertDates(time.Now(), sd, ed)
+	if err != nil {
+		return err
 	}
 
 	// this should return new and ret instead of a unique slice val...
-	dim, val, err := g.analytics.NewVsReturning(g.viewID, startDate, endDate)
+	dim, val, err := g.analytics.NewVsReturning(g.viewID, startDate.Format(gaTimeFormat), endDate.Format(gaTimeFormat))
 	if err != nil {
 		return err
 	}
@@ -336,8 +373,8 @@ func (g *gaWidget) NewVsReturning(widget Widget) error {
 		" Sessions (%s) vs Returning (%s) from %s to %s ",
 		colorStr(firstColor),
 		colorStr(secondColor),
-		startDate,
-		endDate,
+		startDate.Format(gaTimeFormat),
+		endDate.Format(gaTimeFormat),
 	)
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]

@@ -6,13 +6,13 @@ import (
 	"time"
 
 	"github.com/Phantas0s/devdash/internal/plateform"
-	"github.com/Phantas0s/devdash/totime"
 	"github.com/pkg/errors"
 )
 
 const (
-	gsc_pages   = "gsc.pages"
-	gsc_queries = "gsc.queries"
+	gscPages      = "gsc.pages"
+	gscQueries    = "gsc.queries"
+	gscTimeFormat = "2006-01-02"
 )
 
 type gscWidget struct {
@@ -38,9 +38,9 @@ func NewGscWidget(keyfile string, viewID string, address string) (*gscWidget, er
 func (s *gscWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	s.tui = tui
 	switch widget.Name {
-	case gsc_pages:
+	case gscPages:
 		err = s.pages(widget)
-	case gsc_queries:
+	case gscQueries:
 		err = s.table(widget)
 	default:
 		return errors.Errorf("can't find the widget %s", widget.Name)
@@ -62,16 +62,20 @@ func (s *gscWidget) pages(widget Widget) error {
 // table of the result of a Google Search Console query.
 // If no metric provided, default "query" with no filters.
 func (s *gscWidget) table(widget Widget) (err error) {
-	st, en := totime.PrevMonths(time.Now(), 0)
-	startDate := st.Format("2006-01-02")
-	endDate := en.Format("2006-01-02")
 
+	sd := "7_days_ago"
 	if _, ok := widget.Options[optionStartDate]; ok {
-		startDate = widget.Options[optionStartDate]
+		sd = widget.Options[optionStartDate]
 	}
 
+	ed := "today"
 	if _, ok := widget.Options[optionEndDate]; ok {
-		endDate = widget.Options[optionEndDate]
+		ed = widget.Options[optionEndDate]
+	}
+
+	startDate, endDate, err := ConvertDates(time.Now(), sd, ed)
+	if err != nil {
+		return err
 	}
 
 	var elLimit int64 = 5
@@ -108,8 +112,8 @@ func (s *gscWidget) table(widget Widget) (err error) {
 
 	table, err := s.client.Table(
 		s.viewID,
-		startDate,
-		endDate,
+		startDate.Format(gscTimeFormat),
+		endDate.Format(gscTimeFormat),
 		elLimit,
 		s.address,
 		metric,

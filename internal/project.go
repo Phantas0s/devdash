@@ -9,16 +9,6 @@ import (
 var debug bool = false
 
 const (
-	// widget config names
-	realtime       = "ga.realtime"
-	sessions       = "ga.sessions"
-	users          = "ga.users"
-	bar_metric     = "ga.bar_metric"
-	pages          = "ga.pages"
-	new_returning  = "ga.new_returning"
-	traffic_source = "ga.traffic_source"
-	total_metric   = "ga.total_metric"
-
 	// option config names
 	optionTitle      = "title"
 	optionTitleColor = "title_color"
