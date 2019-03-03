@@ -4,106 +4,50 @@ import (
 	"time"
 )
 
-const yyyymmdd = "2006-01-02"
-
-func ThisWeek() (startDate string, endDate string) {
-	tm := time.Now()
-	s := time.Time{}
+func PrevWeeks(base time.Time, count int) (startDate time.Time, endDate time.Time) {
+	startDate = time.Time{}
 
 	// 1 = Monday
-	weekDay := int(tm.Weekday())
-	if weekDay > 1 {
-		s = tm.AddDate(0, 0, -(weekDay - 1))
-	}
-
+	weekDay := int(base.Weekday())
+	startDate = base.AddDate(0, 0, (-(weekDay - 1) - (7 * count)))
 	if weekDay == 0 {
-		s = tm.AddDate(0, 0, weekDay+1)
+		startDate = base.AddDate(0, 0, (-(weekDay + 1) - (7 * count)))
 	}
 
-	startDate = s.Format(yyyymmdd)
-	endDate = s.AddDate(0, 0, 7).Format(yyyymmdd)
+	endDate = startDate.AddDate(0, 0, 6)
 
 	return
 }
 
-func NPrevWeek(count int) (startDate string, endDate string) {
-	tm := time.Now()
-	s := time.Time{}
-
+func NextWeeks(base time.Time, count int) (startDate time.Time, endDate time.Time) {
 	// 1 = Monday
-	weekDay := int(tm.Weekday())
-	if weekDay > 1 {
-		s = tm.AddDate(0, 0, -((weekDay - 1) * (-count)))
-	}
-
+	weekDay := int(base.Weekday())
+	startDate = base.AddDate(0, 0, (-(weekDay - 1) + (7 * count)))
 	if weekDay == 0 {
-		s = tm.AddDate(0, 0, (weekDay+1)*(-count))
+		startDate = base.AddDate(0, 0, (-(weekDay + 1) + (7 * count)))
 	}
 
-	startDate = s.Format(yyyymmdd)
-	endDate = s.AddDate(0, 0, 7*(-count)).Format(yyyymmdd)
+	endDate = startDate.AddDate(0, 0, 6)
 
 	return
 }
 
-func NNextWeek(count int) (startDate string, endDate string) {
-	tm := time.Now()
-	s := time.Time{}
+func PrevMonths(base time.Time, count int) (startDate time.Time, endDate time.Time) {
+	currentLocation := base.Location()
 
-	// 1 = Monday
-	weekDay := int(tm.Weekday())
-	if weekDay > 1 {
-		s = tm.AddDate(0, 0, -((weekDay - 1) * count))
-	}
-
-	if weekDay == 0 {
-		s = tm.AddDate(0, 0, (weekDay+1)*count)
-	}
-
-	startDate = s.Format(yyyymmdd)
-	endDate = s.AddDate(0, 0, 7*count).Format(yyyymmdd)
+	SearchedMonth := base.AddDate(0, -count, 0)
+	startDate = time.Date(SearchedMonth.Year(), SearchedMonth.Month(), 1, 0, 0, 0, 0, currentLocation)
+	endDate = startDate.AddDate(0, 1, -1)
 
 	return
 }
 
-func ThisMonth() (startDate string, endDate string) {
-	now := time.Now()
-	currentYear, currentMonth, _ := now.Date()
-	currentLocation := now.Location()
+func NextMonths(base time.Time, count int) (startDate time.Time, endDate time.Time) {
+	currentLocation := base.Location()
 
-	firstOfMonth := time.Date(currentYear, currentMonth, 1, 0, 0, 0, 0, currentLocation)
-	lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
-
-	startDate = firstOfMonth.Format(yyyymmdd)
-	endDate = lastOfMonth.Format(yyyymmdd)
-
-	return
-}
-
-func NPrevMonth(count int) (startDate string, endDate string) {
-	now := time.Now()
-	currentLocation := now.Location()
-
-	SearchedMonth := now.AddDate(0, -count, 0)
-	firstOfMonth := time.Date(SearchedMonth.Year(), SearchedMonth.Month(), 1, 0, 0, 0, 0, currentLocation)
-	lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
-
-	startDate = firstOfMonth.Format(yyyymmdd)
-	endDate = lastOfMonth.Format(yyyymmdd)
-
-	return
-}
-
-func NNextMonth(count int) (startDate string, endDate string) {
-	now := time.Now()
-	currentLocation := now.Location()
-
-	SearchedMonth := now.AddDate(0, count, 0)
-	firstOfMonth := time.Date(SearchedMonth.Year(), SearchedMonth.Month(), 1, 0, 0, 0, 0, currentLocation)
-	lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
-
-	startDate = firstOfMonth.Format(yyyymmdd)
-	endDate = lastOfMonth.Format(yyyymmdd)
+	SearchedMonth := base.AddDate(0, count, 0)
+	startDate = time.Date(SearchedMonth.Year(), SearchedMonth.Month(), 1, 0, 0, 0, 0, currentLocation)
+	endDate = startDate.AddDate(0, 1, -1)
 
 	return
 }
