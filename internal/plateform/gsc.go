@@ -76,6 +76,11 @@ func (w *SearchConsole) Table(
 	return formatSearchTable(resp.Rows, dimension), nil
 }
 
+// filtersFromString in the config.
+// The rules are the following:
+// 0. Each filters are separated with a coma
+// 1. if there is one word or multiple words, the current dimension will be filtered with Contains
+// 2. If there is one word or multiple words with "-" as prefix, the current dimension will be filtered with notContains
 func filtersFromString(filters string, dimension string) []*sc.ApiDimensionFilter {
 	fg := []*sc.ApiDimensionFilter{}
 	if filters != "" {
@@ -85,8 +90,10 @@ func filtersFromString(filters string, dimension string) []*sc.ApiDimensionFilte
 			dim := dimension
 			if strings.Contains(v, " ") {
 				t := strings.Split(v, " ")
-				dim = t[0]
-				v = t[1]
+				if strings.Contains(t[0], "*") {
+					dim = strings.Trim(t[0], "*")
+					v = strings.Join(t[1:], " ")
+				}
 			}
 
 			operator := "contains"

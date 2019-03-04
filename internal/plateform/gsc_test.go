@@ -61,9 +61,19 @@ func Test_filtersFromString(t *testing.T) {
 					Expression: "hello",
 					Operator:   "contains",
 				},
+				{
+					Dimension:  "page",
+					Expression: "hello halli hallo",
+					Operator:   "contains",
+				},
+				{
+					Dimension:  "query",
+					Expression: "hela helo",
+					Operator:   "notContains",
+				},
 			},
 			dimension: "page",
-			filters:   "-exclude, include,mobile -useless, query hello",
+			filters:   "-exclude, include,*mobile -useless, *query hello, hello halli hallo, *query -hela helo",
 		},
 	}
 
