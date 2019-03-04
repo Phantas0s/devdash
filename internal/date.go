@@ -14,9 +14,11 @@ const (
 	yesterday = "yesterday"
 	days_ago  = "days_ago"
 
+	this_week = "this_week"
 	last_week = "last_week"
 	weeks_ago = "weeks_ago"
 
+	this_month = "this_month"
 	last_month = "last_month"
 	months_ago = "months_ago"
 )
@@ -57,6 +59,11 @@ func convertStartDate(base time.Time, startDate string) (time.Time, error) {
 		return base.AddDate(0, 0, -int(days)), nil
 	}
 
+	if strings.Contains(startDate, this_week) {
+		startDate, _ := totime.ThisWeek(base)
+		return startDate, nil
+	}
+
 	if strings.Contains(startDate, weeks_ago) {
 		t := strings.Split(startDate, "_")
 		weeks, err := strconv.ParseInt(t[0], 0, 0)
@@ -66,6 +73,11 @@ func convertStartDate(base time.Time, startDate string) (time.Time, error) {
 
 		startDate, _ := totime.PrevWeeks(base, int(weeks))
 
+		return startDate, nil
+	}
+
+	if strings.Contains(startDate, this_month) {
+		startDate, _ := totime.ThisMonth(base)
 		return startDate, nil
 	}
 
@@ -99,6 +111,11 @@ func convertEndDate(base time.Time, endDate string) (time.Time, error) {
 		return base.AddDate(0, 0, -int(days)), nil
 	}
 
+	if strings.Contains(endDate, this_week) {
+		_, endDate := totime.ThisWeek(base)
+		return endDate, nil
+	}
+
 	if strings.Contains(endDate, weeks_ago) {
 		t := strings.Split(endDate, "_")
 		weeks, err := strconv.ParseInt(t[0], 0, 0)
@@ -108,6 +125,11 @@ func convertEndDate(base time.Time, endDate string) (time.Time, error) {
 
 		_, endDate := totime.PrevWeeks(base, int(weeks))
 
+		return endDate, nil
+	}
+
+	if strings.Contains(endDate, this_month) {
+		_, endDate := totime.ThisMonth(base)
 		return endDate, nil
 	}
 

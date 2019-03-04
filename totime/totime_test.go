@@ -7,6 +7,42 @@ import (
 
 const yyyymmdd = "2006-01-02"
 
+func Test_ThisMonth(t *testing.T) {
+	testCases := []struct {
+		name      string
+		startDate string
+		endDate   string
+		year      int
+		month     time.Month
+		day       int
+		wantErr   bool
+	}{
+		{
+			name:      "monday",
+			startDate: "2019-03-01",
+			endDate:   "2019-03-31",
+			year:      2019,
+			month:     03,
+			day:       11,
+			wantErr:   false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			current := time.Date(tc.year, tc.month, tc.day, 0, 0, 0, 0, time.UTC)
+			startDate, endDate := ThisMonth(current)
+
+			if tc.wantErr == false && tc.startDate != startDate.Format(yyyymmdd) {
+				t.Errorf("Expected startDate %v, actual %v", tc.startDate, startDate)
+			}
+
+			if tc.wantErr == false && tc.endDate != endDate.Format(yyyymmdd) {
+				t.Errorf("Expected endDate %v, actual %v", tc.endDate, endDate)
+			}
+		})
+	}
+}
 func Test_PrevMonths(t *testing.T) {
 	testCases := []struct {
 		name       string
@@ -145,6 +181,51 @@ func Test_NextMonths(t *testing.T) {
 	}
 }
 
+func Test_ThisWeek(t *testing.T) {
+	testCases := []struct {
+		name      string
+		startDate string
+		endDate   string
+		year      int
+		month     time.Month
+		day       int
+		wantErr   bool
+	}{
+		{
+			name:      "monday",
+			startDate: "2019-03-11",
+			endDate:   "2019-03-17",
+			year:      2019,
+			month:     03,
+			day:       11,
+			wantErr:   false,
+		},
+		{
+			name:      "monday",
+			startDate: "2019-03-11",
+			endDate:   "2019-03-17",
+			year:      2019,
+			month:     03,
+			day:       14,
+			wantErr:   false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			current := time.Date(tc.year, tc.month, tc.day, 00, 00, 00, 00, time.UTC)
+			startDate, endDate := ThisWeek(current)
+
+			if tc.wantErr == false && tc.startDate != startDate.Format(yyyymmdd) {
+				t.Errorf("Expected startDate %v, actual %v", tc.startDate, startDate)
+			}
+
+			if tc.wantErr == false && tc.endDate != endDate.Format(yyyymmdd) {
+				t.Errorf("Expected endDate %v, actual %v", tc.endDate, endDate)
+			}
+		})
+	}
+}
 func Test_NextWeeks(t *testing.T) {
 	testCases := []struct {
 		name         string
