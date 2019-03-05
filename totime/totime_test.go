@@ -201,7 +201,7 @@ func Test_ThisWeek(t *testing.T) {
 			wantErr:   false,
 		},
 		{
-			name:      "monday",
+			name:      "another day",
 			startDate: "2019-03-11",
 			endDate:   "2019-03-17",
 			year:      2019,
