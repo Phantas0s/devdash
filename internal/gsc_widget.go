@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -20,6 +21,11 @@ type gscWidget struct {
 	client  *plateform.SearchConsole
 	viewID  string
 	address string
+}
+
+var mappingGscHeader = map[string]string{
+	"page":  "Page",
+	"query": "Query",
 }
 
 func NewGscWidget(keyfile string, viewID string, address string) (*gscWidget, error) {
@@ -110,7 +116,14 @@ func (s *gscWidget) table(widget Widget) (err error) {
 		filters = widget.Options[optionFilters]
 	}
 
-	table, err := s.client.Table(
+	metrics := []string{"clicks", "impressions", "ctr", "position"}
+	if _, ok := widget.Options[optionMetrics]; ok {
+		if len(widget.Options[optionMetrics]) > 0 {
+			metrics = strings.Split(widget.Options[optionMetrics], ",")
+		}
+	}
+
+	results, err := s.client.Table(
 		s.viewID,
 		startDate.Format(gscTimeFormat),
 		endDate.Format(gscTimeFormat),
@@ -121,6 +134,28 @@ func (s *gscWidget) table(widget Widget) (err error) {
 	)
 	if err != nil {
 		return err
+	}
+
+	table := make([][]string, len(results)+1)
+	table[0] = []string{mappingGscHeader[metric]}
+	table[0] = append(table[0], metrics...)
+
+	for k, v := range results {
+		table[k+1] = append(table[k+1], v.Dimension)
+		for _, m := range metrics {
+			if m == "clicks" {
+				table[k+1] = append(table[k+1], fmt.Sprintf("%g", v.Clicks))
+			}
+			if m == "impressions" {
+				table[k+1] = append(table[k+1], fmt.Sprintf("%g", v.Impressions))
+			}
+			if m == "ctr" {
+				table[k+1] = append(table[k+1], fmt.Sprintf("%.5f", v.Ctr))
+			}
+			if m == "position" {
+				table[k+1] = append(table[k+1], fmt.Sprintf("%.2f", v.Position))
+			}
+		}
 	}
 
 	// Shorten the URL of the page.

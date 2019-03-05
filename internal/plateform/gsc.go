@@ -19,9 +19,12 @@ type SearchConsole struct {
 	service *sc.Service
 }
 
-var mappingGscHeader = map[string]string{
-	"page":  "Page",
-	"query": "Query",
+type SearchConsoleResponse struct {
+	Dimension   string
+	Clicks      float64
+	Impressions float64
+	Ctr         float64
+	Position    float64
 }
 
 func NewSearchConsoleClient(keyfile string) (*SearchConsole, error) {
@@ -55,7 +58,7 @@ func (w *SearchConsole) Table(
 	address string,
 	dimension string,
 	filters string,
-) ([][]string, error) {
+) ([]SearchConsoleResponse, error) {
 	req := &sc.SearchAnalyticsQueryRequest{
 		StartDate:  startDate,
 		EndDate:    endDate,
@@ -73,7 +76,7 @@ func (w *SearchConsole) Table(
 		return nil, err
 	}
 
-	return formatSearchTable(resp.Rows, dimension), nil
+	return formatSearchTable(resp.Rows), nil
 }
 
 // filtersFromString in the config.
@@ -113,18 +116,17 @@ func filtersFromString(filters string, dimension string) []*sc.ApiDimensionFilte
 	return fg
 }
 
-func formatSearchTable(rows []*sc.ApiDataRow, dimension string) [][]string {
-	result := [][]string{{mappingGscHeader[dimension], "Clicks", "Impressions", "CTR", "Position"}}
-
+func formatSearchTable(rows []*sc.ApiDataRow) []SearchConsoleResponse {
+	results := []SearchConsoleResponse{}
 	for _, v := range rows {
-		result = append(result, []string{
-			strings.Join(v.Keys, ","),
-			fmt.Sprintf("%g", v.Clicks),
-			fmt.Sprintf("%g", v.Impressions),
-			fmt.Sprintf("%.5f", v.Ctr),
-			fmt.Sprintf("%.2f", v.Position),
+		results = append(results, SearchConsoleResponse{
+			Dimension:   strings.Join(v.Keys, ","),
+			Clicks:      v.Clicks,
+			Impressions: v.Impressions,
+			Ctr:         v.Ctr,
+			Position:    v.Position,
 		})
 	}
 
-	return result
+	return results
 }
