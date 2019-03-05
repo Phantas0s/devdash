@@ -122,7 +122,11 @@ func (c *Analytics) SimpleMetric(
 		)
 	}
 
-	return resp.Reports[0].Data.Rows[0].Metrics[0].Values[0], nil
+	if len(resp.Reports[0].Data.Rows) != 0 {
+		return resp.Reports[0].Data.Rows[0].Metrics[0].Values[0], nil
+	}
+
+	return "0", nil
 }
 
 func (c *Analytics) BarMetric(viewID string, startDate string, endDate string, metric string) ([]string, []int, error) {

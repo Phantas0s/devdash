@@ -93,7 +93,7 @@ func convertStartDate(base time.Time, startDate string) (time.Time, error) {
 		return startDate, nil
 	}
 
-	return time.Parse(startDate, "2006-01-02")
+	return time.Parse("2006-01-02", startDate)
 }
 
 func convertEndDate(base time.Time, endDate string) (time.Time, error) {
@@ -145,7 +145,7 @@ func convertEndDate(base time.Time, endDate string) (time.Time, error) {
 		return endDate, nil
 	}
 
-	return time.Parse(endDate, "2006-01-02")
+	return time.Parse("2006-01-02", endDate)
 }
 
 func resolveAlias(date string) string {
@@ -158,7 +158,7 @@ func resolveAlias(date string) string {
 	}
 
 	if strings.Contains(date, last_month) {
-		return "1_month_ago"
+		return "1_months_ago"
 	}
 
 	return date

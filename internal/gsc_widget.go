@@ -68,7 +68,6 @@ func (s *gscWidget) pages(widget Widget) error {
 // table of the result of a Google Search Console query.
 // If no metric provided, default "query" with no filters.
 func (s *gscWidget) table(widget Widget) (err error) {
-
 	sd := "7_days_ago"
 	if _, ok := widget.Options[optionStartDate]; ok {
 		sd = widget.Options[optionStartDate]
