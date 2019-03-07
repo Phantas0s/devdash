@@ -179,7 +179,18 @@ func (g *gaWidget) barMetric(widget Widget) error {
 		metric = widget.Options[optionMetric]
 	}
 
-	dim, val, err := g.analytics.BarMetric(g.viewID, startDate.Format(gaTimeFormat), endDate.Format(gaTimeFormat), metric)
+	timePeriod := "day"
+	if _, ok := widget.Options[optionTimePeriod]; ok {
+		timePeriod = strings.TrimSpace(widget.Options[optionTimePeriod])
+	}
+
+	dim, val, err := g.analytics.BarMetric(
+		g.viewID,
+		startDate.Format(gaTimeFormat),
+		endDate.Format(gaTimeFormat),
+		metric,
+		timePeriod,
+	)
 	if err != nil {
 		return err
 	}
@@ -211,14 +222,14 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 	metrics := []string{"sessions", "page_views", "entrances", "unique_page_views"}
 	if _, ok := widget.Options[optionMetrics]; ok {
 		if len(widget.Options[optionMetrics]) > 0 {
-			metrics = strings.Split(widget.Options[optionMetrics], ",")
+			metrics = strings.Split(strings.TrimSpace(widget.Options[optionMetrics]), ",")
 		}
 	}
 
 	orders := []string{metrics[0] + " desc"}
 	if _, ok := widget.Options[optionOrder]; ok {
 		if len(widget.Options[optionOrder]) > 0 {
-			orders = strings.Split(widget.Options[optionOrder], ",")
+			orders = strings.Split(strings.TrimSpace(widget.Options[optionOrder]), ",")
 		}
 	}
 

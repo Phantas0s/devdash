@@ -22,10 +22,11 @@ const (
 	optionRowLimit  = "limit_row"
 	optionCharLimit = "character_limit"
 
-	// Metrics wanted
-	optionDimension = "dimension"
-	optionMetrics   = "metrics"
-	optionMetric    = "metric"
+	// Metrics
+	optionDimension  = "dimension"
+	optionMetrics    = "metrics"
+	optionMetric     = "metric"
+	optionTimePeriod = "time_period"
 
 	optionOrder = "order"
 

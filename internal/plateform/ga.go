@@ -31,6 +31,11 @@ var mappingMetrics = map[string]string{
 	"users":             "ga:users",
 }
 
+var mappingTimePeriod = map[string][]string{
+	"day":   []string{"ga:month", "ga:day"},
+	"month": []string{"ga:year", "ga:month"},
+}
+
 var mappingDimensions = map[string]string{
 	"page_path":      "ga:pagePath",
 	"traffic_source": "ga:source",
@@ -129,7 +134,20 @@ func (c *Analytics) SimpleMetric(
 	return "0", nil
 }
 
-func (c *Analytics) BarMetric(viewID string, startDate string, endDate string, metric string) ([]string, []int, error) {
+func (c *Analytics) BarMetric(
+	viewID string,
+	startDate string,
+	endDate string,
+	metric string,
+	timePeriod string,
+) ([]string, []int, error) {
+	tm := mapTimePeriod(timePeriod)
+
+	dim := []*ga.Dimension{}
+	for _, v := range tm {
+		dim = append(dim, &ga.Dimension{Name: v})
+	}
+
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
@@ -140,13 +158,10 @@ func (c *Analytics) BarMetric(viewID string, startDate string, endDate string, m
 				Metrics: []*ga.Metric{
 					{Expression: mapMetric(metric)},
 				},
-				Dimensions: []*ga.Dimension{
-					{Name: "ga:month"},
-					{Name: "ga:day"},
-				},
+				Dimensions: dim,
 				OrderBys: []*ga.OrderBy{
 					{
-						FieldName: "ga:month",
+						FieldName: string(tm[0]),
 						SortOrder: "ASCENDING",
 					},
 				},
@@ -166,7 +181,11 @@ func (c *Analytics) BarMetric(viewID string, startDate string, endDate string, m
 	}
 
 	formater := func(dim []string) string {
-		return dim[0] + "-" + dim[1]
+		if len(dim) == 2 {
+			return dim[0] + "-" + dim[1]
+		}
+
+		return dim[0]
 	}
 
 	return format(resp.Reports, formater)
@@ -372,6 +391,15 @@ func mapMetrics(m []string) []*ga.Metric {
 	}
 
 	return gam
+}
+
+func mapTimePeriod(m string) []string {
+	timePeriods, ok := mappingTimePeriod[m]
+	if !ok {
+		timePeriods = strings.Split(m, ",")
+	}
+
+	return timePeriods
 }
 
 // mapMetric will first try to search an alias for a google analytics metric,
