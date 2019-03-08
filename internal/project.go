@@ -24,6 +24,7 @@ const (
 
 	// Metrics
 	optionDimension  = "dimension"
+	optionDimensions = "dimensions"
 	optionMetrics    = "metrics"
 	optionMetric     = "metric"
 	optionTimePeriod = "time_period"

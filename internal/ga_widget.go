@@ -18,6 +18,7 @@ const (
 	barMetric     = "ga.bar_metric"
 	pages         = "ga.pages"
 	newReturning  = "ga.new_returning"
+	returning     = "ga.returning"
 	trafficSource = "ga.traffic_source"
 	totalMetric   = "ga.total_metric"
 
@@ -62,6 +63,8 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 		err = g.trafficSource(widget)
 	case newReturning:
 		err = g.NewVsReturning(widget)
+	case returning:
+		err = g.returningUsers(widget)
 	default:
 		return errors.Errorf("can't find the widget %s", widget.Name)
 	}
@@ -150,6 +153,17 @@ func (g *gaWidget) users(widget Widget) (err error) {
 	return g.barMetric(widget)
 }
 
+func (g *gaWidget) returningUsers(widget Widget) (err error) {
+	if widget.Options == nil {
+		widget.Options = map[string]string{optionMetric: "users", optionDimensions: "user_returning"}
+	} else {
+		widget.Options[optionMetric] = "users"
+		widget.Options[optionDimensions] = "user_returning"
+	}
+
+	return g.barMetric(widget)
+}
+
 // users get the number of users the 7 last days on your website
 func (g *gaWidget) barMetric(widget Widget) error {
 	// defaults
@@ -179,6 +193,13 @@ func (g *gaWidget) barMetric(widget Widget) error {
 		metric = widget.Options[optionMetric]
 	}
 
+	dimensions := []string{}
+	if _, ok := widget.Options[optionDimensions]; ok {
+		if len(widget.Options[optionDimensions]) > 0 {
+			dimensions = strings.Split(strings.TrimSpace(widget.Options[optionDimensions]), ",")
+		}
+	}
+
 	timePeriod := "day"
 	if _, ok := widget.Options[optionTimePeriod]; ok {
 		timePeriod = strings.TrimSpace(widget.Options[optionTimePeriod])
@@ -189,6 +210,7 @@ func (g *gaWidget) barMetric(widget Widget) error {
 		startDate.Format(gaTimeFormat),
 		endDate.Format(gaTimeFormat),
 		metric,
+		dimensions,
 		timePeriod,
 	)
 	if err != nil {
@@ -381,11 +403,9 @@ func (g *gaWidget) NewVsReturning(widget Widget) error {
 	data[secondColor-1] = ret
 
 	title := fmt.Sprintf(
-		" Sessions (%s) vs Returning (%s) from %s to %s ",
+		" Sessions (%s) vs Returning (%s) ",
 		colorStr(firstColor),
 		colorStr(secondColor),
-		startDate.Format(gaTimeFormat),
-		endDate.Format(gaTimeFormat),
 	)
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]

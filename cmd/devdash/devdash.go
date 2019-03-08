@@ -18,23 +18,26 @@ func main() {
 	debug = flag.Bool("debug", false, "Debug mode")
 	flag.Parse()
 
-	data, _ := ioutil.ReadFile(*file)
-	cfg := mapConfig(data)
-
-	termui, err := plateform.NewTermUI(*debug)
+	cfg, tui, err := loadFile(*file)
 	if err != nil {
 		fmt.Println(err)
-		return
 	}
-
-	tui := internal.NewTUI(termui)
-	tui.AddKQuit(cfg.KQuit())
 	defer tui.Close()
 
 	err = run(cfg.Projects, tui)
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	// t := time.NewTicker(10 * time.Second)
+	// go func() {
+	// 	for range t.C {
+	// 		cfg, tui, err = loadFile(*file)
+	// 		if err != nil {
+	// 			fmt.Println(err)
+	// 		}
+	// 	}
+	// }()
 
 	ticker := time.NewTicker(time.Duration(cfg.General.Refresh) * time.Second)
 	go func() {
@@ -49,6 +52,21 @@ func main() {
 	}()
 
 	tui.Loop()
+}
+
+func loadFile(file string) (config, *internal.Tui, error) {
+	data, _ := ioutil.ReadFile(file)
+	cfg := mapConfig(data)
+
+	termui, err := plateform.NewTermUI(*debug)
+	if err != nil {
+		return config{}, nil, err
+	}
+
+	tui := internal.NewTUI(termui)
+	tui.AddKQuit(cfg.KQuit())
+
+	return cfg, tui, nil
 }
 
 func run(projects []Project, tui *internal.Tui) (err error) {

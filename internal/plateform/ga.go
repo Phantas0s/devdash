@@ -19,8 +19,9 @@ const gaPrefix = "ga:"
 
 // earliest date google analytics accept for date ranges
 const (
-	earliestDate = "2005-01-01"
-	newVisitor   = "New Visitor"
+	earliestDate     = "2005-01-01"
+	newVisitor       = "New Visitor"
+	returningVisitor = "Returning Visitor"
 )
 
 var mappingMetrics = map[string]string{
@@ -39,6 +40,7 @@ var mappingTimePeriod = map[string][]string{
 var mappingDimensions = map[string]string{
 	"page_path":      "ga:pagePath",
 	"traffic_source": "ga:source",
+	"user_returning": "ga:userType",
 }
 
 var mappingHeader = map[string]string{
@@ -139,6 +141,7 @@ func (c *Analytics) BarMetric(
 	startDate string,
 	endDate string,
 	metric string,
+	dimensions []string,
 	timePeriod string,
 ) ([]string, []int, error) {
 	tm := mapTimePeriod(timePeriod)
@@ -146,6 +149,14 @@ func (c *Analytics) BarMetric(
 	dim := []*ga.Dimension{}
 	for _, v := range tm {
 		dim = append(dim, &ga.Dimension{Name: v})
+	}
+
+	formater := format
+	for _, v := range dimensions {
+		if v == "user_returning" {
+			formater = formatReturning
+		}
+		dim = append(dim, &ga.Dimension{Name: mapDimension(v)})
 	}
 
 	req := &ga.GetReportsRequest{
@@ -180,15 +191,15 @@ func (c *Analytics) BarMetric(
 		)
 	}
 
-	formater := func(dim []string) string {
-		if len(dim) == 2 {
+	f := func(dim []string) string {
+		if len(dim) >= 2 {
 			return dim[0] + "-" + dim[1]
 		}
 
 		return dim[0]
 	}
 
-	return format(resp.Reports, formater)
+	return formater(resp.Reports, f)
 }
 
 // RealTimeUsers queries the Analytics Realtime Reporting API V3 using the
@@ -379,6 +390,36 @@ func formatNewReturning(
 
 	u = append(u, new...)
 	u = append(u, ret...)
+
+	return dim, u, nil
+}
+
+func formatReturning(
+	reps []*ga.Report,
+	dimFormater func(dim []string) string,
+) (dim []string, u []int, err error) {
+	for _, v := range reps {
+		for l := 0; l < len(v.Data.Rows); l++ {
+			if v.Data.Rows[l].Dimensions[2] == returningVisitor {
+				dim = append(dim, dimFormater(v.Data.Rows[l].Dimensions))
+			}
+
+			for m := 0; m < len(v.Data.Rows[l].Metrics); m++ {
+				value := v.Data.Rows[l].Metrics[m].Values[0]
+
+				var vu int64
+				if vu, err = strconv.ParseInt(value, 0, 0); err != nil {
+					return nil, nil, err
+				}
+
+				// this get tricky... first is start date, second is end date, third is user type...
+				// TODO to improve that
+				if v.Data.Rows[l].Dimensions[2] == returningVisitor {
+					u = append(u, int(vu))
+				}
+			}
+		}
+	}
 
 	return dim, u, nil
 }
