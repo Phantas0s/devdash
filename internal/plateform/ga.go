@@ -35,6 +35,7 @@ var mappingMetrics = map[string]string{
 var mappingTimePeriod = map[string][]string{
 	"day":   []string{"ga:month", "ga:day"},
 	"month": []string{"ga:year", "ga:month"},
+	"year":  []string{"ga:year"},
 }
 
 var mappingDimensions = map[string]string{
@@ -182,6 +183,10 @@ func (c *Analytics) BarMetric(
 	}
 
 	resp, err := c.service.Reports.BatchGet(req).Do()
+	// create fixture for tests
+	// j, _ := json.Marshal(resp)
+	// fmt.Println(string(j))
+
 	if err != nil {
 		return nil, nil, errors.Wrapf(
 			err,
@@ -303,6 +308,7 @@ func (c *Analytics) NewVsReturning(viewID string, startDate string, endDate stri
 	}
 
 	resp, err := c.service.Reports.BatchGet(req).Do()
+
 	if err != nil {
 		return nil, nil, errors.Wrapf(
 			err,
@@ -400,7 +406,8 @@ func formatReturning(
 ) (dim []string, u []int, err error) {
 	for _, v := range reps {
 		for l := 0; l < len(v.Data.Rows); l++ {
-			if v.Data.Rows[l].Dimensions[2] == returningVisitor {
+			userType := v.Data.Rows[l].Dimensions[2]
+			if userType == returningVisitor {
 				dim = append(dim, dimFormater(v.Data.Rows[l].Dimensions))
 			}
 
@@ -412,9 +419,7 @@ func formatReturning(
 					return nil, nil, err
 				}
 
-				// this get tricky... first is start date, second is end date, third is user type...
-				// TODO to improve that
-				if v.Data.Rows[l].Dimensions[2] == returningVisitor {
+				if userType == returningVisitor {
 					u = append(u, int(vu))
 				}
 			}

@@ -75,3 +75,32 @@ func NextMonths(base time.Time, count int) (startDate time.Time, endDate time.Ti
 
 	return
 }
+
+func ThisYear(base time.Time) (startDate time.Time, endDate time.Time) {
+	currentLocation := base.Location()
+
+	startDate = time.Date(base.Year(), 1, 1, 0, 0, 0, 0, currentLocation)
+	endDate = startDate.AddDate(1, 0, -1)
+
+	return
+}
+
+func PrevYears(base time.Time, count int) (startDate time.Time, endDate time.Time) {
+	currentLocation := base.Location()
+
+	SearchedYear := base.AddDate(-count, 0, 0)
+	startDate = time.Date(SearchedYear.Year(), 1, 1, 0, 0, 0, 0, currentLocation)
+	endDate = startDate.AddDate(1, 0, -1)
+
+	return
+}
+
+func NextYears(base time.Time, count int) (startDate time.Time, endDate time.Time) {
+	currentLocation := base.Location()
+
+	SearchedYear := base.AddDate(count, 0, 0)
+	startDate = time.Date(SearchedYear.Year(), 1, 1, 0, 0, 0, 0, currentLocation)
+	endDate = startDate.AddDate(1, 0, -1)
+
+	return
+}

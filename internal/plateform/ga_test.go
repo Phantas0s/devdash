@@ -2,7 +2,6 @@ package plateform
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"reflect"
 	"testing"
@@ -134,9 +133,53 @@ func Test_FormatNewReturning(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			fmt.Println(ret)
 
 			dim, val, err := formatNewReturning(ret.Reports, tc.formater)
+			if (err != nil) != tc.wantErr {
+				t.Errorf("Error '%v' even if wantErr is %t", err, tc.wantErr)
+				return
+			}
+
+			if tc.wantErr == false && !reflect.DeepEqual(dim, tc.expectedDim) {
+				t.Errorf("Expected %v, actual %v", tc.expectedDim, dim)
+			}
+
+			if tc.wantErr == false && !reflect.DeepEqual(val, tc.expectedVal) {
+				t.Errorf("Expected %v, actual %v", tc.expectedVal, val)
+			}
+		})
+	}
+}
+
+func Test_FormatReturning(t *testing.T) {
+	testCases := []struct {
+		name        string
+		expectedVal []int
+		fixtureFile string
+		expectedDim []string
+		formater    func([]string) string
+		wantErr     bool
+	}{
+		{
+			name:        "format new vs returning",
+			expectedVal: []int{87, 78, 73, 58, 54, 20},
+			expectedDim: []string{"03-04", "03-05", "03-06", "03-07", "03-08", "03-09"},
+			fixtureFile: "./testdata/fixtures/ga_users_returning.json",
+			formater:    func(dim []string) string { return dim[0] + "-" + dim[1] },
+			wantErr:     false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ret := &ga.GetReportsResponse{}
+			fixtures := ReadFixtureFile(tc.fixtureFile, t)
+			err := json.Unmarshal(fixtures, ret)
+			if err != nil {
+				t.Error(err)
+			}
+
+			dim, val, err := formatReturning(ret.Reports, tc.formater)
 			if (err != nil) != tc.wantErr {
 				t.Errorf("Error '%v' even if wantErr is %t", err, tc.wantErr)
 				return

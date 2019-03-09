@@ -21,6 +21,10 @@ const (
 	this_month = "this_month"
 	last_month = "last_month"
 	months_ago = "months_ago"
+
+	this_year = "this_year"
+	last_year = "last_year"
+	years_ago = "years_ago"
 )
 
 func ConvertDates(
@@ -93,6 +97,23 @@ func convertStartDate(base time.Time, startDate string) (time.Time, error) {
 		return startDate, nil
 	}
 
+	if strings.Contains(startDate, this_year) {
+		startDate, _ := totime.ThisYear(base)
+		return startDate, nil
+	}
+
+	if strings.Contains(startDate, years_ago) {
+		t := strings.Split(startDate, "_")
+		years, err := strconv.ParseInt(t[0], 0, 0)
+		if err != nil {
+			return time.Time{}, errors.Wrapf(err, "%s is not a valid date", startDate)
+		}
+
+		startDate, _ := totime.PrevYears(base, int(years))
+
+		return startDate, nil
+	}
+
 	return time.Parse("2006-01-02", startDate)
 }
 
@@ -145,6 +166,23 @@ func convertEndDate(base time.Time, endDate string) (time.Time, error) {
 		return endDate, nil
 	}
 
+	if strings.Contains(endDate, this_year) {
+		endDate, _ := totime.ThisYear(base)
+		return endDate, nil
+	}
+
+	if strings.Contains(endDate, years_ago) {
+		t := strings.Split(endDate, "_")
+		years, err := strconv.ParseInt(t[0], 0, 0)
+		if err != nil {
+			return time.Time{}, errors.Wrapf(err, "%s is not a valid date", endDate)
+		}
+
+		endDate, _ := totime.PrevYears(base, int(years))
+
+		return endDate, nil
+	}
+
 	return time.Parse("2006-01-02", endDate)
 }
 
@@ -159,6 +197,10 @@ func resolveAlias(date string) string {
 
 	if strings.Contains(date, last_month) {
 		return "1_months_ago"
+	}
+
+	if strings.Contains(date, last_year) {
+		return "1_years_ago"
 	}
 
 	return date
