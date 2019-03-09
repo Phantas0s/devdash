@@ -145,21 +145,23 @@ func (g *gaWidget) realTimeUser(widget Widget) error {
 
 func (g *gaWidget) users(widget Widget) (err error) {
 	if widget.Options == nil {
-		widget.Options = map[string]string{optionMetric: "users"}
-	} else {
-		widget.Options[optionMetric] = "users"
+		widget.Options = map[string]string{}
 	}
+
+	widget.Options[optionMetric] = "users"
+	widget.Options[optionTitle] = " Users "
 
 	return g.barMetric(widget)
 }
 
 func (g *gaWidget) returningUsers(widget Widget) (err error) {
 	if widget.Options == nil {
-		widget.Options = map[string]string{optionMetric: "users", optionDimensions: "user_returning"}
-	} else {
-		widget.Options[optionMetric] = "users"
-		widget.Options[optionDimensions] = "user_returning"
+		widget.Options = map[string]string{}
 	}
+
+	widget.Options[optionMetric] = "users"
+	widget.Options[optionDimensions] = "user_returning"
+	widget.Options[optionTitle] = " Returning users "
 
 	return g.barMetric(widget)
 }
@@ -183,7 +185,7 @@ func (g *gaWidget) barMetric(widget Widget) error {
 		return err
 	}
 
-	title := fmt.Sprintf(" Users from %s to %s ", startDate.Format(gaTimeFormat), endDate.Format(gaTimeFormat))
+	title := " Sessions "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}
@@ -347,10 +349,10 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 
 func (g *gaWidget) trafficSource(widget Widget) (err error) {
 	if widget.Options == nil {
-		widget.Options = map[string]string{"dimension": "traffic_source"}
-	} else {
-		widget.Options["dimension"] = "traffic_source"
+		widget.Options = map[string]string{}
 	}
+
+	widget.Options["dimension"] = "traffic_source"
 
 	return g.table(widget, "Source")
 }
@@ -372,8 +374,20 @@ func (g *gaWidget) NewVsReturning(widget Widget) error {
 		return err
 	}
 
+	metric := "sessions"
+	if _, ok := widget.Options[optionMetric]; ok {
+		if len(widget.Options[optionMetric]) > 0 {
+			metric = widget.Options[optionMetric]
+		}
+	}
+
 	// this should return new and ret instead of a unique slice val...
-	dim, val, err := g.analytics.NewVsReturning(g.viewID, startDate.Format(gaTimeFormat), endDate.Format(gaTimeFormat))
+	dim, val, err := g.analytics.NewVsReturning(
+		g.viewID,
+		startDate.Format(gaTimeFormat),
+		endDate.Format(gaTimeFormat),
+		metric,
+	)
 	if err != nil {
 		return err
 	}
@@ -394,19 +408,15 @@ func (g *gaWidget) NewVsReturning(widget Widget) error {
 	if _, ok := widget.Options[optionFirstColor]; ok {
 		firstColor = colorLookUp[widget.Options[optionFirstColor]]
 	}
-	data[firstColor-1] = new
+	data[firstColor] = new
 
 	secondColor := green
 	if _, ok := widget.Options[optionSecondColor]; ok {
 		secondColor = colorLookUp[widget.Options[optionSecondColor]]
 	}
-	data[secondColor-1] = ret
+	data[secondColor] = ret
 
-	title := fmt.Sprintf(
-		" Sessions (%s) vs Returning (%s) ",
-		colorStr(firstColor),
-		colorStr(secondColor),
-	)
+	title := fmt.Sprintf(" Sessions: Returning (%s) vs New (%s) ", colorStr(firstColor), colorStr(secondColor))
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}

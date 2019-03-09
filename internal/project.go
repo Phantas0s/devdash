@@ -19,7 +19,7 @@ const (
 	optionGlobal    = "global"
 
 	// For tables
-	optionRowLimit  = "limit_row"
+	optionRowLimit  = "row_limit"
 	optionCharLimit = "character_limit"
 
 	// Metrics

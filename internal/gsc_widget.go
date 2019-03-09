@@ -57,10 +57,10 @@ func (s *gscWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 
 func (s *gscWidget) pages(widget Widget) error {
 	if widget.Options == nil {
-		widget.Options = map[string]string{optionMetric: "page"}
-	} else {
-		widget.Options[optionMetric] = "page"
+		widget.Options = map[string]string{}
 	}
+
+	widget.Options[optionMetric] = "page"
 
 	return s.table(widget)
 }
@@ -91,11 +91,6 @@ func (s *gscWidget) table(widget Widget) (err error) {
 		}
 	}
 
-	title := "Search Console"
-	if _, ok := widget.Options[optionTitle]; ok {
-		title = widget.Options[optionTitle]
-	}
-
 	charLimit := 1000
 	if _, ok := widget.Options[optionCharLimit]; ok {
 		c, err := strconv.ParseInt(widget.Options[optionCharLimit], 0, 0)
@@ -120,6 +115,11 @@ func (s *gscWidget) table(widget Widget) (err error) {
 		if len(widget.Options[optionMetrics]) > 0 {
 			metrics = strings.Split(widget.Options[optionMetrics], ",")
 		}
+	}
+
+	title := fmt.Sprintf(" Search %s from %s to %s ", metric, startDate.Format(gscTimeFormat), endDate.Format(gscTimeFormat))
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
 	}
 
 	results, err := s.client.Table(

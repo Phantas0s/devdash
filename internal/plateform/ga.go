@@ -280,7 +280,12 @@ func (c *Analytics) Table(
 
 // NewVsReturning queries the Analytics Reporting API V4 using the
 // Analytics Reporting API V4 service object.
-func (c *Analytics) NewVsReturning(viewID string, startDate string, endDate string) (dim []string, u []int, err error) {
+func (c *Analytics) NewVsReturning(
+	viewID string,
+	startDate string,
+	endDate string,
+	metric string,
+) (dim []string, u []int, err error) {
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
@@ -289,7 +294,7 @@ func (c *Analytics) NewVsReturning(viewID string, startDate string, endDate stri
 					{StartDate: startDate, EndDate: endDate},
 				},
 				Metrics: []*ga.Metric{
-					{Expression: "ga:sessions"},
+					{Expression: mapMetric(metric)},
 				},
 				Dimensions: []*ga.Dimension{
 					{Name: "ga:userType"},
