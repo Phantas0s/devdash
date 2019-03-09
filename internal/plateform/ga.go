@@ -144,9 +144,12 @@ func (c *Analytics) BarMetric(
 	metric string,
 	dimensions []string,
 	timePeriod string,
+	filters []string,
 ) ([]string, []int, error) {
 	tm := mapTimePeriod(timePeriod)
 
+	// time dimensions (days, months, years).
+	// Take the first two index of the dimension slice (0 and 1).
 	dim := []*ga.Dimension{}
 	for _, v := range tm {
 		dim = append(dim, &ga.Dimension{Name: v})
@@ -159,6 +162,18 @@ func (c *Analytics) BarMetric(
 		}
 		dim = append(dim, &ga.Dimension{Name: mapDimension(v)})
 	}
+
+	fi := []*ga.DimensionFilter{}
+	if len(dimensions) == 1 {
+		fi = append(fi, &ga.DimensionFilter{
+			CaseSensitive: false,
+			DimensionName: mapDimension(dimensions[0]),
+			Expressions:   filters,
+			Not:           false,
+			Operator:      "PARTIAL",
+		})
+	}
+	fmt.Println(dimensions)
 
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
@@ -175,6 +190,12 @@ func (c *Analytics) BarMetric(
 					{
 						FieldName: string(tm[0]),
 						SortOrder: "ASCENDING",
+					},
+				},
+				DimensionFilterClauses: []*ga.DimensionFilterClause{
+					{
+						Filters:  fi,
+						Operator: "AND",
 					},
 				},
 				IncludeEmptyRows: true,

@@ -202,6 +202,13 @@ func (g *gaWidget) barMetric(widget Widget) error {
 		}
 	}
 
+	filters := []string{}
+	if _, ok := widget.Options[optionFilters]; ok {
+		if len(widget.Options[optionFilters]) > 0 {
+			filters = strings.Split(strings.TrimSpace(widget.Options[optionFilters]), ",")
+		}
+	}
+
 	timePeriod := "day"
 	if _, ok := widget.Options[optionTimePeriod]; ok {
 		timePeriod = strings.TrimSpace(widget.Options[optionTimePeriod])
@@ -214,6 +221,7 @@ func (g *gaWidget) barMetric(widget Widget) error {
 		metric,
 		dimensions,
 		timePeriod,
+		filters,
 	)
 	if err != nil {
 		return err
