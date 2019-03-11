@@ -173,7 +173,6 @@ func (c *Analytics) BarMetric(
 			Operator:      "PARTIAL",
 		})
 	}
-	fmt.Println(dimensions)
 
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{

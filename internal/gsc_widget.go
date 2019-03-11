@@ -149,7 +149,7 @@ func (s *gscWidget) table(widget Widget) (err error) {
 				table[k+1] = append(table[k+1], fmt.Sprintf("%g", v.Impressions))
 			}
 			if m == "ctr" {
-				table[k+1] = append(table[k+1], fmt.Sprintf("%.5f", v.Ctr))
+				table[k+1] = append(table[k+1], fmt.Sprintf("%.2f%%", v.Ctr*100))
 			}
 			if m == "position" {
 				table[k+1] = append(table[k+1], fmt.Sprintf("%.2f", v.Position))

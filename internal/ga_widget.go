@@ -149,7 +149,6 @@ func (g *gaWidget) users(widget Widget) (err error) {
 	}
 
 	widget.Options[optionMetric] = "users"
-	widget.Options[optionTitle] = " Users "
 
 	return g.barMetric(widget)
 }
@@ -185,11 +184,6 @@ func (g *gaWidget) barMetric(widget Widget) error {
 		return err
 	}
 
-	title := " Sessions "
-	if _, ok := widget.Options[optionTitle]; ok {
-		title = widget.Options[optionTitle]
-	}
-
 	metric := "sessions"
 	if _, ok := widget.Options[optionMetric]; ok {
 		metric = widget.Options[optionMetric]
@@ -212,6 +206,11 @@ func (g *gaWidget) barMetric(widget Widget) error {
 	timePeriod := "day"
 	if _, ok := widget.Options[optionTimePeriod]; ok {
 		timePeriod = strings.TrimSpace(widget.Options[optionTimePeriod])
+	}
+
+	title := fmt.Sprintf(" %s per %s ", strings.Title(metric), timePeriod)
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
 	}
 
 	dim, val, err := g.analytics.BarMetric(
@@ -424,7 +423,12 @@ func (g *gaWidget) NewVsReturning(widget Widget) error {
 	}
 	data[secondColor] = ret
 
-	title := fmt.Sprintf(" Sessions: Returning (%s) vs New (%s) ", colorStr(firstColor), colorStr(secondColor))
+	title := fmt.Sprintf(
+		" %s: Returning (%s) vs New (%s) ",
+		strings.Trim(strings.Title(metric), "_"),
+		colorStr(firstColor),
+		colorStr(secondColor),
+	)
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}
