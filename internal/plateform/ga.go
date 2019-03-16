@@ -98,6 +98,7 @@ func NewAnalyticsClient(keyfile string) (*Analytics, error) {
 
 }
 
+// SimpleMetric of one quantitative value.
 func (c *Analytics) SimpleMetric(
 	viewID,
 	metric,
@@ -137,6 +138,7 @@ func (c *Analytics) SimpleMetric(
 	return "0", nil
 }
 
+// BarMetric provides a bar display with one qualitative dimension and one quantitative value.
 func (c *Analytics) BarMetric(
 	viewID string,
 	startDate string,
@@ -227,10 +229,7 @@ func (c *Analytics) BarMetric(
 	return formater(resp.Reports, f)
 }
 
-// RealTimeUsers queries the Analytics Realtime Reporting API V3 using the
-// Analytics Reporting API V3 service object.
-// It returns the Analytics Realtime Reporting API V3 response
-// for how many active users are currently on the site.
+// RealTimeUsers on the website (using Google api V3).
 func (c *Analytics) RealTimeUsers(viewID string) (string, error) {
 	metric := "rt:activeUsers"
 
@@ -242,8 +241,8 @@ func (c *Analytics) RealTimeUsers(viewID string) (string, error) {
 	return resp.TotalsForAllResults[metric], nil
 }
 
-// Table queries the Analytics Reporting API V4 using the
-// Analytics Reporting API V4 service object.
+// Table shaped analytics.
+// Headers on the first row are qualitative dimensions, value can be qualitative or quantitative.
 func (c *Analytics) Table(
 	viewID string,
 	startDate string,
@@ -298,8 +297,7 @@ func (c *Analytics) Table(
 	return
 }
 
-// NewVsReturning queries the Analytics Reporting API V4 using the
-// Analytics Reporting API V4 service object.
+// NewVsReturning users.
 func (c *Analytics) NewVsReturning(
 	viewID string,
 	startDate string,
@@ -350,6 +348,10 @@ func (c *Analytics) NewVsReturning(
 	return formatNewReturning(resp.Reports, formater)
 }
 
+// formatBar vizualisation data, to return one slice of dimension and one slice of values.
+// The two slices are equals in size.
+// If the same dimension is returned multiple time by the Google API, the data
+// is aggregated not to have duplicated dimensions.
 func formatBar(reps []*ga.Report, dimFormater func(dim []string) string) (dim []string, u []int, err error) {
 	dimVal := map[string]int{}
 	for _, v := range reps {
@@ -369,7 +371,6 @@ func formatBar(reps []*ga.Report, dimFormater func(dim []string) string) (dim []
 					return nil, nil, err
 				}
 
-				// To aggregate value with same dimension.
 				if _, ok := dimVal[d]; ok {
 					dimVal[d] += int(vu)
 					continue
@@ -474,6 +475,8 @@ func formatNewReturning(
 	return dim, u, nil
 }
 
+// The map functions map the properties of the application to the Google Analytics API params.
+
 func mapMetrics(m []string) []*ga.Metric {
 	gam := make([]*ga.Metric, len(m))
 
@@ -482,15 +485,6 @@ func mapMetrics(m []string) []*ga.Metric {
 	}
 
 	return gam
-}
-
-func mapTimePeriod(m string) []string {
-	timePeriods, ok := mappingTimePeriod[m]
-	if !ok {
-		timePeriods = strings.Split(m, ",")
-	}
-
-	return timePeriods
 }
 
 // mapMetric will first try to search an alias for a google analytics metric,
@@ -502,6 +496,15 @@ func mapMetric(metric string) string {
 	}
 
 	return strings.TrimSpace(m)
+}
+
+func mapTimePeriod(m string) []string {
+	timePeriods, ok := mappingTimePeriod[m]
+	if !ok {
+		timePeriods = strings.Split(m, ",")
+	}
+
+	return timePeriods
 }
 
 func mapDimension(dim string) string {
@@ -552,7 +555,6 @@ func mapHeaders(el string, metrics []string) []string {
 				v = strings.Split(v, "ga:")[1]
 			}
 
-			// TODO separate camelcase to a cleaner result for header
 			h[k+1] = strings.TrimSpace(v)
 			continue
 		}
