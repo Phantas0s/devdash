@@ -12,16 +12,18 @@ import (
 
 const (
 	// widget config names
-	realtime      = "ga.realtime"
-	sessions      = "ga.sessions"
-	users         = "ga.users"
-	barMetric     = "ga.bar_metric"
-	pages         = "ga.pages"
-	newReturning  = "ga.new_returning"
-	returning     = "ga.returning"
-	trafficSource = "ga.traffic_source"
-	totalMetric   = "ga.total_metric"
+	gaBoxRealtime         = "ga.box_real_time"
+	gaBoxTotal            = "ga.box_total"
+	gaBar                 = "ga.bar"
+	gaBarSessions         = "ga.bar_sessions"
+	gaBarUsers            = "ga.bar_users"
+	gaBarReturning        = "ga.bar_returning"
+	gaBarNewReturning     = "ga.bar_new_returning"
+	gaBarPages            = "ga.bar_pages"
+	gaTablePages          = "ga.table_pages"
+	gaTableTrafficSources = "ga.table_traffic_sources"
 
+	// format for every start date / end date
 	gaTimeFormat = "2006-01-02"
 )
 
@@ -47,24 +49,26 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	g.tui = tui
 
 	switch widget.Name {
-	case realtime:
+	case gaBoxRealtime:
 		err = g.realTimeUser(widget)
-	case totalMetric:
+	case gaBoxTotal:
 		err = g.totalMetric(widget)
-	case sessions:
+	case gaBarSessions:
 		err = g.barMetric(widget)
-	case users:
+	case gaBarUsers:
 		err = g.users(widget)
-	case barMetric:
+	case gaBar:
 		err = g.barMetric(widget)
-	case pages:
+	case gaTablePages:
 		err = g.table(widget, "Page")
-	case trafficSource:
+	case gaTableTrafficSources:
 		err = g.trafficSource(widget)
-	case newReturning:
+	case gaBarNewReturning:
 		err = g.NewVsReturning(widget)
-	case returning:
+	case gaBarReturning:
 		err = g.returningUsers(widget)
+	case gaBarPages:
+		err = g.barPages(widget)
 	default:
 		return errors.Errorf("can't find the widget %s", widget.Name)
 	}
@@ -161,6 +165,23 @@ func (g *gaWidget) returningUsers(widget Widget) (err error) {
 	widget.Options[optionMetric] = "users"
 	widget.Options[optionDimensions] = "user_returning"
 	widget.Options[optionTitle] = " Returning users "
+
+	return g.barMetric(widget)
+}
+
+func (g *gaWidget) barPages(widget Widget) (err error) {
+	if widget.Options == nil {
+		widget.Options = map[string]string{}
+	}
+	widget.Options[optionDimensions] = "page_path"
+	widget.Options[optionMetric] = "page_views"
+	widget.Options[optionTitle] = " Page views "
+
+	if _, ok := widget.Options[optionFilters]; !ok {
+		return errors.New("The widget ga.bar_pages require a filter (relative url of your page, i.e '/my-super-page/')")
+	}
+
+	widget.Options[optionTitle] += " - filter " + widget.Options[optionFilters] + " "
 
 	return g.barMetric(widget)
 }

@@ -11,8 +11,11 @@ import (
 )
 
 const (
-	gscPages      = "gsc.pages"
-	gscQueries    = "gsc.queries"
+	// widget config names
+	gscTablePages   = "gsc.table_pages"
+	gscTableQueries = "gsc.table_queries"
+
+	// format for every start date / end date
 	gscTimeFormat = "2006-01-02"
 )
 
@@ -44,9 +47,9 @@ func NewGscWidget(keyfile string, viewID string, address string) (*gscWidget, er
 func (s *gscWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	s.tui = tui
 	switch widget.Name {
-	case gscPages:
+	case gscTablePages:
 		err = s.pages(widget)
-	case gscQueries:
+	case gscTableQueries:
 		err = s.table(widget)
 	default:
 		return errors.Errorf("can't find the widget %s", widget.Name)
@@ -66,7 +69,7 @@ func (s *gscWidget) pages(widget Widget) error {
 }
 
 // table of the result of a Google Search Console query.
-// If no metric provided, default "query" with no filters.
+// If no metric provided, the default is "query" with no filters.
 func (s *gscWidget) table(widget Widget) (err error) {
 	sd := "7_days_ago"
 	if _, ok := widget.Options[optionStartDate]; ok {
@@ -117,7 +120,12 @@ func (s *gscWidget) table(widget Widget) (err error) {
 		}
 	}
 
-	title := fmt.Sprintf(" Search %s from %s to %s ", metric, startDate.Format(gscTimeFormat), endDate.Format(gscTimeFormat))
+	title := fmt.Sprintf(
+		" Search %s from %s to %s ",
+		metric,
+		startDate.Format(gscTimeFormat),
+		endDate.Format(gscTimeFormat),
+	)
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}

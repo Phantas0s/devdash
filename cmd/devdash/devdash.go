@@ -29,16 +29,6 @@ func main() {
 		fmt.Println(err)
 	}
 
-	// t := time.NewTicker(10 * time.Second)
-	// go func() {
-	// 	for range t.C {
-	// 		cfg, tui, err = loadFile(*file)
-	// 		if err != nil {
-	// 			fmt.Println(err)
-	// 		}
-	// 	}
-	// }()
-
 	ticker := time.NewTicker(time.Duration(cfg.General.Refresh) * time.Second)
 	go func() {
 		for range ticker.C {

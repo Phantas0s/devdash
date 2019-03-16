@@ -9,29 +9,32 @@ import (
 var debug bool = false
 
 const (
-	// option config names
+	// Widget config options
+
 	optionTitle      = "title"
 	optionTitleColor = "title_color"
 
-	// time
-	optionStartDate = "start_date"
-	optionEndDate   = "end_date"
-	optionGlobal    = "global"
+	// Time
+	optionStartDate  = "start_date"
+	optionEndDate    = "end_date"
+	optionTimePeriod = "time_period"
+	optionGlobal     = "global"
 
-	// For tables
+	// Tables
 	optionRowLimit  = "row_limit"
 	optionCharLimit = "character_limit"
 
 	// Metrics
 	optionDimension  = "dimension"
 	optionDimensions = "dimensions"
-	optionMetrics    = "metrics"
-	optionMetric     = "metric"
-	optionTimePeriod = "time_period"
 
+	optionMetrics = "metrics"
+	optionMetric  = "metric"
+
+	// Ordering
 	optionOrder = "order"
 
-	// filtering
+	// Filtering
 	optionMustContain = "must_contain"
 	optionFilters     = "filters"
 )

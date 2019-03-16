@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	ping         = "mon.ping"
-	availability = "mon.availability"
+	boxPing         = "mon.box_ping"
+	boxAvailability = "mon.box_availability"
 )
 
 type monitorWidget struct {
@@ -29,9 +29,9 @@ func (m *monitorWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	m.tui = tui
 
 	switch widget.Name {
-	case ping:
+	case boxPing:
 		err = m.pingWidget(widget)
-	case availability:
+	case boxAvailability:
 		err = m.availabilityWidget(widget)
 	default:
 		return errors.New("can't find the widget " + widget.Name)
