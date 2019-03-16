@@ -27,6 +27,8 @@ const (
 	years_ago = "years_ago"
 )
 
+// ConvertDates from config string values to normally formatted start date / end date.
+// "next_month" => 2019-01-01 / 2019-01-31
 func ConvertDates(
 	base time.Time,
 	startDate string,

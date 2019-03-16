@@ -155,10 +155,10 @@ func (c *Analytics) BarMetric(
 		dim = append(dim, &ga.Dimension{Name: v})
 	}
 
-	formater := format
+	formater := formatBar
 	for _, v := range dimensions {
 		if v == "user_returning" {
-			formater = formatReturning
+			formater = formatBarReturning
 		}
 		dim = append(dim, &ga.Dimension{Name: mapDimension(v)})
 	}
@@ -350,10 +350,16 @@ func (c *Analytics) NewVsReturning(
 	return formatNewReturning(resp.Reports, formater)
 }
 
-func format(reps []*ga.Report, dimFormater func(dim []string) string) (dim []string, u []int, err error) {
+func formatBar(reps []*ga.Report, dimFormater func(dim []string) string) (dim []string, u []int, err error) {
+	dimVal := map[string]int{}
 	for _, v := range reps {
 		for l := 0; l < len(v.Data.Rows); l++ {
-			dim = append(dim, dimFormater(v.Data.Rows[l].Dimensions))
+			d := dimFormater(v.Data.Rows[l].Dimensions)
+
+			// Add the dimension only if it was not added already.
+			if _, ok := dimVal[d]; !ok {
+				dim = append(dim, d)
+			}
 
 			for m := 0; m < len(v.Data.Rows[l].Metrics); m++ {
 				value := v.Data.Rows[l].Metrics[m].Values[0]
@@ -362,7 +368,50 @@ func format(reps []*ga.Report, dimFormater func(dim []string) string) (dim []str
 				if vu, err = strconv.ParseInt(value, 0, 0); err != nil {
 					return nil, nil, err
 				}
+
+				// To aggregate value with same dimension.
+				if _, ok := dimVal[d]; ok {
+					dimVal[d] += int(vu)
+					continue
+				}
+
+				dimVal[d] = int(vu)
 				u = append(u, int(vu))
+			}
+		}
+	}
+
+	// Aggregate value with same dimension.
+	for k, v := range dim {
+		u[k] = dimVal[v]
+	}
+
+	return dim, u, nil
+}
+
+// formatBarReturning format the special case of new / returning users for a bar vizualisation.
+func formatBarReturning(
+	reps []*ga.Report,
+	dimFormater func(dim []string) string,
+) (dim []string, u []int, err error) {
+	for _, v := range reps {
+		for l := 0; l < len(v.Data.Rows); l++ {
+			userType := v.Data.Rows[l].Dimensions[2]
+			if userType == returningVisitor {
+				dim = append(dim, dimFormater(v.Data.Rows[l].Dimensions))
+			}
+
+			for m := 0; m < len(v.Data.Rows[l].Metrics); m++ {
+				value := v.Data.Rows[l].Metrics[m].Values[0]
+
+				var vu int64
+				if vu, err = strconv.ParseInt(value, 0, 0); err != nil {
+					return nil, nil, err
+				}
+
+				if userType == returningVisitor {
+					u = append(u, int(vu))
+				}
 			}
 		}
 	}
@@ -421,35 +470,6 @@ func formatNewReturning(
 
 	u = append(u, new...)
 	u = append(u, ret...)
-
-	return dim, u, nil
-}
-
-func formatReturning(
-	reps []*ga.Report,
-	dimFormater func(dim []string) string,
-) (dim []string, u []int, err error) {
-	for _, v := range reps {
-		for l := 0; l < len(v.Data.Rows); l++ {
-			userType := v.Data.Rows[l].Dimensions[2]
-			if userType == returningVisitor {
-				dim = append(dim, dimFormater(v.Data.Rows[l].Dimensions))
-			}
-
-			for m := 0; m < len(v.Data.Rows[l].Metrics); m++ {
-				value := v.Data.Rows[l].Metrics[m].Values[0]
-
-				var vu int64
-				if vu, err = strconv.ParseInt(value, 0, 0); err != nil {
-					return nil, nil, err
-				}
-
-				if userType == returningVisitor {
-					u = append(u, int(vu))
-				}
-			}
-		}
-	}
 
 	return dim, u, nil
 }

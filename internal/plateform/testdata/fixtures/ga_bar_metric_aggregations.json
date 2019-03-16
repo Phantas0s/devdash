@@ -1,0 +1,132 @@
+{
+    "reports": [
+        {
+            "columnHeader": {
+                "dimensions": [
+                    "ga:month",
+                    "ga:day",
+                    "ga:pagePath"
+                ],
+                "metricHeader": {
+                    "metricHeaderEntries": [
+                        {
+                            "name": "ga:pageViews",
+                            "type": "INTEGER"
+                        }
+                    ]
+                }
+            },
+            "data": {
+                "isDataGolden": true,
+                "maximums": [
+                    {
+                        "values": [
+                            "38"
+                        ]
+                    }
+                ],
+                "minimums": [
+                    {
+                        "values": [
+                            "1"
+                        ]
+                    }
+                ],
+                "rowCount": 6,
+                "rows": [
+                    {
+                        "dimensions": [
+                            "03",
+                            "01",
+                            "/dry-principle-explained/"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "35"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "02",
+                            "/dry-principle-explained/"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "38"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "02",
+                            "/dry-principle-explained/?fbclid=IwAR333PPV225IUD9dl10M7aYSNVJfUUB5tsEsDJPM4evU_JZdG6uUwMmcfpU"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "1"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "02",
+                            "/search?q=cache:bncjN9Xib_kJ:https://web-techno.net/dry-principle-explained/+&cd=22&hl=en&ct=clnk&gl=us"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "1"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "03",
+                            "/dry-principle-explained/"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "28"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "03",
+                            "/search?q=cache:bncjN9Xib_kJ:https://web-techno.net/dry-principle-explained/+&cd=21&hl=en&ct=clnk&gl=us"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "1"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "totals": [
+                    {
+                        "values": [
+                            "104"
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

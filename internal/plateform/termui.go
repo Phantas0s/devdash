@@ -105,14 +105,14 @@ func (t *termUI) BarChart(
 	bc := termui.NewBarChart()
 	bc.BorderLabel = title
 	bc.Data = data
-	bc.BarGap = gap
 	bc.DataLabels = dimensions
 	bc.Height = height
 	bc.TextColor = termui.Attribute(fg)
-	bc.BarColor = termui.Attribute(barColor)
-	bc.NumColor = termui.Attribute(nc)
 	bc.BorderFg = termui.Attribute(bd)
 	bc.BarWidth = barWidth
+	bc.BarColor = termui.Attribute(barColor)
+	bc.BarGap = gap
+	bc.NumColor = termui.Attribute(nc)
 	bc.Buffer()
 
 	t.widgets = append(t.widgets, bc)
@@ -139,8 +139,6 @@ func (t *termUI) StackedBarChart(
 	bc.TextColor = termui.Attribute(fg)
 	bc.BorderFg = termui.Attribute(bd)
 	bc.NumColor = [8]termui.Attribute{termui.Attribute(nc)}
-	// bc.ShowScale = true
-	// bc.SetMax(10)
 
 	t.widgets = append(t.widgets, bc)
 }

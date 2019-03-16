@@ -27,6 +27,14 @@ func Test_Format(t *testing.T) {
 			formater:    func(dim []string) string { return dim[0] + "-" + dim[1] },
 			wantErr:     false,
 		},
+		{
+			name:        "custom bar metric with aggregation",
+			expectedVal: []int{35, 40, 29},
+			expectedDim: []string{"03-01", "03-02", "03-03"},
+			fixtureFile: "./testdata/fixtures/ga_bar_metric_aggregations.json",
+			formater:    func(dim []string) string { return dim[0] + "-" + dim[1] },
+			wantErr:     false,
+		},
 	}
 
 	for _, tc := range testCases {
@@ -38,7 +46,7 @@ func Test_Format(t *testing.T) {
 				t.Error(err)
 			}
 
-			dim, val, err := format(ret.Reports, tc.formater)
+			dim, val, err := formatBar(ret.Reports, tc.formater)
 			if (err != nil) != tc.wantErr {
 				t.Errorf("Error '%v' even if wantErr is %t", err, tc.wantErr)
 				return
@@ -151,7 +159,7 @@ func Test_FormatNewReturning(t *testing.T) {
 	}
 }
 
-func Test_FormatReturning(t *testing.T) {
+func Test_FormatBarReturning(t *testing.T) {
 	testCases := []struct {
 		name        string
 		expectedVal []int
@@ -179,7 +187,7 @@ func Test_FormatReturning(t *testing.T) {
 				t.Error(err)
 			}
 
-			dim, val, err := formatReturning(ret.Reports, tc.formater)
+			dim, val, err := formatBarReturning(ret.Reports, tc.formater)
 			if (err != nil) != tc.wantErr {
 				t.Errorf("Error '%v' even if wantErr is %t", err, tc.wantErr)
 				return

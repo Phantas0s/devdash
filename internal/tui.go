@@ -277,7 +277,7 @@ func (t *Tui) AddBarChart(
 	options map[string]string,
 ) {
 	// defaults
-	borderColor := blue
+	borderColor := defaultC
 	if _, ok := options[optionBorderColor]; ok {
 		borderColor = colorLookUp[options[optionBorderColor]]
 	}
@@ -287,7 +287,7 @@ func (t *Tui) AddBarChart(
 		textColor = colorLookUp[options[optionTextColor]]
 	}
 
-	numColor := black
+	numColor := defaultC
 	if _, ok := options[optionNumColor]; ok {
 		numColor = colorLookUp[options[optionNumColor]]
 	}
@@ -307,7 +307,7 @@ func (t *Tui) AddBarChart(
 		barWidth, _ = strconv.ParseInt(options[optionBarWidth], 0, 0)
 	}
 
-	var barColor = blue
+	var barColor = defaultC
 	if _, ok := options[optionBarColor]; ok {
 		barColor = colorLookUp[options[optionBarColor]]
 	}

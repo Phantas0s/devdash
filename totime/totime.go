@@ -1,3 +1,11 @@
+// totime is a simple package which return the start date and end date of a precise period of time.
+// The period of time can be this week, this month, previous week, previous month, the month in two months...
+//
+// Examples:
+// We are in January 2019, ThisMonth will return startDate = 2019-01-01, endDate = 2019-01-31
+// We are in January 2019, NextMonth will return startDate = 2019-02-01, endDate = 2019-02-28
+// We are in January 2019, NextMonth with count of 2 will return startDate = 2019-03-01, endDate = 2019-03-31
+
 package totime
 
 import (
