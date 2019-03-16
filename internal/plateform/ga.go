@@ -27,6 +27,7 @@ const (
 var mappingMetrics = map[string]string{
 	"sessions":          "ga:sessions",
 	"page_views":        "ga:pageViews",
+	"bounces":           "ga:bounces",
 	"entrances":         "ga:entrances",
 	"unique_page_views": "ga:uniquePageviews",
 	"users":             "ga:users",
@@ -302,7 +303,7 @@ func (c *Analytics) NewVsReturning(
 	endDate string,
 	metric string,
 	timePeriod string,
-) (dim []string, u []int, err error) {
+) (dim []string, new []int, ret []int, err error) {
 	// Add the time dimensions to the slice (index 1,2)
 	d := []*ga.Dimension{{Name: "ga:userType"}}
 	tm := mapTimePeriod(timePeriod)
@@ -335,7 +336,7 @@ func (c *Analytics) NewVsReturning(
 	resp, err := c.service.Reports.BatchGet(req).Do()
 
 	if err != nil {
-		return nil, nil, errors.Wrapf(
+		return nil, nil, nil, errors.Wrapf(
 			err,
 			"can't get pages data from google analytics with start data %s / end_date %s",
 			startDate,
@@ -446,9 +447,7 @@ func formatTable(
 func formatNewReturning(
 	reps []*ga.Report,
 	dimFormater func(dim []string) string,
-) (dim []string, u []int, err error) {
-	var new []int
-	var ret []int
+) (dim []string, new []int, ret []int, err error) {
 	for _, v := range reps {
 		for l := 0; l < len(v.Data.Rows); l++ {
 			if v.Data.Rows[l].Dimensions[0] == newVisitor {
@@ -460,7 +459,7 @@ func formatNewReturning(
 
 				var vu int64
 				if vu, err = strconv.ParseInt(value, 0, 0); err != nil {
-					return nil, nil, err
+					return nil, nil, nil, err
 				}
 				if v.Data.Rows[l].Dimensions[0] == newVisitor {
 					new = append(new, int(vu))
@@ -471,10 +470,7 @@ func formatNewReturning(
 		}
 	}
 
-	u = append(u, new...)
-	u = append(u, ret...)
-
-	return dim, u, nil
+	return dim, new, ret, nil
 }
 
 // The map functions map the properties of the application to the Google Analytics API params.

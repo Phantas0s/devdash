@@ -67,7 +67,8 @@ func Test_Format(t *testing.T) {
 func Test_FormatNewReturning(t *testing.T) {
 	testCases := []struct {
 		name        string
-		expectedVal []int
+		new         []int
+		ret         []int
 		fixtureFile string
 		expectedDim []string
 		formater    func([]string) string
@@ -75,7 +76,7 @@ func Test_FormatNewReturning(t *testing.T) {
 	}{
 		{
 			name: "format new vs returning",
-			expectedVal: []int{
+			new: []int{
 				141,
 				126,
 				302,
@@ -92,6 +93,8 @@ func Test_FormatNewReturning(t *testing.T) {
 				273,
 				164,
 				105,
+			},
+			ret: []int{
 				58,
 				40,
 				72,
@@ -135,14 +138,14 @@ func Test_FormatNewReturning(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			ret := &ga.GetReportsResponse{}
+			r := &ga.GetReportsResponse{}
 			fixtures := ReadFixtureFile(tc.fixtureFile, t)
-			err := json.Unmarshal(fixtures, ret)
+			err := json.Unmarshal(fixtures, r)
 			if err != nil {
 				t.Error(err)
 			}
 
-			dim, val, err := formatNewReturning(ret.Reports, tc.formater)
+			dim, new, ret, err := formatNewReturning(r.Reports, tc.formater)
 			if (err != nil) != tc.wantErr {
 				t.Errorf("Error '%v' even if wantErr is %t", err, tc.wantErr)
 				return
@@ -152,8 +155,12 @@ func Test_FormatNewReturning(t *testing.T) {
 				t.Errorf("Expected %v, actual %v", tc.expectedDim, dim)
 			}
 
-			if tc.wantErr == false && !reflect.DeepEqual(val, tc.expectedVal) {
-				t.Errorf("Expected %v, actual %v", tc.expectedVal, val)
+			if tc.wantErr == false && !reflect.DeepEqual(new, tc.new) {
+				t.Errorf("Expected %v, actual %v", tc.new, new)
+			}
+
+			if tc.wantErr == false && !reflect.DeepEqual(ret, tc.ret) {
+				t.Errorf("Expected %v, actual %v", tc.ret, ret)
 			}
 		})
 	}

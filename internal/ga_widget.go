@@ -16,6 +16,7 @@ const (
 	gaBoxTotal            = "ga.box_total"
 	gaBar                 = "ga.bar"
 	gaBarSessions         = "ga.bar_sessions"
+	gaBarBounces          = "ga.bar_bounces"
 	gaBarUsers            = "ga.bar_users"
 	gaBarReturning        = "ga.bar_returning"
 	gaBarNewReturning     = "ga.bar_new_returning"
@@ -69,6 +70,8 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 		err = g.returningUsers(widget)
 	case gaBarPages:
 		err = g.barPages(widget)
+	case gaBarBounces:
+		err = g.barBounces(widget)
 	default:
 		return errors.Errorf("can't find the widget %s", widget.Name)
 	}
@@ -182,6 +185,16 @@ func (g *gaWidget) barPages(widget Widget) (err error) {
 	}
 
 	widget.Options[optionTitle] += " - filter " + widget.Options[optionFilters] + " "
+
+	return g.barMetric(widget)
+}
+
+func (g *gaWidget) barBounces(widget Widget) (err error) {
+	if widget.Options == nil {
+		widget.Options = map[string]string{}
+	}
+	widget.Options[optionMetric] = "bounces"
+	widget.Options[optionTitle] += " Bounces "
 
 	return g.barMetric(widget)
 }
@@ -412,7 +425,7 @@ func (g *gaWidget) NewVsReturning(widget Widget) error {
 	}
 
 	// this should return new and ret instead of a unique slice val...
-	dim, val, err := g.analytics.NewVsReturning(
+	dim, new, ret, err := g.analytics.NewVsReturning(
 		g.viewID,
 		startDate.Format(gaTimeFormat),
 		endDate.Format(gaTimeFormat),
@@ -422,10 +435,6 @@ func (g *gaWidget) NewVsReturning(widget Widget) error {
 	if err != nil {
 		return err
 	}
-
-	s := len(val) / 2
-	ret := val[:s]
-	new := val[s:]
 
 	var data [8][]int
 	// need to fill data with []int containing 0
