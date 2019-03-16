@@ -148,10 +148,8 @@ func (c *Analytics) BarMetric(
 	timePeriod string,
 	filters []string,
 ) ([]string, []int, error) {
+	// Add the time dimension to the first two index of the slice (0, 1)
 	tm := mapTimePeriod(timePeriod)
-
-	// time dimensions (days, months, years).
-	// Take the first two index of the dimension slice (0 and 1).
 	dim := []*ga.Dimension{}
 	for _, v := range tm {
 		dim = append(dim, &ga.Dimension{Name: v})
@@ -303,7 +301,15 @@ func (c *Analytics) NewVsReturning(
 	startDate string,
 	endDate string,
 	metric string,
+	timePeriod string,
 ) (dim []string, u []int, err error) {
+	// Add the time dimensions to the slice (index 1,2)
+	d := []*ga.Dimension{{Name: "ga:userType"}}
+	tm := mapTimePeriod(timePeriod)
+	for _, v := range tm {
+		d = append(d, &ga.Dimension{Name: v})
+	}
+
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
@@ -314,14 +320,10 @@ func (c *Analytics) NewVsReturning(
 				Metrics: []*ga.Metric{
 					{Expression: mapMetric(metric)},
 				},
-				Dimensions: []*ga.Dimension{
-					{Name: "ga:userType"},
-					{Name: "ga:month"},
-					{Name: "ga:day"},
-				},
+				Dimensions: d,
 				OrderBys: []*ga.OrderBy{
 					{
-						FieldName: "ga:month",
+						FieldName: string(tm[0]),
 						SortOrder: "ASCENDING",
 					},
 				},

@@ -165,10 +165,7 @@ func (g *gaWidget) returningUsers(widget Widget) (err error) {
 	return g.barMetric(widget)
 }
 
-// users get the number of users the 7 last days on your website
 func (g *gaWidget) barMetric(widget Widget) error {
-	// defaults
-
 	sd := "7_days_ago"
 	if _, ok := widget.Options[optionStartDate]; ok {
 		sd = widget.Options[optionStartDate]
@@ -388,12 +385,18 @@ func (g *gaWidget) NewVsReturning(widget Widget) error {
 		}
 	}
 
+	timePeriod := "day"
+	if _, ok := widget.Options[optionTimePeriod]; ok {
+		timePeriod = strings.TrimSpace(widget.Options[optionTimePeriod])
+	}
+
 	// this should return new and ret instead of a unique slice val...
 	dim, val, err := g.analytics.NewVsReturning(
 		g.viewID,
 		startDate.Format(gaTimeFormat),
 		endDate.Format(gaTimeFormat),
 		metric,
+		timePeriod,
 	)
 	if err != nil {
 		return err
