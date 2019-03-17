@@ -25,12 +25,15 @@ const (
 )
 
 var mappingMetrics = map[string]string{
-	"sessions":          "ga:sessions",
-	"page_views":        "ga:pageViews",
-	"bounces":           "ga:bounces",
-	"entrances":         "ga:entrances",
-	"unique_page_views": "ga:uniquePageviews",
-	"users":             "ga:users",
+	"sessions":                 "ga:sessions",
+	"page_views":               "ga:pageViews",
+	"bounces":                  "ga:bounces",
+	"entrances":                "ga:entrances",
+	"unique_page_views":        "ga:uniquePageviews",
+	"users":                    "ga:users",
+	"session_duration":         "ga:sessionDuration",
+	"average_session_duration": "ga:avgSessionDuration",
+	"bounce_rate":              "ga:bounceRate",
 }
 
 var mappingTimePeriod = map[string][]string{
@@ -42,7 +45,7 @@ var mappingTimePeriod = map[string][]string{
 var mappingDimensions = map[string]string{
 	"page_path":      "ga:pagePath",
 	"traffic_source": "ga:source",
-	"user_returning": "ga:userType",
+	"user_type":      "ga:userType",
 }
 
 var mappingHeader = map[string]string{
@@ -297,15 +300,19 @@ func (c *Analytics) Table(
 }
 
 // NewVsReturning users.
-func (c *Analytics) NewVsReturning(
+func (c *Analytics) StackedBar(
 	viewID string,
 	startDate string,
 	endDate string,
 	metric string,
 	timePeriod string,
+	dimensions []string,
 ) (dim []string, new []int, ret []int, err error) {
 	// Add the time dimensions to the slice (index 1,2)
-	d := []*ga.Dimension{{Name: "ga:userType"}}
+	d := []*ga.Dimension{}
+	for _, v := range dimensions {
+		d = append(d, &ga.Dimension{Name: mapDimension(v)})
+	}
 	tm := mapTimePeriod(timePeriod)
 	for _, v := range tm {
 		d = append(d, &ga.Dimension{Name: v})
@@ -351,7 +358,7 @@ func (c *Analytics) NewVsReturning(
 	return formatNewReturning(resp.Reports, formater)
 }
 
-// formatBar vizualisation data, to return one slice of dimension and one slice of values.
+// formatBar vizualiser, to return one slice of dimension and one slice of values.
 // The two slices are equals in size.
 // If the same dimension is returned multiple time by the Google API, the data
 // is aggregated not to have duplicated dimensions.
@@ -370,7 +377,10 @@ func formatBar(reps []*ga.Report, dimFormater func(dim []string) string) (dim []
 				value := v.Data.Rows[l].Metrics[m].Values[0]
 
 				var vu int64
-				if vu, err = strconv.ParseInt(value, 0, 0); err != nil {
+				if strings.Contains(value, ".") {
+					f, _ := strconv.ParseFloat(value, 0)
+					vu = int64(f)
+				} else if vu, err = strconv.ParseInt(value, 0, 0); err != nil {
 					return nil, nil, err
 				}
 

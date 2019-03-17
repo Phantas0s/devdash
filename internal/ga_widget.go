@@ -65,7 +65,7 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	case gaTableTrafficSources:
 		err = g.trafficSource(widget)
 	case gaBarNewReturning:
-		err = g.NewVsReturning(widget)
+		err = g.newVsReturning(widget)
 	case gaBarReturning:
 		err = g.returningUsers(widget)
 	case gaBarPages:
@@ -166,7 +166,7 @@ func (g *gaWidget) returningUsers(widget Widget) (err error) {
 	}
 
 	widget.Options[optionMetric] = "users"
-	widget.Options[optionDimensions] = "user_returning"
+	widget.Options[optionDimensions] = "user_type"
 	widget.Options[optionTitle] = " Returning users "
 
 	return g.barMetric(widget)
@@ -372,7 +372,7 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 		table[i+1] = append(table[i+1], val[i]...)
 	}
 
-	// Filter out every empty columns because of mustContain conditional
+	// Filter out every empty columns
 	finalTable := [][]string{}
 	for _, v := range table {
 		if v != nil {
@@ -390,12 +390,22 @@ func (g *gaWidget) trafficSource(widget Widget) (err error) {
 		widget.Options = map[string]string{}
 	}
 
-	widget.Options["dimension"] = "traffic_source"
+	widget.Options[optionDimension] = "traffic_source"
 
 	return g.table(widget, "Source")
 }
 
-func (g *gaWidget) NewVsReturning(widget Widget) error {
+func (g *gaWidget) newVsReturning(widget Widget) error {
+	if widget.Options == nil {
+		widget.Options = map[string]string{}
+	}
+
+	widget.Options[optionDimensions] = "user_type"
+
+	return g.stackedBar(widget)
+}
+
+func (g *gaWidget) stackedBar(widget Widget) error {
 	// defaults
 	sd := "7_days_ago"
 	if _, ok := widget.Options[optionStartDate]; ok {
@@ -424,13 +434,21 @@ func (g *gaWidget) NewVsReturning(widget Widget) error {
 		timePeriod = strings.TrimSpace(widget.Options[optionTimePeriod])
 	}
 
+	dimensions := []string{}
+	if _, ok := widget.Options[optionDimensions]; ok {
+		if len(widget.Options[optionDimensions]) > 0 {
+			dimensions = strings.Split(strings.TrimSpace(widget.Options[optionDimensions]), ",")
+		}
+	}
+
 	// this should return new and ret instead of a unique slice val...
-	dim, new, ret, err := g.analytics.NewVsReturning(
+	dim, new, ret, err := g.analytics.StackedBar(
 		g.viewID,
 		startDate.Format(gaTimeFormat),
 		endDate.Format(gaTimeFormat),
 		metric,
 		timePeriod,
+		dimensions,
 	)
 	if err != nil {
 		return err
