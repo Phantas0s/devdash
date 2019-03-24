@@ -113,6 +113,7 @@ type drawer interface {
 		data [8][]int,
 		dimensions []string,
 		title string,
+		colors []uint16,
 		bd uint16,
 		fg uint16,
 		nc uint16,
@@ -336,6 +337,7 @@ func (t *Tui) AddStackedBarChart(
 	data [8][]int,
 	dimensions []string,
 	title string,
+	colors []uint16,
 	options map[string]string,
 ) {
 	// defaults
@@ -373,6 +375,7 @@ func (t *Tui) AddStackedBarChart(
 		data,
 		dimensions,
 		title,
+		colors,
 		borderColor,
 		textColor,
 		numColor,

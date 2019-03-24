@@ -461,30 +461,28 @@ func (g *gaWidget) stackedBar(widget Widget) error {
 			data[i] = append(data[i], 0)
 		}
 	}
+	data[0] = new
+	data[1] = ret
 
-	firstColor := blue
+	colors := []uint16{blue, green}
 	if _, ok := widget.Options[optionFirstColor]; ok {
-		firstColor = colorLookUp[widget.Options[optionFirstColor]]
+		colors[0] = colorLookUp[widget.Options[optionFirstColor]]
 	}
-	data[firstColor] = new
-
-	secondColor := green
 	if _, ok := widget.Options[optionSecondColor]; ok {
-		secondColor = colorLookUp[widget.Options[optionSecondColor]]
+		colors[1] = colorLookUp[widget.Options[optionSecondColor]]
 	}
-	data[secondColor] = ret
 
 	title := fmt.Sprintf(
 		" %s: Returning (%s) vs New (%s) ",
 		strings.Trim(strings.Title(metric), "_"),
-		colorStr(firstColor),
-		colorStr(secondColor),
+		colorStr(colors[0]),
+		colorStr(colors[1]),
 	)
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}
 
-	g.tui.AddStackedBarChart(data, dim, title, widget.Options)
+	g.tui.AddStackedBarChart(data, dim, title, colors, widget.Options)
 
 	return nil
 }
