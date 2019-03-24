@@ -8,8 +8,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// 8 colors
 const (
+	// Colors
 	defaultC uint16 = iota
 	black
 	red
@@ -178,13 +178,19 @@ type Tui struct {
 	instance manager
 }
 
+// Map the size of each column if t-shirt size provided (XXS to XL).
+// Otherwise use the value provided in the config directly.
 func MapSize(size string) (int, error) {
 	s := strings.ToLower(size)
 	if size, ok := sizeLookup[s]; ok {
 		return size, nil
 	}
+	si, err := strconv.ParseInt(size, 0, 0)
+	if err != nil {
+		return 0, err
+	}
 
-	return 0, errors.Errorf("size %s doesn't exists - please verify your configuration file", s)
+	return int(si), err
 }
 
 func (t *Tui) AddProjectTitle(title string, options map[string]string) (err error) {
@@ -193,12 +199,12 @@ func (t *Tui) AddProjectTitle(title string, options map[string]string) (err erro
 		size = options[optionSize]
 	}
 
-	textColor := blue
+	textColor := defaultC
 	if _, ok := options[optionTextColor]; ok {
 		textColor = colorLookUp[options[optionTextColor]]
 	}
 
-	borderColor := blue
+	borderColor := defaultC
 	if _, ok := options[optionBorderColor]; ok {
 		borderColor = colorLookUp[options[optionBorderColor]]
 	}

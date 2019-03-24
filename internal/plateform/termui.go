@@ -30,8 +30,6 @@ func NewTermUI(d bool) (*termUI, error) {
 	body.BgColor = termui.ThemeAttr("bg")
 	body.Width = termui.TermWidth()
 
-	debugPrint(body)
-
 	return &termUI{
 		body: body,
 		row:  []*termui.Row{},
@@ -187,10 +185,4 @@ func (t *termUI) Clean() {
 	t.body.Y = 0
 	t.body.BgColor = termui.ThemeAttr("bg")
 	t.body.Width = termui.TermWidth()
-}
-
-func debugPrint(v interface{}) {
-	if debug {
-		fmt.Println(v)
-	}
 }

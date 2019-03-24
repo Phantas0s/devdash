@@ -1,0 +1,54 @@
+---
+general:
+  refresh: 600
+  keys:
+    quit: "C-c"
+
+projects:
+  - name: Example
+    title_options:
+      border_color: default
+      text_color: default
+      size: XXL
+      bold: true
+    services:
+      google_analytics:
+        keyfile: goanalytics-dace33d3cede.json
+        view_id: 89379071
+      monitor:
+        address: "https://www.web-techno.net"
+    widgets:
+      - row:
+          - col:
+              size: "6"
+              elements:
+                - name: ga.bar_users
+                  options:
+                    title: "Example bar widget 1"
+                    start_date: "15_days_ago"
+                    end_date: "today"
+                - name: ga.bar_users
+                  options:
+                    title: "Example bar widget 2"
+                    start_date: "12_months_ago"
+                    end_date: "this_month"
+          - col:
+              size: "S"
+              elements:
+                - name: ga.bar_new_returning
+                  options:
+                    title: "Example bar widget 3"
+                    start_date: "3_days_ago"
+                    end_date: "today"
+                    metric: "users"
+                    height: 20
+          - col:
+              size: "XS"
+              elements:
+                - name: ga.box_real_time
+                - name: mon.box_availability
+                - name: ga.box_total
+                  options:
+                    startDate: today
+                    endDate: today
+                    metric: "users"

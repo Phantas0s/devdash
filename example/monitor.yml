@@ -1,0 +1,19 @@
+---
+general:
+  refresh: 600
+  keys:
+    quit: "C-c"
+
+projects:
+  - name: Quickstart
+    services:
+      monitor:
+        address: "https://www.web-techno.net"
+    widgets:
+      - row:
+          - col:
+              size: "M"
+              elements:
+                - name: mon.box_availability
+                  options:
+                    border_color: green
