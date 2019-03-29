@@ -2,4 +2,3 @@ vendor
 goanalytics-*
 cmd/devdash/devdash
 .devdash*
-README-PREPAR.md
