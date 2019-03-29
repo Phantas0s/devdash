@@ -1,4 +1,4 @@
-README
+Devdash
 
 DevDash is a terminal based dashboard for developers who wants to have all the up-to-date information they need about their projects, at one place.
 
@@ -81,7 +81,7 @@ Since a diagram is better than a wall of text, here we go:
 
 general : Global configuration of your dashboard
 projects : List of your project
-services: Configurations of every services you want to call
+services: Configurations of every services you want to use
 widgets: List of widgets you want to display.
 row: Create a row which contains columns
 col: Create a column which contains widgets
@@ -113,7 +113,7 @@ The widget's type and the service you need are directly in the name of the widge
 
 ## Google Services
 
-You can pull data from your Google Analytics and Google Search Console accounts directly to DevDash. 
+You can pull data from your Google Analytics and Google Search Console accounts directly to DevDash.
 In order to do so, you need to authorize DevDash to pull the data from there.
 
 I wrote tutorials how to do exactly that:
@@ -123,7 +123,7 @@ I wrote tutorials how to do exactly that:
 
 ### Google Analytics
 
-The basic configuration for Google Analytics' service is the following:
+#### Service configuration
 
 ```yml
     services:
@@ -134,23 +134,73 @@ The basic configuration for Google Analytics' service is the following:
 
 #### Widgets available
 
-| Name                     | Description                                                                     |
-|--------------------------|---------------------------------------------------------------------------------|
-| ga.box_real_time         | Number of users on the website now                                              |
-| ga.bar_sessions          | Count of sessions overtime                                                      |
-| ga.bar_bounces           | Count of bounce sessions overtime                                               |
-| ga.bar_users             | Count of users overtime                                                         |
-| ga.bar_returning         | Count of returning users overtime                                               |
-| ga.bar_new_returning     | Count of new and returning users overtime                                       |
-| ga.bar_pages             | Count of sessions (or any other metric like users) on specific page(s) overtime |
-| ga.table_pages           | Data about pages overtime                                                       |
-| ga.table_traffic_sources | Data about traffic sources overtime                                             |
-| ga.box_total             | Total of any metric overtime                                                    |
+| Name                       | Description                                                                       |
+| -------------------------- | --------------------------------------------------------------------------------- |
+| ga.box_real_time           | Number of users on the website now                                                |
+| ga.box_total               | Total of any metric on a given time period                                        |
+| ga.bar_sessions            | Count of sessions overtime                                                        |
+| ga.bar_bounces             | Count of bounce sessions overtime                                                 |
+| ga.bar_users               | Count of users overtime                                                           |
+| ga.bar_returning           | Count of returning users overtime                                                 |
+| ga.bar_new_returning       | Count of new and returning users overtime                                         |
+| ga.bar_pages               | Count of sessions (or any other metric like users) on specific page(s) overtime   |
+| ga.bar                     | Count of theoretically any metrics from Google Analytics overtime                 |
+| ga.table_pages             | Display choosed data about pages on a given time period                           |
+| ga.table_traffic_sources   | Display Data about traffic sources on a given time period                         |
+| ga.table                   | Display theoretically any metrics from Google Analytics on a given time period    |
+
+#### Options available
+
+##### Bar widgets
+
+###### Data Options
+
+| Name             | Description                                                                     | Required       | Default value     | Examples                             | Not used by   |
+|------------------|---------------------------------------------------------------------------------|----------------|-------------------|--------------------------------------|---------------|
+| start_date       | Start date of time period                                                       | no             | `7_days_ago`      | `2018-01-01`, `2_weeks_ago`          |               |
+| end_date         | End date of time period                                                         | no             | `today`           | `2018-01-31`, `2_weeks_ago`          |               |
+| time_period      | Time period represented by a bar (days, months, years)                          | no             | `days`            | `days`, `months`, `years`            |               |
+| metric           | Google analytics metric                                                         | no             | `sessions`        | `page_views`, `bounces`, `entrances` |               |
+| dimensions       | Google analytics dimensions. Multiple value possible separated with a comma (,) | no             | no dimension      | `2018-01-31`, `2_weeks_ago`          |               |
+| filters          | Query filter. `-` can be used in front to exclude instead of include            | no             |                   | `value`, `-value`                    |               |
+
+###### Display Options
+
+| Name             | Description                | Required | Default value             | Examples                        | Not used by   |
+| ---------------- | -------------------------- | -------- | -----------------         | ------------------------------- | ------------- |
+| title            | Widget title               | no       | `Depending on the widget` | `Users `                        |               |
+| border_color     | Border color of the widget | no       | `Default color`           | `yellow`, `red` (see colors)    |               |
+| height           | Widget height              | no       | `10`                      | `5`                             |               |
+| text_color       | Text color                 | no       | `Default color`           | `yellow`, `red` (see colors)    |               |
+| num_color        | Color of numerical data    | no       | `Default color`           | `yellow`, `red` (see colors)    |               |
+| bar_color        | Bar color                  | no       | `Default color`           | `yellow`, `red` (see colors)    |               |
+| bar_gap          | Space size between the bar | no       | `0`                       | `5`                             |               |
+| bar_width        | Bar width                  | no       | `6`                       | `5`                             |               |
+
+###### Table widgets
+
+#### Examples 
 
 Here are some examples. Click on the screenshot to see the config for each of them:
 
 [<img src="./example/img/monitor.png" alt="monitor_widget" type="image/png" width="45%">](./example/ga.yml)
 
+### Google Search Console
+
+#### Service configuration
+
+```yml
+    services:
+      google_search_console:
+        keyfile: goanalytics-abc123.json
+```
+
+#### Widgets available
+
+ | Name                       | Description                                                                       |
+ | -------------------------- | --------------------------------------------------------------------------------- |
+ | gsc.table_pages            | Display clicks, impressions, ctr, position for pages                              |
+ | gsc.table_queries          | Display clicks, impressions, ctr, position for queries                              |
 
 
 Authorize google search console api
