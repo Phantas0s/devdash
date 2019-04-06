@@ -1,0 +1,67 @@
+---
+general:
+  refresh: 600
+  keys:
+    quit: "C-c"
+
+projects:
+  - name: Example
+    title_options:
+      border_color: default
+      text_color: default
+      size: XXL
+      bold: true
+    services:
+      google_analytics:
+        keyfile: goanalytics-dace33d3cede.json
+        view_id: 89379071
+      monitor:
+        address: "https://www.web-techno.net"
+    widgets:
+      - row:
+          - col:
+              size: "6"
+              elements:
+                - name: ga.bar_users
+                  options:
+                    title: "Example bar widget 1"
+                    border_color: red
+                    text_color: yellow
+                    bar_width: 10
+                    bar_gap: 5
+                    start_date: "3_months_ago"
+                    end_date: "this_month"
+                    time_period: month
+          - col:
+              size: M
+              elements:
+                - name: ga.table_pages
+                  options:
+                    title: "Pages - Yesterday"
+                    start_date: "yesterday"
+                    end_date: "yesterday"
+                    metrics: "sessions"
+                    character_limit: 10
+                    row_limit: 2
+      - row:
+          - col:
+              size: "XXL"
+              elements:
+                - name: ga.table_traffic_sources
+                  options:
+                    title: "Traffic sources - Today"
+                    start_date: "today"
+                    end_date: "today"
+                    row_limit: 8
+      - row:
+          - col:
+              size: M
+              elements:
+                - name: ga.table_pages
+                  options:
+                    title: "Bounces - Yesterday"
+                    start_date: "yesterday"
+                    end_date: "yesterday"
+                    metrics: "ga:bounces"
+                    character_limit: 10
+                    row_limit: 2

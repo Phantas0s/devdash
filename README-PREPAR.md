@@ -166,24 +166,35 @@ I wrote tutorials how to do exactly that:
 
 ###### Display Options
 
-| Name             | Description                | Required | Default value             | Examples                        | Not used by   |
-| ---------------- | -------------------------- | -------- | -----------------         | ------------------------------- | ------------- |
-| title            | Widget title               | no       | `Depending on the widget` | `Users `                        |               |
-| border_color     | Border color of the widget | no       | `Default color`           | `yellow`, `red` (see colors)    |               |
-| height           | Widget height              | no       | `10`                      | `5`                             |               |
-| text_color       | Text color                 | no       | `Default color`           | `yellow`, `red` (see colors)    |               |
-| num_color        | Color of numerical data    | no       | `Default color`           | `yellow`, `red` (see colors)    |               |
-| bar_color        | Bar color                  | no       | `Default color`           | `yellow`, `red` (see colors)    |               |
-| bar_gap          | Space size between the bar | no       | `0`                       | `5`                             |               |
-| bar_width        | Bar width                  | no       | `6`                       | `5`                             |               |
+| Name             | Description                | Default value             | Examples                        | Not used by   |
+| ---------------- | -------------------------- | -----------------         | ------------------------------- | ------------- |
+| title            | Widget title               | `Depending on the widget` | `Users `                        |               |
+| border_color     | Border color of the widget | `Default color`           | `yellow`, `red` (see colors)    |               |
+| height           | Widget height              | `10`                      | `5`                             |               |
+| text_color       | Text color                 | `Default color`           | `yellow`, `red` (see colors)    |               |
+| num_color        | Color of numerical data    | `Default color`           | `yellow`, `red` (see colors)    |               |
+| bar_color        | Bar color                  | `Default color`           | `yellow`, `red` (see colors)    |               |
+| bar_gap          | Space size between the bar | `0`                       | `5`                             |               |
+| bar_width        | Bar width                  | `6`                       | `5`                             |               |
 
-###### Table widgets
+##### Table widgets
+
+###### Data Options
+
+| Name               | Description                                                                       | Default value                                     | Examples                               | Not used by     |
+|--------------------|-----------------------------------------------------------------------------------|---------------------------------------------------|----------------------------------------|-----------------|
+| start_date         | Start date of time period                                                         | `7_days_ago`                                      | `2018-01-01`, `2_weeks_ago`            |                 |
+| end_date           | End date of time period                                                           | `today`                                           | `2018-01-31`, `2_weeks_ago`            |                 |
+| metrics            | Google analytics metrics. Multiple values possible separated with a comma (,)     | "sessions,page_views,entrances,unique_page_views" | "bounces,sessions"                     |                 |
+| dimensions         | Google analytics dimensions. Multiple value possible separated with a comma (,)   | no dimension                                      | `2018-01-31`, `2_weeks_ago`            |                 |
+| filters            | Query filter. `-` can be used in front to exclude instead of include              |                                                   | `value`, `-value`                      |                 |
 
 #### Examples 
 
 Here are some examples. Click on the screenshot to see the config for each of them:
 
-[<img src="./example/img/monitor.png" alt="monitor_widget" type="image/png" width="45%">](./example/ga.yml)
+[<img src="./example/img/ga-1.png" alt="monitor_widget" type="image/png" >](./example/ga-1.yml)
+[<img src="./example/img/ga-2.png" alt="monitor_widget" type="image/png" >](./example/ga-2.yml)
 
 ### Google Search Console
 
@@ -201,6 +212,8 @@ Here are some examples. Click on the screenshot to see the config for each of th
  | -------------------------- | --------------------------------------------------------------------------------- |
  | gsc.table_pages            | Display clicks, impressions, ctr, position for pages                              |
  | gsc.table_queries          | Display clicks, impressions, ctr, position for queries                              |
+
+
 
 
 Authorize google search console api
