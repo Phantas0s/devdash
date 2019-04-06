@@ -77,27 +77,31 @@ Our dashboard looks a bit empty and boring for now, but it won't last long.
 
 Since a diagram is better than a wall of text, here we go:
 
-@startuml
+![Alt text](https://g.gravizo.com/source/custom_mark13?https%3A%2F%2Fraw.githubusercontent.com%2FTLmaK0%2Fgravizo%2Fmaster%2FREADME.md)
+<details> 
+<summary></summary>
+custom_mark13
+@startuml;
 
-general : Global configuration of your dashboard
-projects : List of your project
-services: Configurations of every services you want to use
-widgets: List of widgets you want to display.
-row: Create a row which contains columns
-col: Create a column which contains widgets
-size: Size of the column (T-shirt sizes or number 0-12)
-elements: Your actual widgets and their configuration
+general : Global configuration of your dashboard;
+projects : List of your project;
+services: Configurations of every services you want to use;
+widgets: List of widgets you want to display;
+row: Create a row which contains columns;
+col: Create a column which contains widgets;
+size: Size of the column (T-shirt sizes or number 0-12);
+elements: Your actual widgets and their configuration;
 
 
-general-->projects
-projects-->services
-projects--->widgets
-widgets-->row
-row-->col
-col-->size
-col--->elements
+general-->projects;
+projects-->services;
+projects--->widgets;
+widgets-->row;
+row-->col;
+col-->size;
+col--->elements;
 
-@enduml
+@enduml;
 
 # Widget displays
 
@@ -181,13 +185,13 @@ I wrote tutorials how to do exactly that:
 
 ###### Data Options
 
-| Name               | Description                                                                       | Default value                                     | Examples                               | Not used by     |
-|--------------------|-----------------------------------------------------------------------------------|---------------------------------------------------|----------------------------------------|-----------------|
-| start_date         | Start date of time period                                                         | `7_days_ago`                                      | `2018-01-01`, `2_weeks_ago`            |                 |
-| end_date           | End date of time period                                                           | `today`                                           | `2018-01-31`, `2_weeks_ago`            |                 |
-| metrics            | Google analytics metrics. Multiple values possible separated with a comma (,)     | "sessions,page_views,entrances,unique_page_views" | "bounces,sessions"                     |                 |
-| dimensions         | Google analytics dimensions. Multiple value possible separated with a comma (,)   | no dimension                                      | `2018-01-31`, `2_weeks_ago`            |                 |
-| filters            | Query filter. `-` can be used in front to exclude instead of include              |                                                   | `value`, `-value`                      |                 |
+| Name                 | Description                                                                         | Default value                                       | Examples                                 | Not used by       |
+| -------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------- | ---------------------------------------- | ----------------- |
+| start_date           | Start date of time period.                                                          | `7_days_ago`                                        | `2018-01-01`, `2_weeks_ago`              |                   |
+| end_date             | End date of time period.                                                            | `today`                                             | `2018-01-31`, `2_weeks_ago`              |                   |
+| metrics              | Google analytics metrics. Multiple values possible separated with a comma.          | "sessions,page_views,entrances,unique_page_views"   | "bounces,sessions"                       |                   |
+| dimensions           | Google analytics dimensions. Multiple value possible separated with a comma.        | no dimension                                        | `2018-01-31`, `2_weeks_ago`              |                   |
+| filters              | Query filter. Include by default. `-` can be used in front for exclusion.           |                                                     | `value`, `-value`                        |                   |
 
 #### Examples 
 
