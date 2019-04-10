@@ -315,6 +315,13 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 		title = widget.Options[optionTitle]
 	}
 
+	filters := []string{}
+	if _, ok := widget.Options[optionFilters]; ok {
+		if len(widget.Options[optionFilters]) > 0 {
+			filters = strings.Split(strings.TrimSpace(widget.Options[optionFilters]), ",")
+		}
+	}
+
 	headers, dim, val, err := g.analytics.Table(
 		g.viewID,
 		startDate.Format(gaTimeFormat),
@@ -324,6 +331,7 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 		dimension,
 		orders,
 		firstHeader,
+		filters,
 	)
 	if err != nil {
 		return err

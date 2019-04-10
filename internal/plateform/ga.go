@@ -254,11 +254,13 @@ func (c *Analytics) Table(
 	dimension string,
 	orders []string,
 	firstHeader string,
+	filters []string,
 ) (headers []string, dim []string, u [][]string, err error) {
 
 	dateRange := []*ga.DateRange{
 		{StartDate: startDate, EndDate: endDate},
 	}
+
 	if global {
 		dateRange = []*ga.DateRange{
 			{StartDate: earliestDate, EndDate: endDate},
@@ -280,11 +282,28 @@ func (c *Analytics) Table(
 		},
 	}
 
+	if len(filters) > 0 {
+		req.ReportRequests[0].DimensionFilterClauses = []*ga.DimensionFilterClause{
+			{
+				Filters: []*ga.DimensionFilter{
+					{
+						CaseSensitive: false,
+						DimensionName: mapDimension(dimension),
+						Expressions:   filters,
+						Not:           false,
+						Operator:      "PARTIAL",
+					},
+				},
+				Operator: "AND",
+			},
+		}
+	}
+
 	resp, err := c.service.Reports.BatchGet(req).Do()
 	if err != nil {
 		return nil, nil, nil, errors.Wrapf(
 			err,
-			"can't get pages data from google analytics with start data %s / end_date %s",
+			"can't get table data from google analytics with start data %s / end_date %s",
 			startDate,
 			endDate,
 		)
@@ -345,7 +364,7 @@ func (c *Analytics) StackedBar(
 	if err != nil {
 		return nil, nil, nil, errors.Wrapf(
 			err,
-			"can't get pages data from google analytics with start data %s / end_date %s",
+			"can't get stacked bar data from google analytics with start data %s / end_date %s",
 			startDate,
 			endDate,
 		)

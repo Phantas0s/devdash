@@ -246,17 +246,17 @@ func (t *Tui) AddTextBox(
 	options map[string]string,
 ) {
 	// defaults
-	borderColor := blue
+	borderColor := defaultC
 	if _, ok := options[optionBorderColor]; ok {
 		borderColor = colorLookUp[options[optionBorderColor]]
 	}
 
-	textColor := blue
+	textColor := defaultC
 	if _, ok := options[optionTextColor]; ok {
 		textColor = colorLookUp[options[optionTextColor]]
 	}
 
-	titleColor := green
+	titleColor := defaultC
 	if _, ok := options[optionTitleColor]; ok {
 		titleColor = colorLookUp[options[optionTitleColor]]
 	}
@@ -388,12 +388,12 @@ func (t *Tui) AddStackedBarChart(
 func (t *Tui) AddTable(data [][]string, title string, options map[string]string) {
 	// defaults
 
-	borderColor := blue
+	borderColor := defaultC
 	if _, ok := options[optionBorderColor]; ok {
 		borderColor = colorLookUp[options[optionBorderColor]]
 	}
 
-	textColor := blue
+	textColor := defaultC
 	if _, ok := options[optionTextColor]; ok {
 		textColor = colorLookUp[options[optionTextColor]]
 	}

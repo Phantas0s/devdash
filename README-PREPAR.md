@@ -77,31 +77,27 @@ Our dashboard looks a bit empty and boring for now, but it won't last long.
 
 Since a diagram is better than a wall of text, here we go:
 
-![Alt text](https://g.gravizo.com/source/custom_mark13?https%3A%2F%2Fraw.githubusercontent.com%2Phantas0s%2Fdevdash%2Fmaster%2FREADME-PREPAR.md)
-<details> 
-<summary></summary>
-custom_mark13
-@startuml;
+@startuml
 
-general : Global configuration of your dashboard;
-projects : List of your project;
-services: Configurations of every services you want to use;
-widgets: List of widgets you want to display;
-row: Create a row which contains columns;
-col: Create a column which contains widgets;
-size: Size of the column (T-shirt sizes or number 0-12);
-elements: Your actual widgets and their configuration;
+general : Global configuration of your dashboard
+projects : List of your project
+services: Configurations of every services you want to use
+widgets: List of widgets you want to display.
+row: Create a row which contains columns
+col: Create a column which contains widgets
+size: Size of the column (T-shirt sizes or number 0-12)
+elements: Your actual widgets and their configuration
 
 
-general-->projects;
-projects-->services;
-projects--->widgets;
-widgets-->row;
-row-->col;
-col-->size;
-col--->elements;
+general-->projects
+projects-->services
+projects--->widgets
+widgets-->row
+row-->col
+col-->size
+col--->elements
 
-@enduml;
+@enduml
 
 # Widget displays
 
@@ -159,14 +155,14 @@ I wrote tutorials how to do exactly that:
 
 ###### Data Options
 
-| Name             | Description                                                                     | Required       | Default value     | Examples                             | Not used by   |
-|------------------|---------------------------------------------------------------------------------|----------------|-------------------|--------------------------------------|---------------|
-| start_date       | Start date of time period                                                       | no             | `7_days_ago`      | `2018-01-01`, `2_weeks_ago`          |               |
-| end_date         | End date of time period                                                         | no             | `today`           | `2018-01-31`, `2_weeks_ago`          |               |
-| time_period      | Time period represented by a bar (days, months, years)                          | no             | `days`            | `days`, `months`, `years`            |               |
-| metric           | Google analytics metric                                                         | no             | `sessions`        | `page_views`, `bounces`, `entrances` |               |
-| dimensions       | Google analytics dimensions. Multiple value possible separated with a comma (,) | no             | no dimension      | `2018-01-31`, `2_weeks_ago`          |               |
-| filters          | Query filter. `-` can be used in front to exclude instead of include            | no             |                   | `value`, `-value`                    |               |
+| Name             | Description                                                                     | Default value     | Examples                             | Not used by   |
+|------------------|---------------------------------------------------------------------------------|-------------------|--------------------------------------|---------------|
+| start_date       | Start date of time period                                                       | `7_days_ago`      | `2018-01-01`, `2_weeks_ago`          |               |
+| end_date         | End date of time period                                                         | `today`           | `2018-01-31`, `2_weeks_ago`          |               |
+| time_period      | Time period represented by a bar (days, months, years)                          | `days`            | `days`, `months`, `years`            |               |
+| metric           | Google analytics metric                                                         | `sessions`        | `page_views`, `bounces`, `entrances` |               |
+| dimensions       | Google analytics dimensions. Multiple value possible separated with a comma (,) | no dimension      | `2018-01-31`, `2_weeks_ago`          |               |
+| filters          | Query filter. `-` can be used in front to exclude instead of include            |                   | `value`, `-value`                    |               |
 
 ###### Display Options
 
@@ -178,20 +174,49 @@ I wrote tutorials how to do exactly that:
 | text_color       | Text color                 | `Default color`           | `yellow`, `red` (see colors)    |               |
 | num_color        | Color of numerical data    | `Default color`           | `yellow`, `red` (see colors)    |               |
 | bar_color        | Bar color                  | `Default color`           | `yellow`, `red` (see colors)    |               |
-| bar_gap          | Space size between the bar | `0`                       | `5`                             |               |
-| bar_width        | Bar width                  | `6`                       | `5`                             |               |
+| bar_gap          | Space size between the bar | `0`                       | `5`, `10`                       |               |
+| bar_width        | Bar width                  | `6`                       | `5`, `10`                       |               |
 
 ##### Table widgets
 
 ###### Data Options
 
-| Name                 | Description                                                                         | Default value                                       | Examples                                 | Not used by       |
-| -------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------- | ---------------------------------------- | ----------------- |
-| start_date           | Start date of time period.                                                          | `7_days_ago`                                        | `2018-01-01`, `2_weeks_ago`              |                   |
-| end_date             | End date of time period.                                                            | `today`                                             | `2018-01-31`, `2_weeks_ago`              |                   |
-| metrics              | Google analytics metrics. Multiple values possible separated with a comma.          | "sessions,page_views,entrances,unique_page_views"   | "bounces,sessions"                       |                   |
-| dimensions           | Google analytics dimensions. Multiple value possible separated with a comma.        | no dimension                                        | `2018-01-31`, `2_weeks_ago`              |                   |
-| filters              | Query filter. Include by default. `-` can be used in front for exclusion.           |                                                     | `value`, `-value`                        |                   |
+| Name                 | Description                                                                         | Default value                                       | Examples                                     | Not used by       |
+| -------------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------- | ----------------------------------------     | ----------------- |
+| start_date           | Start date of time period.                                                          | `7_days_ago`                                        | `2018-01-01`, `2_weeks_ago`                  |                   |
+| end_date             | End date of time period.                                                            | `today`                                             | `2018-01-31`, `2_weeks_ago`                  |                   |
+| metrics              | Google analytics metrics. Multiple values possible separated with a comma.          | `sessions,page_views,entrances,unique_page_views`   | `bounces,sessions`, `entrances`              |                   |
+| dimension            | Google analytics dimension.                                                         | `page_path`                                         | `2018-01-31`, `2_weeks_ago`                  |                   |
+| orders               | Order of the result. Multiple value possible separated with a comma.                | `sessions desc`                                     | `sessions desc,page_views asc`. `page_views` |                   |
+| filters              | Query filter. Include by default. `-` can be used in front for exclusion.           |                                                     | `value`, `-value`                            |                   |
+
+###### Display Options
+
+| Name             | Description                | Default value             | Examples                        | Not used by   |
+| ---------------- | -------------------------- | -----------------         | ------------------------------- | ------------- |
+| title            | Widget's title             | `Depending on the widget` | `Users `                        |               |
+| border_color     | Widget's border color      | `Default color`           | `yellow`, `red` (see colors)    |               |
+| text_color       | Text color                 | `Default color`           | `yellow`, `red` (see colors)    |               |
+
+##### Box widgets
+
+###### Data Options
+
+| Name             | Description                                                                     | Default value     | Examples                             | Not used by   |
+|------------------|---------------------------------------------------------------------------------|-------------------|--------------------------------------|---------------|
+| start_date       | Start date of time period                                                       | `7_days_ago`      | `2018-01-01`, `2_weeks_ago`          |               |
+| end_date         | End date of time period                                                         | `today`           | `2018-01-31`, `2_weeks_ago`          |               |
+| metric           | Google analytics metric                                                         | `sessions`        | `page_views`, `bounces`, `entrances` |               |
+
+###### Display Options
+
+| Name             | Description                | Default value             | Examples                        | Not used by   |
+| ---------------- | -------------------------- | -----------------         | ------------------------------- | ------------- |
+| title            | Widget title               | `Depending on the widget` | `Users `                        |               |
+| title_color      | Widget's title color       | `Default color`           | `yellow`, `red` (see colors)    |               |
+| height           | Widget's height            | `10`                      | `5`                             |               |
+| border_color     | Widget's border color      | `Default color`           | `yellow`, `red` (see colors)    |               |
+| text_color       | Text color                 | `Default color`           | `yellow`, `red` (see colors)    |               |
 
 #### Examples 
 
@@ -215,10 +240,7 @@ Here are some examples. Click on the screenshot to see the config for each of th
  | Name                       | Description                                                                       |
  | -------------------------- | --------------------------------------------------------------------------------- |
  | gsc.table_pages            | Display clicks, impressions, ctr, position for pages                              |
- | gsc.table_queries          | Display clicks, impressions, ctr, position for queries                              |
-
-
-
+ | gsc.table_queries          | Display clicks, impressions, ctr, position for queries                            |
 
 Authorize google search console api
 
