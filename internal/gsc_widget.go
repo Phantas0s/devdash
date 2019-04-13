@@ -14,6 +14,7 @@ const (
 	// widget config names
 	gscTablePages   = "gsc.table_pages"
 	gscTableQueries = "gsc.table_queries"
+	gscTable        = "gsc.table"
 
 	// format for every start date / end date
 	gscTimeFormat = "2006-01-02"
@@ -51,6 +52,8 @@ func (s *gscWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 		err = s.pages(widget)
 	case gscTableQueries:
 		err = s.table(widget)
+	case gscTable:
+		err = s.table(widget)
 	default:
 		return errors.Errorf("can't find the widget %s", widget.Name)
 	}
@@ -86,9 +89,9 @@ func (s *gscWidget) table(widget Widget) (err error) {
 		return err
 	}
 
-	var elLimit int64 = 5
+	var rowLimit int64 = 5
 	if _, ok := widget.Options[optionRowLimit]; ok {
-		elLimit, err = strconv.ParseInt(widget.Options[optionRowLimit], 0, 0)
+		rowLimit, err = strconv.ParseInt(widget.Options[optionRowLimit], 0, 0)
 		if err != nil {
 			return errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
 		}
@@ -103,9 +106,9 @@ func (s *gscWidget) table(widget Widget) (err error) {
 		charLimit = int(c)
 	}
 
-	metric := "query"
-	if _, ok := widget.Options[optionMetric]; ok {
-		metric = widget.Options[optionMetric]
+	dimension := "query"
+	if _, ok := widget.Options[optionDimension]; ok {
+		dimension = widget.Options[optionDimension]
 	}
 
 	filters := ""
@@ -122,7 +125,7 @@ func (s *gscWidget) table(widget Widget) (err error) {
 
 	title := fmt.Sprintf(
 		" Search %s from %s to %s ",
-		metric,
+		dimension,
 		startDate.Format(gscTimeFormat),
 		endDate.Format(gscTimeFormat),
 	)
@@ -134,9 +137,9 @@ func (s *gscWidget) table(widget Widget) (err error) {
 		s.viewID,
 		startDate.Format(gscTimeFormat),
 		endDate.Format(gscTimeFormat),
-		elLimit,
+		rowLimit,
 		s.address,
-		metric,
+		dimension,
 		filters,
 	)
 	if err != nil {
@@ -144,7 +147,7 @@ func (s *gscWidget) table(widget Widget) (err error) {
 	}
 
 	table := make([][]string, len(results)+1)
-	table[0] = []string{mappingGscHeader[metric]}
+	table[0] = []string{mappingGscHeader[dimension]}
 	table[0] = append(table[0], metrics...)
 
 	for k, v := range results {

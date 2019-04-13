@@ -67,7 +67,7 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	case gaBarNewReturning:
 		err = g.newVsReturning(widget)
 	case gaBarReturning:
-		err = g.returningUsers(widget)
+		err = g.barReturning(widget)
 	case gaBarPages:
 		err = g.barPages(widget)
 	case gaBarBounces:
@@ -160,7 +160,7 @@ func (g *gaWidget) users(widget Widget) (err error) {
 	return g.barMetric(widget)
 }
 
-func (g *gaWidget) returningUsers(widget Widget) (err error) {
+func (g *gaWidget) barReturning(widget Widget) (err error) {
 	if widget.Options == nil {
 		widget.Options = map[string]string{}
 	}
