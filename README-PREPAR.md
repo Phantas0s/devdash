@@ -119,9 +119,9 @@ Click on the screenshot to see the config of these examples
 
 You can find more examples in the folder `example`.
 
-## Mix
+## Mix services
 
-[<img src="./example/img/mix-1.png" alt="monitor_widget" type="image/png" >](./example/ga-2.yml)
+[<img src="./example/img/mix-1.png" alt="monitor_widget" type="image/png" >](./example/mix-1.yml)
 
 # Structure of the config file
 
