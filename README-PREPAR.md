@@ -70,13 +70,13 @@ projects:
 You can: 
 
 * Copy past the config in a new file (`monitoring.yml`, for example)
-* Run DevDash: `devdash -config <config_filename>.yml`
+* Run DevDash: `devdash -config monitoring.yml`
 
 Congratulation! You just created your first dashboard. DevDash will simply send a request every `600` seconds to `https://www.web-techno.net` and display the response's status code.
 
 # Authorization and permissions
 
-Some services need some authorization for Devdash to pull the data into your shiny terminal. Here are the detailed step by step to create these permissions:
+Some services need credentials and permissions for Devdash to pull the data into your shiny terminal. Here are the detailed step by step to create these permissions:
 
 ## Google Data
 
@@ -108,12 +108,13 @@ Some services need some authorization for Devdash to pull the data into your shi
 
 # Configuration examples
 
-Click on the screenshot to see the config for each of them:
+Click on the screenshot to see the config of these examples
 
 ## Google Analytics
 
 [<img src="./example/img/ga-1.png" alt="monitor_widget" type="image/png" >](./example/ga-1.yml)
 [<img src="./example/img/ga-2.png" alt="monitor_widget" type="image/png" >](./example/ga-2.yml)
+[<img src="./example/img/mix-1.png" alt="monitor_widget" type="image/png" >](./example/ga-2.yml)
 
 ## Google Search Console
 
@@ -145,20 +146,16 @@ col--->elements
 
 @enduml
 
-# Configuration reference
-
-I encourage you to look at the examples and use the following as a reference only if you want to personalize your dashboard even further.
-
-## Widget displays
+# Widget displays
 
 There are three category of widgets:
 
-* box 
-* bar (bar diagram)
-* sbar (stacked bar)
-* table
+* `box` - a single value in a box
+* `bar` - a bar diagram with multiple values overtime
+* `table` - data in a tabble
 
-The widget's type and the service you need are directly in the name of the widgets themselves. For example, the widget `mon.box_availability` needs the `monitor` service configured to work, will display a `box` metric and will inform you about the `availability` of the project.
+
+# Configuration reference
 
 ## Monitoring
 
@@ -182,13 +179,13 @@ None.
 
 ##### Display Options
 
-| Name             | Description                | Default value             | Examples                        |
-| ---------------- | -------------------------- | -----------------         | ------------------------------- |
-| title            | Widget title               | `Depending on the widget` | `Users `                        |
-| height           | Widget's height            | `10`                      | `5`                             |
-| title_color      | Widget's title color       | `Default color`           | `yellow`, `red` (see colors)    |
-| border_color     | Widget's border color      | `Default color`           | `yellow`, `red` (see colors)    |
-| text_color       | Text color                 | `Default color`           | `yellow`, `red` (see colors)    |
+| Name             | Description  | Default value           | Examples                                |
+| ---------------- | -            | -----------------       | -------------------------------         |
+| title            | Title        | Depending on the widget | ` Users `                               |
+| height           | Height       | `10`                    | `5`                                     |
+| title_color      | Title color  | `Default color`         | `yellow`, `red` (see [colors](#colors)) |
+| border_color     | Border color | `Default color`         | `yellow`, `red` (see [colors](#colors)) |
+| text_color       | Text color   | `Default color`         | `yellow`, `red` (see [colors](#colors)) |
 
 ## Google Analytics
 
@@ -205,20 +202,20 @@ None.
 
 Here's the list of every widgets and their different configuration. 
 
-| Name                       | Description                                                                       |
-| -------------------------- | --------------------------------------------------------------------------------- |
-| ga.box_real_time           | Number of users on the website now                                                |
-| ga.box_total               | Total of any metric on a given time period                                        |
-| ga.bar_sessions            | Count of sessions overtime                                                        |
-| ga.bar_bounces             | Count of bounce sessions overtime                                                 |
-| ga.bar_users               | Count of users overtime                                                           |
-| ga.bar_returning           | Count of returning users overtime                                                 |
-| ga.bar_pages               | Count of sessions (or any other metric like users) on specific page(s) overtime   |
-| ga.bar                     | Count of theoretically any metrics from Google Analytics overtime                 |
-| ga.bar_new_returning       | Count of new and returning users overtime                                         |
-| ga.table_pages             | Display chosen data about pages on a given time period                            |
-| ga.table_traffic_sources   | Display Data about traffic sources on a given time period                         |
-| ga.table                   | Display theoretically any metrics from Google Analytics on a given time period    |
+| Name                     | Description                                                                       |
+| -                        | --------------------------------------------------------------------------------- |
+| ga.box_real_time         | Number of users on the website now                                                |
+| ga.box_total             | Total of any metric on a given time period                                        |
+| ga.bar_sessions          | Count of sessions overtime                                                        |
+| ga.bar_bounces           | Count of bounce sessions overtime                                                 |
+| ga.bar_users             | Count of users overtime                                                           |
+| ga.bar_returning         | Count of returning users overtime                                                 |
+| ga.bar_pages             | Count of sessions (or any other metric like users) on specific page(s) overtime   |
+| ga.bar                   | Count of theoretically any metrics from Google Analytics overtime                 |
+| ga.bar_new_returning     | Count of new and returning users overtime                                         |
+| ga.table_pages           | Display chosen data about pages on a given time period                            |
+| ga.table_traffic_sources | Display Data about traffic sources on a given time period                         |
+| ga.table                 | Display theoretically any metrics from Google Analytics on a given time period    |
 
 ### Widget Options
 
@@ -226,57 +223,59 @@ Here's the list of every widgets and their different configuration.
 
 ##### Data Options
 
-| Name               | Description                                                                       | Default value       | Examples                               | Not available for                                    |
-| ------------------ | --------------------------------------------------------------------------------- | ------------------- | -------------------------------------- | ---------------                                      |
-| start_date         | Start date of time period                                                         | `7_days_ago`        | `2018-01-01`, `2_weeks_ago`            |                                                      |
-| end_date           | End date of time period                                                           | `today`             | `2018-01-31`, `2_weeks_ago`            |                                                      |
-| time_period        | Time period represented by a bar (days, months, years)                            | `days`              | `days`, `months`, `years`              |                                                      |
-| metric             | Google analytics metric                                                           | `sessions`          | `page_views`, `bounces`, `entrances`   | `ga.bar_pages`, `ga.bar_returning`                   |
-| dimensions         | Google analytics dimensions. Multiple value possible separated with a comma (,)   |                     | `page_path`, `user_types`              | `ga.bar_pages`, `ga.bar_bounces`, `ga.bar_returning` |
-| filters            | Query filter. `-` can be used in front to exclude instead of include              |                     | `value`, `-value`                      |                                                      |
+| Name        | Description                                                                       | Default value       | Examples                               | Not available for                                    |
+| -           | --------------------------------------------------------------------------------- | ------------------- | -------------------------------------- | ---------------                                      |
+| start_date  | Start date of time period                                                         | `7_days_ago`        | `2018-01-01`, `2_weeks_ago`            |                                                      |
+| end_date    | End date of time period                                                           | `today`             | `2018-01-31`, `2_weeks_ago`            |                                                      |
+| time_period | Time period represented by a bar (days, months, years)                            | `days`              | `days`, `months`, `years`              |                                                      |
+| metric      | Google analytics metric                                                           | `sessions`          | `page_views`, `bounces`, `entrances`   | `ga.bar_pages`, `ga.bar_returning`                   |
+| dimensions  | Google analytics dimensions. Multiple value possible separated with a comma (,)   |                     | `page_path`, `user_types`              | `ga.bar_pages`, `ga.bar_bounces`, `ga.bar_returning` |
+| filters     | Query filter. `-` can be used in front to exclude instead of include              |                     | `value`, `-value`                      |                                                      |
 
 ##### Display Options
 
-| Name             | Description                | Default value             | Examples                        | 
-| ---------------- | -------------------------- | -----------------         | ------------------------------- |
-| title            | Widget title               | `Depending on the widget` | `Users `                        |
-| border_color     | Border color of the widget | `Default color`           | `yellow`, `red` (see colors)    |
-| height           | Widget height              | `10`                      | `5`                             |
-| text_color       | Text color                 | `Default color`           | `yellow`, `red` (see colors)    |
-| num_color        | Color of numerical data    | `Default color`           | `yellow`, `red` (see colors)    |
-| bar_color        | Bar color                  | `Default color`           | `yellow`, `red` (see colors)    |
-| bar_gap          | Space size between the bar | `0`                       | `5`, `10`                       |
-| bar_width        | Bar width                  | `6`                       | `5`, `10`                       |
+| Name         | Description                | Default value             | Examples                        |
+| -            | -------------------------- | -----------------         | ------------------------------- |
+| title        | Widget title               | `Depending on the widget` | `Users `                        |
+| border_color | Border color of the widget | `Default color`           | `yellow`, `red` (see colors)    |
+| height       | Widget height              | `10`                      | `5`                             |
+| title_color      | Title color  | `Default color`         | `yellow`, `red` (see [colors](#colors)) |
+| text_color   | Text color                 | `Default color`           | `yellow`, `red` (see colors)    |
+| num_color    | Color of numerical data    | `Default color`           | `yellow`, `red` (see colors)    |
+| bar_color    | Bar color                  | `Default color`           | `yellow`, `red` (see colors)    |
+| bar_gap      | Space size between the bar | `0`                       | `5`, `10`                       |
+| bar_width    | Bar width                  | `6`                       | `5`, `10`                       |
 
 #### Table widgets
 
 ##### Data Options
 
-| Name                 | Description                                                               | Default value                                     | Examples                                     | Not used by                |
-| -------------------- | ------------------------------------------------                          | ---                                               | ----------------------------------------     | -----------------          |
-| start_date           | Start date of time period                                                 | `7_days_ago`                                      | `2018-01-01`, `2_weeks_ago`                  |                            |
-| end_date             | End date of time period                                                   | `today`                                           | `2018-01-31`, `2_weeks_ago`                  |                            |
-| metrics              | Google analytics metrics. Multiple values possible separated with a comma | `sessions,page_views,entrances,unique_page_views` | `bounces,sessions`, `entrances`              |                            |
-| dimension            | Google analytics dimension                                                | `page_path`                                       | `2018-01-31`, `2_weeks_ago`                  | `ga.table_traffic_sources` |
-| orders               | Order of the result. Multiple value possible separated with a comma       | `sessions desc`                                   | `sessions desc,page_views asc`. `page_views` |                            |
-| filters              | Query filter (prefix `-` to exclude)                                      |                                                   | `value`, `-value`                            |                            |
-| row_limit            | Limit the row number                                                      | 5                                                 | 5, 100                                       |                            |
-| character_limit      | Limit the number of character of the dimension                            | 1000                                              | 100, 200                                     |                            |
+| Name            | Description                                                               | Default value                                     | Examples                                     | Not used by                |
+| -               | ------------------------------------------------                          | ---                                               | ----------------------------------------     | -----------------          |
+| start_date      | Start date of time period                                                 | `7_days_ago`                                      | `2018-01-01`, `2_weeks_ago`                  |                            |
+| end_date        | End date of time period                                                   | `today`                                           | `2018-01-31`, `2_weeks_ago`                  |                            |
+| metrics         | Google analytics metrics. Multiple values possible separated with a comma | `sessions,page_views,entrances,unique_page_views` | `bounces,sessions`, `entrances`              |                            |
+| dimension       | Google analytics dimension                                                | `page_path`                                       | `2018-01-31`, `2_weeks_ago`                  | `ga.table_traffic_sources` |
+| orders          | Order of the result. Multiple value possible separated with a comma       | `sessions desc`                                   | `sessions desc,page_views asc`. `page_views` |                            |
+| filters         | Query filter (prefix `-` to exclude)                                      |                                                   | `value`, `-value`                            |                            |
+| row_limit       | Limit the row number                                                      | 5                                                 | 5, 100                                       |                            |
+| character_limit | Limit the number of character of the dimension                            | 1000                                              | 100, 200                                     |                            |
 
 ##### Display Options
 
-| Name             | Description                | Default value             | Examples                        | Not used by   |
-| ---------------- | -------------------------- | -----------------         | ------------------------------- | ------------- |
-| title            | Widget's title             | `Depending on the widget` | `Users `                        |               |
-| border_color     | Widget's border color      | `Default color`           | `yellow`, `red` (see colors)    |               |
-| text_color       | Text color                 | `Default color`           | `yellow`, `red` (see colors)    |               |
+| Name         | Description           | Default value             | Examples                     | Not used by   |
+| -            | -                     | -----------------         | -                            | ------------- |
+| title        | Widget's title        | `Depending on the widget` | `Users `                     |               |
+| title_color      | Title color  | `Default color`         | `yellow`, `red` (see [colors](#colors)) |
+| border_color | Widget's border color | `Default color`           | `yellow`, `red` (see colors) |               |
+| text_color   | Text color            | `Default color`           | `yellow`, `red` (see colors) |               |
 
 #### Box widgets
 
 ##### Data Options
 
 | Name             | Description                                                                     | Default value     | Examples                             | 
-|------------------|---------------------------------------------------------------------------------|-------------------|--------------------------------------|
+|------------------| - |-------------------|--------------------------------------|
 | start_date       | Start date of time period                                                       | `7_days_ago`      | `2018-01-01`, `2_weeks_ago`          |
 | end_date         | End date of time period                                                         | `today`           | `2018-01-31`, `2_weeks_ago`          |
 | metric           | Google analytics metric                                                         | `sessions`        | `page_views`, `bounces`, `entrances` |
@@ -284,7 +283,7 @@ Here's the list of every widgets and their different configuration.
 ##### Display Options
 
 | Name             | Description                | Default value             | Examples                        |
-| ---------------- | -------------------------- | -----------------         | ------------------------------- |
+| ---------------- | - | -----------------         | ------------------------------- |
 | title            | Widget title               | `Depending on the widget` | `Users `                        |
 | height           | Widget's height            | `10`                      | `5`                             |
 | title_color      | Widget's title color       | `Default color`           | `yellow`, `red` (see colors)    |
@@ -304,11 +303,11 @@ Here's the list of every widgets and their different configuration.
 
 ### Widgets available
 
- | Name                       | Description                                                                           |
- | -------------------------- | ---------------------------------------------------------------------------------     |
- | gsc.table_pages            | Display clicks, impressions, ctr, position for pages                                  |
- | gsc.table_queries          | Display clicks, impressions, ctr, position for queries                                |
- | ga.table                   | Display theoretically any dimension from Google Search Console on a given time period |
+ | Name              | Description                                                                           |
+ | -                 | ---------------------------------------------------------------------------------     |
+ | gsc.table_pages   | Display clicks, impressions, ctr, position for pages                                  |
+ | gsc.table_queries | Display clicks, impressions, ctr, position for queries                                |
+ | ga.table          | Display theoretically any dimension from Google Search Console on a given time period |
 
 ### Widget Options
 
@@ -316,24 +315,24 @@ Here's the list of every widgets and their different configuration.
 
 ##### Data Options
 
-| Name                 | Description                                                                   | Default value                                       | Examples                                     | Not used by       |
-| -------------------- | --                                                                            | --------------------------------------------------- | ----------------------------------------     | ----------------- |
-| start_date           | Start date of time period                                                     | `7_days_ago`                                        | `2018-01-01`, `2_weeks_ago`                  |                   |
-| end_date             | End date of time period                                                       | `today`                                             | `2018-01-31`, `2_weeks_ago`                  |                   |
-| metrics              | Google Search Console metrics (multiple values possible separated with `,`)   | `clicks,impressions,ctr,position`                   | `query`, `page`                              | `gsc.table_pages` |
-| dimension            | Google Search Console dimension (multiple values possible separated with `,`) | `quert`,                                            | `2018-01-31`, `2_weeks_ago`                  |                   |
-| orders               | Order of the result. (multiple values possible separated with `,`)            | `sessions desc`                                     | `sessions desc,page_views asc`. `page_views` |                   |
-| filters              | Filter the default dimension (prefix `-` to exclude)                          |                                                     | `value`, `-super value`                      |                   |
-| row_limit            | Limit the row number                                                          | 5                                                   | 5, 100                                       |                   |
-| character_limit      | Limit the number of character of the dimension                                | 1000                                                | 100, 200                                     |                   |
+| Name            | Description                                                                   | Default value                     | Examples                                     | Not used by       |
+| _               | --                                                                            | -                                 | -                                            | ----------------- |
+| start_date      | Start date of time period                                                     | `7_days_ago`                      | `2018-01-01`, `2_weeks_ago`                  |                   |
+| end_date        | End date of time period                                                       | `today`                           | `2018-01-31`, `2_weeks_ago`                  |                   |
+| metrics         | Google Search Console metrics (multiple values possible separated with `,`)   | `clicks,impressions,ctr,position` | `query`, `page`                              | `gsc.table_pages` |
+| dimension       | Google Search Console dimension (multiple values possible separated with `,`) | `quert`,                          | `2018-01-31`, `2_weeks_ago`                  |                   |
+| orders          | Order of the result. (multiple values possible separated with `,`)            | `sessions desc`                   | `sessions desc,page_views asc`. `page_views` |                   |
+| filters         | Filter the default dimension (prefix `-` to exclude)                          |                                   | `value`, `-super value`                      |                   |
+| row_limit       | Limit the row number                                                          | 5                                 | 5, 100                                       |                   |
+| character_limit | Limit the number of character of the dimension                                | 1000                              | 100, 200                                     |                   |
 
 ##### Display Options
 
-| Name             | Description                | Default value             | Examples                        | Not used by   |
-| ---------------- | -------------------------- | -----------------         | ------------------------------- | ------------- |
-| title            | Widget's title             | `Depending on the widget` | `Users `                        |               |
-| border_color     | Widget's border color      | `Default color`           | `yellow`, `red` (see colors)    |               |
-| text_color       | Text color                 | `Default color`           | `yellow`, `red` (see colors)    |               |
+| Name         | Description                | Default value             | Examples                        | Not used by   |
+| -            | -------------------------- | -----------------         | ------------------------------- | ------------- |
+| title        | Widget's title             | `Depending on the widget` | `Users `                        |               |
+| border_color | Widget's border color      | `Default color`           | `yellow`, `red` (see colors)    |               |
+| text_color   | Text color                 | `Default color`           | `yellow`, `red` (see colors)    |               |
 
 # General references
 
@@ -374,3 +373,8 @@ You can indicate the width of a widget in number of column, or using the equival
 | xl   | 10                |
 | xxl  | 12                |
 
+# Contribute
+
+# Licence
+
+[Apache Licence 2.0](https://choosealicense.com/licenses/apache-2.0/)
