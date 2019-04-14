@@ -114,11 +114,14 @@ Click on the screenshot to see the config of these examples
 
 [<img src="./example/img/ga-1.png" alt="monitor_widget" type="image/png" >](./example/ga-1.yml)
 [<img src="./example/img/ga-2.png" alt="monitor_widget" type="image/png" >](./example/ga-2.yml)
-[<img src="./example/img/mix-1.png" alt="monitor_widget" type="image/png" >](./example/ga-2.yml)
 
 ## Google Search Console
 
 You can find more examples in the folder `example`.
+
+## Mix
+
+[<img src="./example/img/mix-1.png" alt="monitor_widget" type="image/png" >](./example/ga-2.yml)
 
 # Structure of the config file
 
