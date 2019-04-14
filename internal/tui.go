@@ -100,6 +100,7 @@ type drawer interface {
 		data []int,
 		dimensions []string,
 		title string,
+		tc uint16,
 		bd uint16,
 		fg uint16,
 		nc uint16,
@@ -113,6 +114,7 @@ type drawer interface {
 		data [8][]int,
 		dimensions []string,
 		title string,
+		tc uint16,
 		colors []uint16,
 		bd uint16,
 		fg uint16,
@@ -124,7 +126,8 @@ type drawer interface {
 
 	Table(
 		data [][]string,
-		bdLabel string,
+		title string,
+		tc uint16,
 		bd uint16,
 		fg uint16,
 	)
@@ -294,6 +297,11 @@ func (t *Tui) AddBarChart(
 		textColor = colorLookUp[options[optionTextColor]]
 	}
 
+	titleColor := defaultC
+	if _, ok := options[optionTitleColor]; ok {
+		titleColor = colorLookUp[options[optionTitleColor]]
+	}
+
 	numColor := defaultC
 	if _, ok := options[optionNumColor]; ok {
 		numColor = colorLookUp[options[optionNumColor]]
@@ -323,6 +331,7 @@ func (t *Tui) AddBarChart(
 		data,
 		dimensions,
 		title,
+		titleColor,
 		borderColor,
 		textColor,
 		numColor,
@@ -351,6 +360,11 @@ func (t *Tui) AddStackedBarChart(
 		textColor = colorLookUp[options[optionTextColor]]
 	}
 
+	titleColor := defaultC
+	if _, ok := options[optionTitleColor]; ok {
+		titleColor = colorLookUp[options[optionTitleColor]]
+	}
+
 	numColor := black
 	if _, ok := options[optionNumColor]; ok {
 		numColor = colorLookUp[options[optionNumColor]]
@@ -375,6 +389,7 @@ func (t *Tui) AddStackedBarChart(
 		data,
 		dimensions,
 		title,
+		titleColor,
 		colors,
 		borderColor,
 		textColor,
@@ -398,9 +413,15 @@ func (t *Tui) AddTable(data [][]string, title string, options map[string]string)
 		textColor = colorLookUp[options[optionTextColor]]
 	}
 
+	titleColor := defaultC
+	if _, ok := options[optionTitleColor]; ok {
+		titleColor = colorLookUp[options[optionTitleColor]]
+	}
+
 	t.instance.Table(
 		data,
 		title,
+		titleColor,
 		borderColor,
 		textColor,
 	)
