@@ -117,7 +117,7 @@ Click on the screenshot to see the config of these examples
 
 ## Google Search Console
 
-You can find more examples in the folder `example`.
+[<img src="./example/img/gsc-1.png" alt="monitor_widget" type="image/png" >](./example/gsc-1.yml)
 
 ## Mix services
 
@@ -293,7 +293,6 @@ Here's the list of every widgets and their different configuration.
 | border_color     | Widget's border color      | `Default color`           | `yellow`, `red` (see colors)    |
 | text_color       | Text color                 | `Default color`           | `yellow`, `red` (see colors)    |
 
-### Examples 
 ## Google Search Console
 
 ### Service configuration
@@ -375,6 +374,18 @@ You can indicate the width of a widget in number of column, or using the equival
 | l    | 8                 |
 | xl   | 10                |
 | xxl  | 12                |
+
+### Time range
+
+The `start_date` and `end_date` options accept dates following this format: `2016-01-02`.
+
+You can use as well this aliases, relatives to the actual day. This table suppose the actual day is `2019-04-01`
+
+| Name      | start_date               | end_date               |
+| --        | --                       |                        |
+| this_week | start of the actual week | end of the actual week |
+| last_week | start of the last week   | end of the last week   |
+
 
 # Contribute
 

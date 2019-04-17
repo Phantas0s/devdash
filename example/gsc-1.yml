@@ -1,0 +1,47 @@
+---
+general:
+  refresh: 600
+  keys:
+    quit: "C-c"
+
+projects:
+  - name: https://web-techno.net
+    title_options:
+      border_color: green
+      text_color: yellow
+      size: L
+      bold: true
+    services:
+      google_search_console:
+        keyfile: goanalytics-dace33d3cede.json
+        address: 'https://web-techno.net'
+    widgets:
+      - row:
+          - col:
+              size: 12
+              elements:
+                - name: gsc.table_queries
+                  options:
+                    title: " Last month queries "
+                    start_date: "last_month"
+                    end_date: "last_month"
+                    character_limit: 25
+                    row_limit: 10
+                    metrics: "clicks,impressions"
+                    border_color: green
+                    title_color: green
+                    text_color: green
+      - row:
+          - col:
+              size: 12
+              elements:
+                - name: gsc.table_pages
+                  options:
+                    title: " Last month pages "
+                    start_date: "last_month"
+                    end_date: "last_month"
+                    character_limit: 25
+                    row_limit: 10
+                    border_color: yellow
+                    title_color: yellow
+                    text_color: yellow
