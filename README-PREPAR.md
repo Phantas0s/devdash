@@ -130,13 +130,13 @@ Since a diagram is better than a wall of text, here we go:
 @startuml
 
 general : Global configuration of your dashboard
-projects : List of your project
+projects : List of your projects
 services: Configurations of every services you want to use
-widgets: List of widgets you want to display.
+widgets: List of widgets you want to display
 row: Create a row which contains columns
 col: Create a column which contains widgets
 size: Size of the column (T-shirt sizes or number 0-12)
-elements: Your actual widgets and their configuration
+elements: Your actual widgets and their configuration for the current column
 
 
 general-->projects
@@ -154,8 +154,8 @@ col--->elements
 There are three category of widgets:
 
 * `box` - a single value in a box
-* `bar` - a bar diagram with multiple values overtime
-* `table` - data in a tabble
+* `bar` - a bar diagram with multiple values overtime (dates on the x-axis)
+* `table` - data in a table
 
 
 # Configuration reference
@@ -183,7 +183,7 @@ None.
 ##### Display Options
 
 | Name             | Description  | Default value           | Examples                                |
-| ---------------- | -            | -----------------       | -------------------------------         |
+| ---------------- | --           | -----------------       | -------------------------------         |
 | title            | Title        | Depending on the widget | ` Users `                               |
 | height           | Height       | `10`                    | `5`                                     |
 | title_color      | Title color  | `Default color`         | `yellow`, `red` (see [colors](#colors)) |
@@ -254,7 +254,7 @@ Here's the list of every widgets and their different configuration.
 ##### Data Options
 
 | Name            | Description                                                               | Default value                                     | Examples                                     | Not used by                |
-| -               | ------------------------------------------------                          | ---                                               | ----------------------------------------     | -----------------          |
+|--               | ------------------------------------------------                          | ---                                               | ----------------------------------------     | -----------------          |
 | start_date      | Start date of time period                                                 | `7_days_ago`                                      | `2018-01-01`, `2_weeks_ago`                  |                            |
 | end_date        | End date of time period                                                   | `today`                                           | `2018-01-31`, `2_weeks_ago`                  |                            |
 | metrics         | Google analytics metrics. Multiple values possible separated with a comma | `sessions,page_views,entrances,unique_page_views` | `bounces,sessions`, `entrances`              |                            |
@@ -318,7 +318,7 @@ Here's the list of every widgets and their different configuration.
 ##### Data Options
 
 | Name            | Description                                                                   | Default value                     | Examples                                     | Not used by       |
-| _               | --                                                                            | -                                 | -                                            | ----------------- |
+| -               | --                                                                            | -                                 | -                                            | ----------------- |
 | start_date      | Start date of time period                                                     | `7_days_ago`                      | `2018-01-01`, `2_weeks_ago`                  |                   |
 | end_date        | End date of time period                                                       | `today`                           | `2018-01-31`, `2_weeks_ago`                  |                   |
 | metrics         | Google Search Console metrics (multiple values possible separated with `,`)   | `clicks,impressions,ctr,position` | `query`, `page`                              | `gsc.table_pages` |
@@ -342,8 +342,8 @@ Here's the list of every widgets and their different configuration.
 
 ### Colors
 
-The list of colors you can use with the widgets's options:
-
+The list of colors you can use with the widgets's options. 
+There displays depend on the colors configured for your terminal.
 
 | Name    |
 |---------|
@@ -357,13 +357,10 @@ The list of colors you can use with the widgets's options:
 | cyan    |
 | white   |
 
-These colors depend on the configuration of your terminal
-
 ### Size
 
 Devdash is based on a 12 columns grid.
-
-You can indicate the width of a widget in number of column, or using the equivalent t-shirt size as described below:
+You can indicate the width of a widget in number of column (1 to 12), or using the equivalent t-shirt size as described below:
 
 | Name | Number of columns |
 | --   | --                |
@@ -379,15 +376,37 @@ You can indicate the width of a widget in number of column, or using the equival
 
 The `start_date` and `end_date` options accept dates following this format: `2016-01-02`.
 
-You can use as well this aliases, relatives to the actual day. This table suppose the actual day is `2019-04-01`
+You can use as well aliases relative to the present day.
 
-| Name      | start_date               | end_date               |
-| --        | --                       |                        |
-| this_week | start of the actual week | end of the actual week |
-| last_week | start of the last week   | end of the last week   |
+The same alias can be a different date depending if it's used for the `start_date` or the `end_date` option.
 
+| Name         | start_date                                         | end_date                                          |
+|--------------|----------------------------------------------------|---------------------------------------------------|
+| today        | current day                                        | current day                                       |
+| yesterday    | yesterday                                          | yesterday                                         |
+| x_days_ago   | `x`th day before the current day                   | `x`th day before the current day                  |
+|--------------|----------------------------------------------------|---------------------------------------------------|
+| this_week    | first day of the actual week                       | last day of the actual week                       |
+| last_week    | first day of the last week                         | last day of the last week                         |
+| x_weeks_ago  | first day the `x`th week before the current week   | last day the `x`th week before the current week   |
+|--------------|----------------------------------------------------|---------------------------------------------------|
+| this_month   | first day of the actual month                      | last day of the actual month                      |
+| last_month   | first day of the last month                        | last day of the last month                        |
+| x_months_ago | first day the `x`th month before the current month | last day the `x`th month before the current month |
+|--------------|----------------------------------------------------|---------------------------------------------------|
+| this_year    | first day of the actual year                       | last day of the actual year                       |
+| last_year    | first day of the last year                         | last day of the last year                         |
+| x_years_ago  | first day the `x`th year before the current year   | last day the `x`th year before the current year   |
 
 # Contribute
+
+First of all, thanks a lot if you want to contribute to DevDash!
+
+I think the ["talk, then talk"](https://dave.cheney.net/tag/contributing) practice is pretty good to avoid misunderstandings and hours of work for nothing.
+
+Therefore:
+
+"Every new feature or bug fix should be discussed with the maintainer(s) of the project before work commences. It’s fine to experiment privately, but do not send a change without discussing it first."
 
 # Licence
 
