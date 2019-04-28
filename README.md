@@ -2,7 +2,7 @@
 
 DevDash is a dashboard in the terminal, for developers who want the most up-to-date data they need about their projects, at one place.
 
-# What DevDash can bring you
+# Why using DevDash?
 
 * All the metrics you specifically need, at one place.
 * A huge amount of flexibility:
