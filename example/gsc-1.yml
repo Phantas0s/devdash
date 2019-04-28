@@ -13,7 +13,7 @@ projects:
       bold: true
     services:
       google_search_console:
-        keyfile: goanalytics-dace33d3cede.json
+        keyfile: goanalytics-123.json
         address: 'https://web-techno.net'
     widgets:
       - row:

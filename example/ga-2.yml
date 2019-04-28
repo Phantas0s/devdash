@@ -13,8 +13,8 @@ projects:
       bold: true
     services:
       google_analytics:
-        keyfile: goanalytics-dace33d3cede.json
-        view_id: 89379071
+        keyfile: goanalytics-123.json
+        view_id: 12345678
       monitor:
         address: "https://www.web-techno.net"
     widgets:

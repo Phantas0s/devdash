@@ -14,7 +14,7 @@ projects:
     services:
       google_analytics:
         keyfile: goanalytics-123.json
-        view_id: 456
+        view_id: 12345678
       monitor:
         address: "https://www.web-techno.net"
     widgets:
