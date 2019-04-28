@@ -11,7 +11,7 @@ DevDash is a dashboard in the terminal, for developers who want the most up-to-d
   * Choose the color, the data and a lot of other things for each widget.
 * Pull data from Google Analytics and Google Search Console. More services to come!
 * Unlimited amount of different dashboards with different configurations.
-* Widgets are refreshed on a chosen time period, to have the most up-to-date data.
+* Widgets' data refreshed automatically.
 * It's in the terminal so it's cool!
 
 # Menu
