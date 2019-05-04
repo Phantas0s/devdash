@@ -52,3 +52,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/sparrc/go-ping"
+
+[[constraint]]
+  name = "github.com/google/go-github"
+  version = "25.0.2"

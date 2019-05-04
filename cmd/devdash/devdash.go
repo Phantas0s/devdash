@@ -94,6 +94,15 @@ func run(projects []Project, tui *internal.Tui) (err error) {
 			project.WithMonitor(monWidget)
 		}
 
+		githubService := p.Services.Github
+		if !githubService.empty() {
+			githubWidget, err := internal.NewGithubWidget(githubService.Token, githubService.Owner, githubService.Repository)
+			if err != nil {
+				return err
+			}
+			project.WithGithub(githubWidget)
+		}
+
 		err = project.Render(tui, *debug)
 		if err != nil {
 			return err

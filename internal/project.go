@@ -57,6 +57,7 @@ type project struct {
 	gaWidget      service
 	monitorWidget service
 	gscWidget     service
+	githubWidget  service
 }
 
 func NewProject(
@@ -83,6 +84,10 @@ func (p *project) WithMonitor(mon *monitorWidget) {
 
 func (p *project) WithGoogleSearchConsole(gsc *gscWidget) {
 	p.gscWidget = gsc
+}
+
+func (p *project) WithGithub(github *githubWidget) {
+	p.githubWidget = github
 }
 
 func (p *project) Render(tui *Tui, d bool) (err error) {
@@ -116,10 +121,18 @@ func (p *project) Render(tui *Tui, d bool) (err error) {
 					}
 				case "gsc":
 					if p.gscWidget == nil {
-						return errors.Errorf("can't use the widget %s without the service Search - please fix your configuration file.", w.Name)
+						return errors.Errorf("can't use the widget %s without the service Google Search Console - please fix your configuration file.", w.Name)
 					}
 
 					if err = p.gscWidget.CreateWidgets(w, tui); err != nil {
+						return err
+					}
+				case "github":
+					if p.githubWidget == nil {
+						return errors.Errorf("can't use the widget %s without the service Github - please fix your configuration file.", w.Name)
+					}
+
+					if err = p.githubWidget.CreateWidgets(w, tui); err != nil {
 						return err
 					}
 				default:
