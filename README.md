@@ -5,13 +5,13 @@ DevDash is a dashboard in the terminal, for developers who want the most up-to-d
 # Why using DevDash?
 
 * All the metrics you specifically need, at one place.
-* A huge amount of flexibility:
-  * Choose the widgets you want.
-  * Place your widgets where you want.
-  * Choose the color, the data and a lot of other things for each widget.
 * Pull data from Google Analytics and Google Search Console. More services to come!
 * Unlimited amount of different dashboards with different configurations.
 * Widgets' data refreshed automatically.
+* A huge amount of flexibility compared to other terminal dashboards:
+  * Choose the widgets you want.
+  * Place your widgets where you want.
+  * Choose the color, the data and a lot of other things for each widget.
 * It's in the terminal so it's cool!
 
 # Menu
@@ -32,12 +32,12 @@ DevDash is a dashboard in the terminal, for developers who want the most up-to-d
 
 ## Linux
 
-You can simply grab the [latest released binary file]() and put it wherever you want.
+You can simply grab the [latest released binary file](https://github.com/Phantas0s/devdash/releases/download/0.1.0/devdash) and put it wherever you want.
 
 Here's a simple way to download and put DevDash in `/usr/local/bin`, which should be part of your path.
 
 ```shell
-cd /usr/local/bin && sudo curl -LO https://github.com/Phantas0s/devdash/releases/download/v0.0.1/devdash && sudo chmod 755 devdash && cd -
+cd /usr/local/bin && sudo curl -LO https://github.com/Phantas0s/devdash/releases/download/0.1.0/devdash && sudo chmod 755 devdash && cd -
 ```
 
 ## Manual installation
