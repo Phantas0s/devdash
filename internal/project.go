@@ -37,6 +37,9 @@ const (
 	// Filtering
 	optionMustContain = "must_contain"
 	optionFilters     = "filters"
+
+	// Repository
+	optionRepository = "repository"
 )
 
 type service interface {
