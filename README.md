@@ -5,7 +5,7 @@ DevDash is a dashboard in the terminal, for developers who want the most up-to-d
 # Why using DevDash?
 
 * All the metrics you specifically need, at one place.
-* Pull data from Google Analytics and Google Search Console. More services to come!
+* Pull data from Github, Google Analytics or Google Search Console. More services to come!
 * Unlimited amount of different dashboards with different configurations.
 * Widgets' data refreshed automatically.
 * A huge amount of flexibility compared to other terminal dashboards:
@@ -92,6 +92,16 @@ Congratulation! You just created your first dashboard. DevDash will simply send 
 # Authorization and permissions
 
 Some services need credentials and permissions for DevDash to pull the data into your shiny terminal. Following the detailed step by step tutorial to create these permissions:
+
+## Github
+
+1. Go to your Github account in your favorite browser
+2. Click on your avatar (top right corner)
+3. Click on "Settings"
+4. Click on "Developer settings"
+5. Click on "Personal access tokens"
+6. You don't need to select any scope for DevDash, except if you want to read data from your private repositories.
+7. Generate a **new token you will add in your DevDash configuration**.
 
 ## Google Data
 
@@ -188,6 +198,40 @@ None.
 | border_color   | Border color   | `Default color`           | `yellow`, `red` (see [colors](#colors))   |
 | text_color     | Text color     | `Default color`           | `yellow`, `red` (see [colors](#colors))   |
 
+## Github
+
+### Service configuration
+
+```yml
+    services:
+      github:
+        token: myToken
+        owner: myName
+        repository: myCoolRepo
+```
+
+The repository is not mandatory. However, you will need to precise the repository for each widget fetching data for a specific one.
+
+### Widgets available
+
+| Name                        | Description                                     |
+| --------------------------- | ----------------------------------------------- |
+| github.box_stars            | Number of stars of a precise repository         |
+| github.box_watchers         | Number of watchers of a precise repository      |
+| github.box_open_issues      | Number of open issues of a precise repository   |
+| github.table_repositories   | Table of all repositories                       |
+
+### Widget Options
+
+#### Table Widgets
+
+##### Data Options
+
+| Name        | Description                | Default value   | Examples                                      | 
+| ----------- | -------------------------- | --------------- | --------------------------------------------- |
+| order       | Order of the list          | `updated`       | `created`, `updated`, `pushed`, `full_name`   |
+| row_limit   | Limit the number of rows   | 5               | 5, 100                                        |
+
 ## Google Analytics
 
 ### Service configuration
@@ -200,8 +244,6 @@ None.
 ```
 
 ### Widgets available
-
-Here's the list of every widgets and their different configuration. 
 
 | Name                           | Description                                                              |
 | ------------------------------ | ------------------------------------------------------------------------ |
