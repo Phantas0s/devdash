@@ -481,7 +481,7 @@ func Test_PrevYears(t *testing.T) {
 			wantErr:    false,
 		},
 		{
-			name:       "5 year in past",
+			name:       "5 years in past",
 			startDate:  "2013-01-01",
 			endDate:    "2013-12-31",
 			year:       2018,

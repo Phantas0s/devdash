@@ -59,7 +59,7 @@ func (g *Github) OpenIssues(repository string) (int, error) {
 }
 
 func (g *Github) ListRepo(limit int, order string) ([][]string, error) {
-	headers := []string{"name", "stars", "watchers", "forks"}
+	headers := []string{"name", "stars", "watchers", "forks", "open issues"}
 
 	rs, err := g.fetchAllRepo(order)
 	if err != nil {
@@ -78,6 +78,7 @@ func (g *Github) ListRepo(limit int, order string) ([][]string, error) {
 			repos[k] = append(repos[k], strconv.FormatInt(int64(v.GetStargazersCount()), 10))
 			repos[k] = append(repos[k], strconv.FormatInt(int64(v.GetSubscribersCount()), 10))
 			repos[k] = append(repos[k], strconv.FormatInt(int64(v.GetForksCount()), 10))
+			repos[k] = append(repos[k], strconv.FormatInt(int64(v.GetOpenIssuesCount()), 10))
 		}
 	}
 

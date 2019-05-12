@@ -1,6 +1,6 @@
 ![logo of devdash with a gopher](./doc/img/logo.jpg)
 
-DevDash is a dashboard in the terminal, for developers who want the most up-to-date data they need about their projects, at one place.
+DevDash terminal dashboard, for developers who want the most up-to-date data they need about their projects, at one place.
 
 # Why using DevDash?
 
@@ -48,11 +48,12 @@ Then, simply run `go get -u github.com/Phantas0s/devdash/cmd/devdash/`
 
 # Getting started
 
-For now, you can access three APIs (services) via DevDash:
+For now, you can access four APIs (services) via DevDash:
 
 * Google Analytics (ga)
 * Google Search Console (gsc)
 * A monitoring service (mon)
+* Github (github)
 
 To see DevDash in action and get familiar with the config file, you can easily configure the monitoring service:
 
@@ -214,12 +215,12 @@ The repository is not mandatory. However, you will need to precise the repositor
 
 ### Widgets available
 
-| Name                        | Description                                     |
-| --------------------------- | ----------------------------------------------- |
-| github.box_stars            | Number of stars of a precise repository         |
-| github.box_watchers         | Number of watchers of a precise repository      |
-| github.box_open_issues      | Number of open issues of a precise repository   |
-| github.table_repositories   | Table of all repositories                       |
+| Name                          | Description                                                                      |
+| ----------------------------- | -------------------------------------------------------------------------------- |
+| github.box_stars              | Number of stars of a precise repository                                          |
+| github.box_watchers           | Number of watchers of a precise repository                                       |
+| github.box_open_issues        | Number of open issues of a precise repository                                    |
+| github.table_repositories     | Table of all repositories with count of stars / watchers / forks / open issues   |
 
 ### Widget Options
 
@@ -231,6 +232,15 @@ The repository is not mandatory. However, you will need to precise the repositor
 | ----------- | -------------------------- | --------------- | --------------------------------------------- |
 | order       | Order of the list          | `updated`       | `created`, `updated`, `pushed`, `full_name`   |
 | row_limit   | Limit the number of rows   | 5               | 5, 100                                        |
+
+##### Display Options
+
+| Name             | Description    | Default value                 | Examples                                    |
+| ---------------- | -------------- | ----------------------------- | ------------------------------------------- |
+| title            | Title          | `Depending on the widget`     | `Users `                                    |
+| title_color      | Title color    | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| border_color     | Border color   | `Default color`               | `yellow`, `red` (see [colors](#colors))                |
+| text_color       | Text color     | `Default color`               | `yellow`, `red` (see [colors](#colors))                |
 
 ## Google Analytics
 
@@ -280,12 +290,12 @@ The repository is not mandatory. However, you will need to precise the repositor
 | Name           | Description                 | Default value               | Examples                                  |
 | -------------- | --------------------------- | --------------------------- | ----------------------------------------- |
 | title          | Title                       | `Depending on the widget`   | `Users `                                  |
-| border_color   | Border color                | `Default color`             | `yellow`, `red` (see colors)              |
+| border_color   | Border color                | `Default color`             | `yellow`, `red` (see [colors](#colors))              |
 | height         | Height                      | `10`                        | `5`                                       |
 | title_color    | Title color                 | `Default color`             | `yellow`, `red` (see [colors](#colors))   |
-| text_color     | Text color                  | `Default color`             | `yellow`, `red` (see colors)              |
-| num_color      | Color of numerical data     | `Default color`             | `yellow`, `red` (see colors)              |
-| bar_color      | Bar color                   | `Default color`             | `yellow`, `red` (see colors)              |
+| text_color     | Text color                  | `Default color`             | `yellow`, `red` (see [colors](#colors))              |
+| num_color      | Color of numerical data     | `Default color`             | `yellow`, `red` (see [colors](#colors))              |
+| bar_color      | Bar color                   | `Default color`             | `yellow`, `red` (see [colors](#colors))              |
 | bar_gap        | Gap size between the bars   | `0`                         | `5`, `10`                                 |
 | bar_width      | Bar width                   | `6`                         | `5`, `10`                                 |
 
@@ -310,8 +320,8 @@ The repository is not mandatory. However, you will need to precise the repositor
 | ---------------- | -------------- | ----------------------------- | ------------------------------------------- |
 | title            | Title          | `Depending on the widget`     | `Users `                                    |
 | title_color      | Title color    | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
-| border_color     | Border color   | `Default color`               | `yellow`, `red` (see colors)                |
-| text_color       | Text color     | `Default color`               | `yellow`, `red` (see colors)                |
+| border_color     | Border color   | `Default color`               | `yellow`, `red` (see [colors](#colors))                |
+| text_color       | Text color     | `Default color`               | `yellow`, `red` (see [colors](#colors))                |
 
 #### Box widgets
 
@@ -329,9 +339,9 @@ The repository is not mandatory. However, you will need to precise the repositor
 | ---------------- | ---------------- | --------------------------------- | ------------------------------ |
 | title            | Title            | `Depending on the widget`         | `Users `                       |
 | height           | Height           | `10`                              | `5`                            |
-| title_color      | Title color      | `Default color`                   | `yellow`, `red` (see colors)   |
-| border_color     | Border color     | `Default color`                   | `yellow`, `red` (see colors)   |
-| text_color       | Text color       | `Default color`                   | `yellow`, `red` (see colors)   |
+| title_color      | Title color      | `Default color`                   | `yellow`, `red` (see [colors](#colors))   |
+| border_color     | Border color     | `Default color`                   | `yellow`, `red` (see [colors](#colors))   |
+| text_color       | Text color       | `Default color`                   | `yellow`, `red` (see [colors](#colors))   |
 
 ## Google Search Console
 
@@ -373,8 +383,8 @@ The repository is not mandatory. However, you will need to precise the repositor
 | Name           | Description    | Default value               | Examples                       |
 | -------------- | -------------- | --------------------------- | ------------------------------ |
 | title          | Title          | `Depending on the widget`   | `Users `                       |
-| border_color   | Border color   | `Default color`             | `yellow`, `red` (see colors)   |
-| text_color     | text_color     | `Default color`             | `yellow`, `red` (see colors)   |
+| border_color   | Border color   | `Default color`             | `yellow`, `red` (see [colors](#colors))   |
+| text_color     | text_color     | `Default color`             | `yellow`, `red` (see [colors](#colors))   |
 # General references
 
 ## Options values
@@ -383,7 +393,7 @@ The repository is not mandatory. However, you will need to precise the repositor
 
 The list of colors you can use in DevDash configuration.
 
-The colors' display themselves depend what colors you configured for your terminal.
+Their display will depend of the colors you've configured for your terminal.
 
 | Name    |
 |---------|
