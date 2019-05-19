@@ -3,6 +3,7 @@ package internal
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/Phantas0s/devdash/internal/plateform"
 	"github.com/pkg/errors"
@@ -13,6 +14,8 @@ const (
 	githubBoxWatchers       = "github.box_watchers"
 	githubBoxOpenIssues     = "github.box_open_issues"
 	githubTableRepositories = "github.table_repositories"
+	githubTableBranches     = "github.table_branches"
+	githubTableIssues       = "github.table_issues"
 )
 
 type githubWidget struct {
@@ -42,6 +45,10 @@ func (g *githubWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 		err = g.boxOpenIssues(widget)
 	case githubTableRepositories:
 		err = g.tableRepo(widget)
+	case githubTableBranches:
+		err = g.tableBranches(widget)
+	case githubTableIssues:
+		err = g.tableIssues(widget)
 	default:
 		return errors.Errorf("can't find the widget %s for service github", widget.Name)
 	}
@@ -144,17 +151,82 @@ func (g *githubWidget) tableRepo(widget Widget) (err error) {
 		}
 	}
 
+	metrics := []string{"name", "stars", "watchers", "forks", "open issues"}
+	if _, ok := widget.Options[optionMetrics]; ok {
+		if len(widget.Options[optionMetrics]) > 0 {
+			metrics = strings.Split(strings.TrimSpace(widget.Options[optionMetrics]), ",")
+		}
+	}
+
 	order := "pushed"
 	if _, ok := widget.Options[optionOrder]; ok {
 		order = widget.Options[optionRowLimit]
 	}
 
-	rs, err := g.client.ListRepo(int(limit), order)
+	rs, err := g.client.ListRepo(int(limit), order, metrics)
 	if err != nil {
 		return err
 	}
 
 	g.tui.AddTable(rs, title, widget.Options)
+
+	return nil
+}
+
+func (g *githubWidget) tableBranches(widget Widget) (err error) {
+	var repo string
+	if _, ok := widget.Options[optionRepository]; ok {
+		repo = widget.Options[optionRepository]
+	}
+
+	title := " Github Branches "
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	var limit int64 = 5
+	if _, ok := widget.Options[optionRowLimit]; ok {
+		limit, err = strconv.ParseInt(widget.Options[optionRowLimit], 10, 0)
+		if err != nil {
+			return errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
+		}
+	}
+
+	bs, err := g.client.ListBranches(repo, int(limit))
+	if err != nil {
+		return err
+	}
+
+	g.tui.AddTable(bs, title, widget.Options)
+
+	return nil
+}
+
+func (g *githubWidget) tableIssues(widget Widget) (err error) {
+	var repo string
+	if _, ok := widget.Options[optionRepository]; ok {
+		repo = widget.Options[optionRepository]
+	}
+
+	title := " Github Issues "
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	var limit int64 = 5
+	if _, ok := widget.Options[optionRowLimit]; ok {
+		limit, err = strconv.ParseInt(widget.Options[optionRowLimit], 10, 0)
+		if err != nil {
+			return errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
+		}
+	}
+
+	is, err := g.client.ListIssues(repo, int(limit))
+	if err != nil {
+		return err
+	}
+
+	g.tui.AddTable(is, title, widget.Options)
 
 	return nil
 }

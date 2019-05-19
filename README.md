@@ -104,7 +104,7 @@ Some services need credentials and permissions for DevDash to pull the data into
 6. You don't need to select any scope for DevDash, except if you want to read data from your private repositories.
 7. Generate a **new token you will add in your DevDash configuration**.
 
-## Google Data
+## Google Analytics / Google Search Console
 
 Obviously, you need to have a Google Analytics account or Google Search account to access these two services.
 
@@ -148,6 +148,10 @@ You can click on each screenshot to see the config of these dashboards.
 ## Google Search Console
 
 [<img src="./example/img/gsc-1.png" alt="monitor_widget" type="image/png" >](./example/gsc-1.yml)
+
+## Git 
+
+[<img src="./example/img/git-1.png" alt="monitor_widget" type="image/png" >](./example/git-1.yml)
 
 ## Real life dashboard
 
@@ -220,7 +224,9 @@ The repository is not mandatory. However, you will need to precise the repositor
 | github.box_stars              | Number of stars of a precise repository                                          |
 | github.box_watchers           | Number of watchers of a precise repository                                       |
 | github.box_open_issues        | Number of open issues of a precise repository                                    |
-| github.table_repositories     | Table of all repositories with count of stars / watchers / forks / open issues   |
+| github.table_branches         | All branches of a precise repository                                             |
+| github.table_issues           | All issues (and their states) of a precise repository                            |
+| github.table_repositories     | Table of all repositories with count different information (see `metrics` option)|
 
 ### Widget Options
 
@@ -228,19 +234,20 @@ The repository is not mandatory. However, you will need to precise the repositor
 
 ##### Data Options
 
-| Name        | Description                | Default value   | Examples                                      | 
-| ----------- | -------------------------- | --------------- | --------------------------------------------- |
-| order       | Order of the list          | `updated`       | `created`, `updated`, `pushed`, `full_name`   |
-| row_limit   | Limit the number of rows   | 5               | 5, 100                                        |
+| Name            | Description                    | Default value                        | Examples                                          | Not available for                                  |
+| --------------- | ------------------------------ | ------------------------------------ | ------------------------------------------------- | -------------------------------------------------- |
+| row_limit       | Limit the number of rows       | 5                                    | 5, 100                                            |                                                    |
+| order           | Order of the list              | `updated`                            | `created`, `updated`, `pushed`, `full_name`       | `github.table_branches`, `github.table_issues`     |
+| metrics         | Column display                 | `stars,watchers,forks,open_issues`   | `stars,forks`                                     | `github.table_branches`, `github.table_issues`     |
 
 ##### Display Options
 
-| Name             | Description    | Default value                 | Examples                                    |
-| ---------------- | -------------- | ----------------------------- | ------------------------------------------- |
-| title            | Title          | `Depending on the widget`     | `Users `                                    |
-| title_color      | Title color    | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
-| border_color     | Border color   | `Default color`               | `yellow`, `red` (see [colors](#colors))                |
-| text_color       | Text color     | `Default color`               | `yellow`, `red` (see [colors](#colors))                |
+| Name               | Description      | Default value                   | Examples                                      |
+| ------------------ | ---------------- | ------------------------------- | --------------------------------------------- |
+| title              | Title            | `Depending on the widget`       | `Users `                                      |
+| title_color        | Title color      | `Default color`                 | `yellow`, `red` (see [colors](#colors))       |
+| border_color       | Border color     | `Default color`                 | `yellow`, `red` (see [colors](#colors))       |
+| text_color         | Text color       | `Default color`                 | `yellow`, `red` (see [colors](#colors))       |
 
 ## Google Analytics
 
@@ -290,12 +297,12 @@ The repository is not mandatory. However, you will need to precise the repositor
 | Name           | Description                 | Default value               | Examples                                  |
 | -------------- | --------------------------- | --------------------------- | ----------------------------------------- |
 | title          | Title                       | `Depending on the widget`   | `Users `                                  |
-| border_color   | Border color                | `Default color`             | `yellow`, `red` (see [colors](#colors))              |
+| border_color   | Border color                | `Default color`             | `yellow`, `red` (see [colors](#colors))   |
 | height         | Height                      | `10`                        | `5`                                       |
 | title_color    | Title color                 | `Default color`             | `yellow`, `red` (see [colors](#colors))   |
-| text_color     | Text color                  | `Default color`             | `yellow`, `red` (see [colors](#colors))              |
-| num_color      | Color of numerical data     | `Default color`             | `yellow`, `red` (see [colors](#colors))              |
-| bar_color      | Bar color                   | `Default color`             | `yellow`, `red` (see [colors](#colors))              |
+| text_color     | Text color                  | `Default color`             | `yellow`, `red` (see [colors](#colors))   |
+| num_color      | Color of numerical data     | `Default color`             | `yellow`, `red` (see [colors](#colors))   |
+| bar_color      | Bar color                   | `Default color`             | `yellow`, `red` (see [colors](#colors))   |
 | bar_gap        | Gap size between the bars   | `0`                         | `5`, `10`                                 |
 | bar_width      | Bar width                   | `6`                         | `5`, `10`                                 |
 
@@ -320,8 +327,8 @@ The repository is not mandatory. However, you will need to precise the repositor
 | ---------------- | -------------- | ----------------------------- | ------------------------------------------- |
 | title            | Title          | `Depending on the widget`     | `Users `                                    |
 | title_color      | Title color    | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
-| border_color     | Border color   | `Default color`               | `yellow`, `red` (see [colors](#colors))                |
-| text_color       | Text color     | `Default color`               | `yellow`, `red` (see [colors](#colors))                |
+| border_color     | Border color   | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| text_color       | Text color     | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
 
 #### Box widgets
 
@@ -335,13 +342,13 @@ The repository is not mandatory. However, you will need to precise the repositor
 
 ##### Display Options
 
-| Name             | Description      | Default value                     | Examples                       |
-| ---------------- | ---------------- | --------------------------------- | ------------------------------ |
-| title            | Title            | `Depending on the widget`         | `Users `                       |
-| height           | Height           | `10`                              | `5`                            |
-| title_color      | Title color      | `Default color`                   | `yellow`, `red` (see [colors](#colors))   |
-| border_color     | Border color     | `Default color`                   | `yellow`, `red` (see [colors](#colors))   |
-| text_color       | Text color       | `Default color`                   | `yellow`, `red` (see [colors](#colors))   |
+| Name               | Description        | Default value                       | Examples                                  |
+| ------------------ | ------------------ | ----------------------------------- | ----------------------------------------- |
+| title              | Title              | `Depending on the widget`           | `Users `                                  |
+| height             | Height             | `10`                                | `5`                                       |
+| title_color        | Title color        | `Default color`                     | `yellow`, `red` (see [colors](#colors))   |
+| border_color       | Border color       | `Default color`                     | `yellow`, `red` (see [colors](#colors))   |
+| text_color         | Text color         | `Default color`                     | `yellow`, `red` (see [colors](#colors))   |
 
 ## Google Search Console
 
@@ -380,11 +387,12 @@ The repository is not mandatory. However, you will need to precise the repositor
 
 ##### Display Options
 
-| Name           | Description    | Default value               | Examples                       |
-| -------------- | -------------- | --------------------------- | ------------------------------ |
-| title          | Title          | `Depending on the widget`   | `Users `                       |
-| border_color   | Border color   | `Default color`             | `yellow`, `red` (see [colors](#colors))   |
-| text_color     | text_color     | `Default color`             | `yellow`, `red` (see [colors](#colors))   |
+| Name             | Description      | Default value                 | Examples                                  |
+| ---------------- | ---------------- | ----------------------------- | ----------------------------------------- |
+| title            | Title            | `Depending on the widget`     | `Users `                                  |
+| border_color     | Border color     | `Default color`               | `yellow`, `red` (see [colors](#colors))   |
+| text_color       | text_color       | `Default color`               | `yellow`, `red` (see [colors](#colors))   |
+
 # General references
 
 ## Options values

@@ -9,6 +9,13 @@ import (
 	"golang.org/x/oauth2"
 )
 
+const (
+	githubRepoStars      = "stars"
+	githubRepoWatchers   = "watchers"
+	githubRepoForks      = "forks"
+	githubRepoOpenIssues = "open_issues"
+)
+
 type Github struct {
 	client *github.Client
 	repo   string
@@ -24,6 +31,7 @@ func NewGithubClient(token string, owner string, repo string) (*Github, error) {
 
 	// get go-github client
 	client := github.NewClient(tc)
+
 	return &Github{
 		client: client,
 		repo:   repo,
@@ -58,8 +66,36 @@ func (g *Github) OpenIssues(repository string) (int, error) {
 	return r.GetOpenIssuesCount(), nil
 }
 
-func (g *Github) ListRepo(limit int, order string) ([][]string, error) {
-	headers := []string{"name", "stars", "watchers", "forks", "open issues"}
+func (g *Github) ListBranches(repository string, limit int) ([][]string, error) {
+	headers := []string{"name"}
+
+	bs, err := g.fetchBranches(repository, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	if limit > len(bs) {
+		limit = len(bs)
+	}
+
+	branches := make([][]string, limit+1)
+	branches[0] = headers
+	for k, v := range bs {
+		n := "unknown"
+		if v.Name != nil {
+			n = *v.Name
+		}
+
+		if k < limit {
+			branches[k+1] = append(branches[k+1], n)
+		}
+	}
+
+	return branches, nil
+}
+
+func (g *Github) ListRepo(limit int, order string, metrics []string) ([][]string, error) {
+	headers := []string{"name"}
 
 	rs, err := g.fetchAllRepo(order)
 	if err != nil {
@@ -71,18 +107,84 @@ func (g *Github) ListRepo(limit int, order string) ([][]string, error) {
 	}
 
 	repos := make([][]string, limit+1)
+
+	stars := false
+	watchers := false
+	forks := false
+	openIssues := false
+
+	if contains(metrics, githubRepoStars) {
+		headers = append(headers, githubRepoStars)
+		stars = true
+	}
+	if contains(metrics, githubRepoWatchers) {
+		headers = append(headers, githubRepoWatchers)
+		watchers = true
+	}
+	if contains(metrics, githubRepoForks) {
+		headers = append(headers, githubRepoForks)
+		forks = true
+	}
+	if contains(metrics, githubRepoOpenIssues) {
+		headers = append(headers, githubRepoOpenIssues)
+		openIssues = true
+	}
+
 	repos[0] = headers
+
 	for k, v := range rs {
-		if k <= limit && k != 0 {
-			repos[k] = append(repos[k], v.GetName())
-			repos[k] = append(repos[k], strconv.FormatInt(int64(v.GetStargazersCount()), 10))
-			repos[k] = append(repos[k], strconv.FormatInt(int64(v.GetSubscribersCount()), 10))
-			repos[k] = append(repos[k], strconv.FormatInt(int64(v.GetForksCount()), 10))
-			repos[k] = append(repos[k], strconv.FormatInt(int64(v.GetOpenIssuesCount()), 10))
+		if k < limit {
+			repos[k+1] = append(repos[k+1], v.GetName())
+			if stars {
+				repos[k+1] = append(repos[k+1], strconv.FormatInt(int64(v.GetStargazersCount()), 10))
+			}
+			if watchers {
+				repos[k+1] = append(repos[k+1], strconv.FormatInt(int64(v.GetSubscribersCount()), 10))
+			}
+			if forks {
+				repos[k+1] = append(repos[k+1], strconv.FormatInt(int64(v.GetForksCount()), 10))
+			}
+			if openIssues {
+				repos[k+1] = append(repos[k+1], strconv.FormatInt(int64(v.GetOpenIssuesCount()), 10))
+			}
 		}
 	}
 
 	return repos, nil
+}
+
+func (g *Github) ListIssues(repository string, limit int) ([][]string, error) {
+	headers := []string{"name", "state"}
+
+	is, err := g.fetchIssues(repository, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	if limit > len(is) {
+		limit = len(is)
+	}
+
+	issues := make([][]string, limit+1)
+	issues[0] = headers
+	for k, v := range is {
+		n := "unknown"
+		if v.Title != nil {
+			n = *v.Title
+		}
+
+		state := "unknown"
+		if v.State != nil {
+			state = *v.State
+		}
+
+		if k < limit {
+			issues[k+1] = append(issues[k+1], n)
+			issues[k+1] = append(issues[k+1], state)
+		}
+	}
+
+	return issues, nil
 }
 
 // Fetch the whole repo per widget since we need to fetch the data during a regular time interval.
@@ -98,10 +200,52 @@ func (g *Github) fetchRepo(repository string) (*github.Repository, error) {
 
 	r, _, err := g.client.Repositories.Get(context.Background(), g.owner, repo)
 	if err != nil {
-		return nil, errors.Wrapf(err, "can't find repo %s of owner %s", repository, g.owner)
+		return nil, errors.Wrapf(err, "can't find repo %s of owner %s", repo, g.owner)
 	}
 
 	return r, nil
+}
+
+// Fetch the branches of a repo
+func (g *Github) fetchBranches(repository string, limit int) ([]*github.Branch, error) {
+	repo := g.repo
+	if repository != "" {
+		repo = repository
+	}
+
+	if repo == "" {
+		return nil, errors.New("you need to specify a repository in the github service or in the widget")
+	}
+
+	opt := github.ListOptions{PerPage: limit}
+	bs, _, err := g.client.Repositories.ListBranches(context.Background(), g.owner, repo, &opt)
+	if err != nil {
+		return nil, errors.Wrapf(err, "can't find branches of owner %s for repo %s", g.owner, repo)
+	}
+
+	return bs, nil
+}
+
+func (g *Github) fetchIssues(repository string, limit int) ([]*github.Issue, error) {
+	repo := g.repo
+	if repository != "" {
+		repo = repository
+	}
+
+	if repo == "" {
+		return nil, errors.New("you need to specify a repository in the github service or in the widget")
+	}
+
+	opt := github.IssueListByRepoOptions{
+		ListOptions: github.ListOptions{PerPage: limit},
+		State:       "all",
+	}
+	is, _, err := g.client.Issues.ListByRepo(context.Background(), g.owner, repo, &opt)
+	if err != nil {
+		return nil, errors.Wrapf(err, "can't find branches of owner %s for repo %s", g.owner, repo)
+	}
+
+	return is, nil
 }
 
 func (g *Github) fetchAllRepo(order string) ([]*github.Repository, error) {
@@ -113,4 +257,14 @@ func (g *Github) fetchAllRepo(order string) ([]*github.Repository, error) {
 	}
 
 	return r, nil
+}
+
+func contains(slice []string, value string) bool {
+	for _, v := range slice {
+		if v == value {
+			return true
+		}
+	}
+
+	return false
 }

@@ -1,0 +1,49 @@
+---
+general:
+  refresh: 600
+  keys:
+    quit: "C-c"
+
+projects:
+  - name: github
+    title_options:
+      border_color: default
+      text_color: default
+      size: XXL
+      bold: true
+    services:
+      github:
+        token: 123456789abcde12345av
+        owner: Phantas0s
+        repository: .dotfiles
+    widgets:
+      - row:
+          - col:
+              size: 12
+              elements:
+                - name: github.table_repositories
+                  options:
+                    metrics: stars,forks
+                    row_limit: 5
+                    title_color: blue
+                    text_color: yellow
+                    border_color: yellow
+                    order: created
+                - name: github.table_repositories
+                  options:
+                    row_limit: 5
+                    title_color: blue
+                    text_color: magenta
+                    border_color: magenta
+                - name: github.table_branches
+                  options:
+                    row_limit: 3
+                    title_color: blue
+                    text_color: green
+                    border_color: green
+                - name: github.table_issues
+                  options:
+                    row_limit: 10
+                    title_color: blue
+                    text_color: red
+                    border_color: red
