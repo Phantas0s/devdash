@@ -149,7 +149,7 @@ You can click on each screenshot to see the config of these dashboards.
 
 [<img src="./example/img/gsc-1.png" alt="monitor_widget" type="image/png" >](./example/gsc-1.yml)
 
-## Git 
+## Github 
 
 [<img src="./example/img/git-1.png" alt="monitor_widget" type="image/png" >](./example/git-1.yml)
 
