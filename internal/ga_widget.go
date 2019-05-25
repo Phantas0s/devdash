@@ -23,6 +23,7 @@ const (
 	gaBarPages            = "ga.bar_pages"
 	gaTablePages          = "ga.table_pages"
 	gaTableTrafficSources = "ga.table_traffic_sources"
+	gaTable               = "ga.table"
 
 	// format for every start date / end date
 	gaTimeFormat = "2006-01-02"
@@ -72,6 +73,8 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 		err = g.barPages(widget)
 	case gaBarBounces:
 		err = g.barBounces(widget)
+	case gaTable:
+		err = g.table(widget, widget.Options[optionDimension])
 	default:
 		return errors.Errorf("can't find the widget %s", widget.Name)
 	}
