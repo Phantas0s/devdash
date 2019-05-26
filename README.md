@@ -1,4 +1,4 @@
-![travis CLI](https://travis-ci.org/Phantas0s/devdash.svg?branch=master) [![codebeat badge](https://codebeat.co/badges/58a1c6c8-fc23-4f2d-bc6d-e804108ba289)](https://codebeat.co/projects/github-com-phantas0s-devdash-master)
+![travis CLI](https://travis-ci.org/Phantas0s/devdash.svg?branch=master) 
 ![logo of devdash with a gopher](./doc/img/logo.jpg)
 [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/T6T4W5K0)
 
