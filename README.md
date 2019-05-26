@@ -1,4 +1,4 @@
-https://travis-ci.org/Phantas0s/devdash.svg?branch=master
+![travis CLI](ttps://travis-ci.org/Phantas0s/devdash.svg?branch=master)
 
 ![logo of devdash with a gopher](./doc/img/logo.jpg)
 
