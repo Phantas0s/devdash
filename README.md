@@ -1,5 +1,6 @@
-![travis CLI](https://travis-ci.org/Phantas0s/devdash.svg?branch=master)[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/T6T4W5K0)
+![travis CLI](https://travis-ci.org/Phantas0s/devdash.svg?branch=master)
 ![logo of devdash with a gopher](./doc/img/logo.jpg)
+[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/T6T4W5K0)
 
 DevDash terminal dashboard, for developers who want the most up-to-date data they need about their projects, at one place.
 
