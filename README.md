@@ -467,8 +467,8 @@ Thanks to [MariaLetta](https://github.com/MariaLetta/free-gophers-pack) for the 
 
 DevDash was inspired from other open source projects:
 
-[wtf](https://github.com/wtfutil/wtf)
-[tdash](https://github.com/jessfraz/tdash)
+* [wtf](https://github.com/wtfutil/wtf)
+* [tdash](https://github.com/jessfraz/tdash)
 
 # Contribute
 
