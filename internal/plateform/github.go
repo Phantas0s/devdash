@@ -187,6 +187,61 @@ func (g *Github) ListIssues(repository string, limit int) ([][]string, error) {
 	return issues, nil
 }
 
+func (g *Github) ListPullRequests(repository string, limit int) ([][]string, error) {
+	headers := []string{"title", "state", "created at", "merged", "commits"}
+
+	is, err := g.fetchPullRequests(repository, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	if limit > len(is) {
+		limit = len(is)
+	}
+
+	prs := make([][]string, limit+1)
+	prs[0] = headers
+	for k, v := range is {
+		n := "unknown"
+		if v.Title != nil {
+			n = *v.Title
+		}
+
+		state := "unknown"
+		if v.State != nil {
+			state = *v.State
+		}
+
+		createdAt := "unknown"
+		if v.CreatedAt != nil {
+			t := *v.CreatedAt
+			createdAt = t.String()
+		}
+
+		merged := "unknown"
+		if v.Merged != nil {
+			m := *v.Merged
+			merged = strconv.FormatBool(m)
+		}
+
+		commits := "unknown"
+		if v.Commits != nil {
+			c := *v.Commits
+			commits = strconv.FormatInt(int64(c), 10)
+		}
+
+		if k < limit {
+			prs[k+1] = append(prs[k+1], n)
+			prs[k+1] = append(prs[k+1], state)
+			prs[k+1] = append(prs[k+1], createdAt)
+			prs[k+1] = append(prs[k+1], merged)
+			prs[k+1] = append(prs[k+1], commits)
+		}
+	}
+
+	return prs, nil
+}
+
 // Fetch the whole repo per widget since we need to fetch the data during a regular time interval.
 func (g *Github) fetchRepo(repository string) (*github.Repository, error) {
 	repo := g.repo
@@ -237,8 +292,8 @@ func (g *Github) fetchIssues(repository string, limit int) ([]*github.Issue, err
 	}
 
 	opt := github.IssueListByRepoOptions{
-		ListOptions: github.ListOptions{PerPage: limit},
 		State:       "all",
+		ListOptions: github.ListOptions{PerPage: limit},
 	}
 	is, _, err := g.client.Issues.ListByRepo(context.Background(), g.owner, repo, &opt)
 	if err != nil {
@@ -246,6 +301,24 @@ func (g *Github) fetchIssues(repository string, limit int) ([]*github.Issue, err
 	}
 
 	return is, nil
+}
+
+func (g *Github) fetchPullRequests(repository string, limit int) ([]*github.PullRequest, error) {
+	ctx := context.Background()
+	repo := g.repo
+	if repository != "" {
+		repo = repository
+	}
+
+	prs, _, err := g.client.PullRequests.List(ctx, g.owner, repo, &github.PullRequestListOptions{
+		State:       "all",
+		ListOptions: github.ListOptions{PerPage: limit},
+	})
+	if err != nil {
+		return nil, errors.Wrapf(err, "can't find all repo of owner %s", g.owner)
+	}
+
+	return prs, nil
 }
 
 func (g *Github) fetchAllRepo(order string) ([]*github.Repository, error) {

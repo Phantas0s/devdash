@@ -16,6 +16,7 @@ const (
 	githubTableRepositories = "github.table_repositories"
 	githubTableBranches     = "github.table_branches"
 	githubTableIssues       = "github.table_issues"
+	githubTablePullRequests = "github.table_pull_requests"
 )
 
 type githubWidget struct {
@@ -49,6 +50,8 @@ func (g *githubWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 		err = g.tableBranches(widget)
 	case githubTableIssues:
 		err = g.tableIssues(widget)
+	case githubTablePullRequests:
+		err = g.tablePullRequests(widget)
 	default:
 		return errors.Errorf("can't find the widget %s for service github", widget.Name)
 	}
@@ -222,6 +225,35 @@ func (g *githubWidget) tableIssues(widget Widget) (err error) {
 	}
 
 	is, err := g.client.ListIssues(repo, int(limit))
+	if err != nil {
+		return err
+	}
+
+	g.tui.AddTable(is, title, widget.Options)
+
+	return nil
+}
+
+func (g *githubWidget) tablePullRequests(widget Widget) (err error) {
+	var repo string
+	if _, ok := widget.Options[optionRepository]; ok {
+		repo = widget.Options[optionRepository]
+	}
+
+	title := " Github Pull Requests "
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	var limit int64 = 5
+	if _, ok := widget.Options[optionRowLimit]; ok {
+		limit, err = strconv.ParseInt(widget.Options[optionRowLimit], 10, 0)
+		if err != nil {
+			return errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
+		}
+	}
+
+	is, err := g.client.ListPullRequests(repo, int(limit))
 	if err != nil {
 		return err
 	}
