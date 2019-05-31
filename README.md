@@ -1,4 +1,4 @@
-![travis CLI](https://travis-ci.org/Phantas0s/devdash.svg?branch=master&style=for-the-badge) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ec1e19b08f3b40d19f3acaf93e3e186b)](https://www.codacy.com/app/Phantas0s/devdash?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Phantas0s/devdash&amp;utm_campaign=Badge_Grade) [![Hits-of-Code](https://hitsofcode.com/github/phantas0s/devdash)](https://hitsofcode.com/view/github/phantas0s/devdash) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+![travis CLI](https://travis-ci.org/Phantas0s/devdash.svg?branch=master&style=for-the-badge) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ec1e19b08f3b40d19f3acaf93e3e186b)](https://www.codacy.com/app/Phantas0s/devdash?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Phantas0s/devdash&amp;utm_campaign=Badge_Grade) [![Hits-of-Code](https://hitsofcode.com/github/phantas0s/devdash)](https://hitsofcode.com/view/github/phantas0s/devdash) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![GitSpo Mentions](https://gitspo.com/badges/mentions/Phantas0s/devdash?style=flat-square)](https://gitspo.com/mentions/Phantas0s/devdash)
 ![logo of devdash with a gopher](./doc/img/logo.jpg) 
 [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/T6T4W5K0)
 
@@ -112,7 +112,7 @@ Obviously, you need to have a Google Analytics account or Google Search account 
 
 ### Downloading the authorization JSON file 
 
-1. Go to [https://console.developers.google.com/apis/api/webmasters.googleapis.com/credentials](Google APIs Credentials).
+1. Go to [Google APIs Credentials](https://console.developers.google.com/apis/api/webmasters.googleapis.com/credentials).
 2. Select `Service account key`.
 3. Create a new service account.
 4. Select the role `Project -> Viewer` for a read access only.
