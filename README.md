@@ -112,7 +112,7 @@ Obviously, you need to have a Google Analytics account or Google Search account 
 
 ### Downloading the authorization JSON file 
 
-1. Go to [https://console.developers.google.com/apis/api/webmasters.googleapis.com/credentials](Google APIs Credentials).
+1. Go to [Google APIs Credentials](https://console.developers.google.com/apis/api/webmasters.googleapis.com/credentials).
 2. Select `Service account key`.
 3. Create a new service account.
 4. Select the role `Project -> Viewer` for a read access only.
