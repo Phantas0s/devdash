@@ -3,7 +3,9 @@ package plateform
 import (
 	"context"
 	"strconv"
+	"time"
 
+	"github.com/Phantas0s/devdash/totime"
 	"github.com/google/go-github/github"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
@@ -261,6 +263,49 @@ func (g *Github) TrafficView(repository string, days int) ([]string, []int, erro
 	return dimension, counts, nil
 }
 
+// TODO refactoring / finding a better solution
+func (g *Github) CommitCounts(repository string, weeks_ago int) ([]string, []int, error) {
+	c, err := g.fetchCommitCount(repository)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// reverse the count of commits (from ASC to DESC)
+	for i := len(c.Owner)/2 - 1; i >= 0; i-- {
+		opp := len(c.Owner) - 1 - i
+		c.Owner[i], c.Owner[opp] = c.Owner[opp], c.Owner[i]
+	}
+
+	counts := []int{}
+	for _, v := range c.Owner {
+		counts = append(counts, v)
+	}
+
+	dimension := []string{}
+	for k, _ := range c.Owner {
+		sw, _ := totime.ThisWeek(time.Now())
+		sd, _ := totime.PrevWeeks(sw, k)
+		// Week begins the sunday... so we go one day back before Monday.
+		sd = sd.AddDate(0, 0, -1)
+		dimension = append(dimension, sd.Format("01-02"))
+	}
+
+	// reverse the count of commits (from DESC to ASC)
+	for i := len(counts)/2 - 1; i >= 0; i-- {
+		opp := len(counts) - 1 - i
+		counts[i], counts[opp] = counts[opp], counts[i]
+	}
+
+	// reverse the dimension (from DESC to ASC)
+	for i := len(dimension)/2 - 1; i >= 0; i-- {
+		opp := len(dimension) - 1 - i
+		dimension[i], dimension[opp] = dimension[opp], dimension[i]
+	}
+
+	// Week displayed configurable (from 2nd week to 32th week for example).
+	return dimension[25:], counts[25:], nil
+}
+
 // Fetch the whole repo per widget since we need to fetch the data during a regular time interval.
 func (g *Github) fetchRepo(repository string) (*github.Repository, error) {
 	repo := g.repo
@@ -281,6 +326,26 @@ func (g *Github) fetchRepo(repository string) (*github.Repository, error) {
 
 }
 
+// TODO possibility to filter by ALL or OWNER
+func (g *Github) fetchCommitCount(repository string) (*github.RepositoryParticipation, error) {
+	repo := g.repo
+	if repository != "" {
+		repo = repository
+	}
+
+	if repo == "" {
+		return nil, errors.New("you need to specify a repository in the github service or in the widget")
+	}
+
+	p, _, err := g.client.Repositories.ListParticipation(context.Background(), g.owner, repo)
+	if err != nil {
+		return nil, errors.Wrapf(err, "can't find repo %s of owner %s", repo, g.owner)
+	}
+
+	return p, nil
+}
+
+// TODO data can be breakdown by day or week
 func (g *Github) fetchTrafficViews(repository string) (*github.TrafficViews, error) {
 	repo := g.repo
 	if repository != "" {
@@ -299,7 +364,6 @@ func (g *Github) fetchTrafficViews(repository string) (*github.TrafficViews, err
 	return t, nil
 }
 
-// Fetch the branches of a repo
 func (g *Github) fetchBranches(repository string, limit int) ([]*github.Branch, error) {
 	repo := g.repo
 	if repository != "" {
@@ -319,6 +383,7 @@ func (g *Github) fetchBranches(repository string, limit int) ([]*github.Branch, 
 	return bs, nil
 }
 
+// Possibility to add options to filter quite a lot
 func (g *Github) fetchIssues(repository string, limit int) ([]*github.Issue, error) {
 	repo := g.repo
 	if repository != "" {
@@ -341,6 +406,7 @@ func (g *Github) fetchIssues(repository string, limit int) ([]*github.Issue, err
 	return is, nil
 }
 
+// TODO add sorting
 func (g *Github) fetchPullRequests(repository string, limit int) ([]*github.PullRequest, error) {
 	ctx := context.Background()
 	repo := g.repo
@@ -359,6 +425,7 @@ func (g *Github) fetchPullRequests(repository string, limit int) ([]*github.Pull
 	return prs, nil
 }
 
+// TODO possibility to add filters / ordering
 func (g *Github) fetchAllRepo(order string) ([]*github.Repository, error) {
 	ctx := context.Background()
 

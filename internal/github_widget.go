@@ -18,6 +18,7 @@ const (
 	githubTableIssues       = "github.table_issues"
 	githubTablePullRequests = "github.table_pull_requests"
 	githubBarTrafficView    = "github.bar_traffic_view"
+	githubBarCommits        = "github.bar_commits"
 )
 
 type githubWidget struct {
@@ -55,6 +56,8 @@ func (g *githubWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 		err = g.tablePullRequests(widget)
 	case githubBarTrafficView:
 		err = g.barTrafficView(widget)
+	case githubBarCommits:
+		err = g.barCommits(widget)
 	default:
 		return errors.Errorf("can't find the widget %s for service github", widget.Name)
 	}
@@ -278,6 +281,27 @@ func (g *githubWidget) barTrafficView(widget Widget) (err error) {
 	}
 
 	dim, counts, err := g.client.TrafficView(repo, 0)
+	if err != nil {
+		return err
+	}
+
+	g.tui.AddBarChart(counts, dim, title, widget.Options)
+
+	return nil
+}
+
+func (g *githubWidget) barCommits(widget Widget) (err error) {
+	var repo string
+	if _, ok := widget.Options[optionRepository]; ok {
+		repo = widget.Options[optionRepository]
+	}
+
+	title := " Github Commit Per Week "
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	dim, counts, err := g.client.CommitCounts(repo, 0)
 	if err != nil {
 		return err
 	}
