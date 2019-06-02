@@ -133,61 +133,51 @@ func Test_NextWeeks(t *testing.T) {
 
 func Test_PrevWeeks(t *testing.T) {
 	testCases := []struct {
-		name         string
-		startDate    string
-		endDate      string
-		year         int
-		month        time.Month
-		day          int
-		weekInFuture int
-		wantErr      bool
+		name       string
+		startDate  string
+		endDate    string
+		year       int
+		month      time.Month
+		day        int
+		weekInPast int
+		wantErr    bool
 	}{
 		{
-			name:         "monday",
-			startDate:    "2019-03-04",
-			endDate:      "2019-03-10",
-			year:         2019,
-			month:        03,
-			day:          11,
-			weekInFuture: 1,
-			wantErr:      false,
+			name:       "monday",
+			startDate:  "2019-03-04",
+			endDate:    "2019-03-10",
+			year:       2019,
+			month:      03,
+			day:        11,
+			weekInPast: 1,
+			wantErr:    false,
 		},
 		{
-			name:         "middle of week",
-			startDate:    "2019-03-04",
-			endDate:      "2019-03-10",
-			year:         2019,
-			month:        03,
-			day:          13,
-			weekInFuture: 1,
-			wantErr:      false,
+			name:       "middle of week",
+			startDate:  "2019-03-04",
+			endDate:    "2019-03-10",
+			year:       2019,
+			month:      03,
+			day:        13,
+			weekInPast: 1,
+			wantErr:    false,
 		},
 		{
-			name:         "beginning of month",
-			startDate:    "2019-03-25",
-			endDate:      "2019-03-31",
-			year:         2019,
-			month:        04,
-			day:          03,
-			weekInFuture: 1,
-			wantErr:      false,
-		},
-		{
-			name:         "begining of year",
-			startDate:    "2018-12-24",
-			endDate:      "2018-12-30",
-			year:         2019,
-			month:        01,
-			day:          02,
-			weekInFuture: 1,
-			wantErr:      false,
+			name:       "beginning of month",
+			startDate:  "2019-03-25",
+			endDate:    "2019-03-31",
+			year:       2019,
+			month:      04,
+			day:        03,
+			weekInPast: 1,
+			wantErr:    false,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			current := time.Date(tc.year, tc.month, tc.day, 00, 00, 00, 00, time.UTC)
-			startDate, endDate := PrevWeeks(current, tc.weekInFuture)
+			startDate, endDate := PrevWeeks(current, tc.weekInPast)
 
 			if tc.wantErr == false && tc.startDate != startDate.Format(yyyymmdd) {
 				t.Errorf("Expected startDate %v, actual %v", tc.startDate, startDate)
