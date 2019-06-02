@@ -242,6 +242,25 @@ func (g *Github) ListPullRequests(repository string, limit int) ([][]string, err
 	return prs, nil
 }
 
+func (g *Github) TrafficView(repository string, days int) ([]string, []int, error) {
+	tv, err := g.fetchTrafficViews(repository)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	counts := []int{}
+	for _, v := range tv.Views {
+		counts = append(counts, v.GetCount())
+	}
+
+	dimension := []string{}
+	for _, v := range tv.Views {
+		dimension = append(dimension, v.GetTimestamp().Format("01-02"))
+	}
+
+	return dimension, counts, nil
+}
+
 // Fetch the whole repo per widget since we need to fetch the data during a regular time interval.
 func (g *Github) fetchRepo(repository string) (*github.Repository, error) {
 	repo := g.repo
@@ -259,6 +278,25 @@ func (g *Github) fetchRepo(repository string) (*github.Repository, error) {
 	}
 
 	return r, nil
+
+}
+
+func (g *Github) fetchTrafficViews(repository string) (*github.TrafficViews, error) {
+	repo := g.repo
+	if repository != "" {
+		repo = repository
+	}
+
+	if repo == "" {
+		return nil, errors.New("you need to specify a repository in the github service or in the widget")
+	}
+
+	t, _, err := g.client.Repositories.ListTrafficViews(context.Background(), g.owner, repo, nil)
+	if err != nil {
+		return nil, errors.Wrapf(err, "can't find repo %s of owner %s", repo, g.owner)
+	}
+
+	return t, nil
 }
 
 // Fetch the branches of a repo

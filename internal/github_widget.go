@@ -17,6 +17,7 @@ const (
 	githubTableBranches     = "github.table_branches"
 	githubTableIssues       = "github.table_issues"
 	githubTablePullRequests = "github.table_pull_requests"
+	githubBarTrafficView    = "github.bar_traffic_view"
 )
 
 type githubWidget struct {
@@ -52,6 +53,8 @@ func (g *githubWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 		err = g.tableIssues(widget)
 	case githubTablePullRequests:
 		err = g.tablePullRequests(widget)
+	case githubBarTrafficView:
+		err = g.barTrafficView(widget)
 	default:
 		return errors.Errorf("can't find the widget %s for service github", widget.Name)
 	}
@@ -154,7 +157,7 @@ func (g *githubWidget) tableRepo(widget Widget) (err error) {
 		}
 	}
 
-	metrics := []string{"name", "stars", "watchers", "forks", "open issues"}
+	metrics := []string{"name", "stars", "watchers", "forks", "open_issues"}
 	if _, ok := widget.Options[optionMetrics]; ok {
 		if len(widget.Options[optionMetrics]) > 0 {
 			metrics = strings.Split(strings.TrimSpace(widget.Options[optionMetrics]), ",")
@@ -259,6 +262,27 @@ func (g *githubWidget) tablePullRequests(widget Widget) (err error) {
 	}
 
 	g.tui.AddTable(is, title, widget.Options)
+
+	return nil
+}
+
+func (g *githubWidget) barTrafficView(widget Widget) (err error) {
+	var repo string
+	if _, ok := widget.Options[optionRepository]; ok {
+		repo = widget.Options[optionRepository]
+	}
+
+	title := " Github Traffic Views "
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	dim, counts, err := g.client.TrafficView(repo, 0)
+	if err != nil {
+		return err
+	}
+
+	g.tui.AddBarChart(counts, dim, title, widget.Options)
 
 	return nil
 }
