@@ -22,9 +22,10 @@ const (
 
 	optionSize = "size"
 
-	optionBorderColor = "border_color"
-	optionTextColor   = "text_color"
-	optionNumColor    = "num_color"
+	optionBorderColor   = "border_color"
+	optionTextColor     = "text_color"
+	optionNumColor      = "num_color"
+	optionEmptyNumColor = "empty_num_color"
 
 	optionBold = "bold"
 
@@ -104,6 +105,7 @@ type drawer interface {
 		bd uint16,
 		fg uint16,
 		nc uint16,
+		enc uint16,
 		height int,
 		gap int,
 		barWidth int,
@@ -307,6 +309,11 @@ func (t *Tui) AddBarChart(
 		numColor = colorLookUp[options[optionNumColor]]
 	}
 
+	emptyNumColor := defaultC
+	if _, ok := options[optionEmptyNumColor]; ok {
+		emptyNumColor = colorLookUp[options[optionEmptyNumColor]]
+	}
+
 	var height int64 = 10
 	if _, ok := options[optionHeight]; ok {
 		height, _ = strconv.ParseInt(options[optionHeight], 0, 0)
@@ -335,6 +342,7 @@ func (t *Tui) AddBarChart(
 		borderColor,
 		textColor,
 		numColor,
+		emptyNumColor,
 		int(height),
 		int(gap),
 		int(barWidth),

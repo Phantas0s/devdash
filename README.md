@@ -296,17 +296,18 @@ The repository is not mandatory. However, you will need to precise the repositor
 
 ##### Display Options
 
-| Name           | Description                 | Default value               | Examples                                  |
-| -------------- | --------------------------- | --------------------------- | ----------------------------------------- |
-| title          | Title                       | `Depending on the widget`   | `Users `                                  |
-| border_color   | Border color                | `Default color`             | `yellow`, `red` (see [colors](#colors))   |
-| height         | Height                      | `10`                        | `5`                                       |
-| title_color    | Title color                 | `Default color`             | `yellow`, `red` (see [colors](#colors))   |
-| text_color     | Text color                  | `Default color`             | `yellow`, `red` (see [colors](#colors))   |
-| num_color      | Color of numerical data     | `Default color`             | `yellow`, `red` (see [colors](#colors))   |
-| bar_color      | Bar color                   | `Default color`             | `yellow`, `red` (see [colors](#colors))   |
-| bar_gap        | Gap size between the bars   | `0`                         | `5`, `10`                                 |
-| bar_width      | Bar width                   | `6`                         | `5`, `10`                                 |
+| Name              | Description                                                   | Default value                 | Examples                                    |
+| ----------------- | ------------------------------------------------------------- | ----------------------------- | ------------------------------------------- |
+| title             | Title                                                         | `Depending on the widget`     | `Users `                                    |
+| border_color      | Border color                                                  | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| height            | Height                                                        | `10`                          | `5`                                         |
+| title_color       | Title color                                                   | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| text_color        | Text color                                                    | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| num_color         | Color of numerical data                                       | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| empty_num_color   | Color of numerical data when the bar is too small to appear   | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| bar_color         | Bar color                                                     | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| bar_gap           | Gap size between the bars                                     | `0`                           | `5`, `10`                                   |
+| bar_width         | Bar width                                                     | `6`                           | `5`, `10`                                   |
 
 #### Table widgets
 
