@@ -96,6 +96,7 @@ func (t *termUI) BarChart(
 	bd uint16,
 	fg uint16,
 	nc uint16,
+	enc uint16,
 	height int,
 	gap int,
 	barWidth int,
@@ -113,6 +114,7 @@ func (t *termUI) BarChart(
 	bc.BarColor = termui.Attribute(barColor)
 	bc.BarGap = gap
 	bc.NumColor = termui.Attribute(nc)
+	bc.EmptyNumColor = termui.Attribute(enc)
 	bc.Buffer()
 
 	t.widgets = append(t.widgets, bc)
