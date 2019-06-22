@@ -112,3 +112,19 @@ func NextYears(base time.Time, count int) (startDate time.Time, endDate time.Tim
 
 	return
 }
+
+// ISOWeek returns the ISO 8601 year and week number, going back in time for nth weeks (count).
+func PrevISOWeek(base time.Time, count int) int {
+	startDate, _ := PrevWeeks(base, count)
+	_, w := startDate.ISOWeek()
+
+	return w
+}
+
+// ISOWeek returns the ISO 8601 year and week number, going forward in time for nth weeks (count).
+func NextISOWeek(base time.Time, count int) int {
+	startDate, _ := NextWeeks(base, count)
+	_, w := startDate.ISOWeek()
+
+	return w
+}

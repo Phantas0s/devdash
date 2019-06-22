@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/Phantas0s/devdash/internal/plateform"
 	"github.com/pkg/errors"
@@ -290,6 +291,7 @@ func (g *githubWidget) barTrafficView(widget Widget) (err error) {
 	return nil
 }
 
+// TODO refactoring
 func (g *githubWidget) barCommits(widget Widget) (err error) {
 	var repo string
 	if _, ok := widget.Options[optionRepository]; ok {
@@ -301,7 +303,44 @@ func (g *githubWidget) barCommits(widget Widget) (err error) {
 		title = widget.Options[optionTitle]
 	}
 
-	dim, counts, err := g.client.CommitCounts(repo, 0)
+	sd := "7_weeks_ago"
+	if _, ok := widget.Options[optionStartDate]; ok {
+		sd = widget.Options[optionStartDate]
+	}
+
+	ed := "0_weeks_ago"
+	if _, ok := widget.Options[optionEndDate]; ok {
+		ed = widget.Options[optionEndDate]
+	}
+
+	var ew int64 = 0
+	if strings.Contains(ed, "weeks_ago") {
+		t := strings.Split(ed, "_")
+		ew, err = strconv.ParseInt(t[0], 0, 0)
+		if err != nil {
+			return errors.Wrapf(err, "%s is not a valid date", ed)
+		}
+	} else {
+		return errors.New("the widget bar_commits require you to indicate a week range, ie startDate: 5_weeks_ago, endDate: 0_weeks_ago ")
+	}
+
+	var sw int64 = 0
+	if strings.Contains(sd, "weeks_ago") {
+		t := strings.Split(sd, "_")
+		sw, err = strconv.ParseInt(t[0], 0, 0)
+		if err != nil {
+			return errors.Wrapf(err, "%s is not a valid date", sd)
+		}
+	} else {
+		return errors.New("the widget bar_commits require you to indicate a week range, ie startDate: 5_weeks_ago, endDate: 0_weeks_ago ")
+	}
+
+	startDate, _, err := ConvertDates(time.Now(), sd, ed)
+	if err != nil {
+		return err
+	}
+
+	dim, counts, err := g.client.CommitCounts(repo, sw, ew, startDate)
 	if err != nil {
 		return err
 	}

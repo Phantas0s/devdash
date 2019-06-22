@@ -454,9 +454,7 @@ func Test_PrevYears(t *testing.T) {
 		name       string
 		startDate  string
 		endDate    string
-		year       int
-		month      time.Month
-		day        int
+		current    time.Time
 		countYears int
 		wantErr    bool
 	}{
@@ -464,28 +462,21 @@ func Test_PrevYears(t *testing.T) {
 			name:       "1 year in past",
 			startDate:  "2017-01-01",
 			endDate:    "2017-12-31",
-			year:       2018,
-			month:      01,
-			day:        18,
 			countYears: 1,
-			wantErr:    false,
+			current:    time.Date(2018, 01, 18, 00, 00, 00, 00, time.UTC),
 		},
 		{
 			name:       "5 years in past",
 			startDate:  "2013-01-01",
 			endDate:    "2013-12-31",
-			year:       2018,
-			month:      01,
-			day:        18,
 			countYears: 5,
-			wantErr:    false,
+			current:    time.Date(2018, 01, 18, 00, 00, 00, 00, time.UTC),
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			current := time.Date(tc.year, tc.month, tc.day, 00, 00, 00, 00, time.UTC)
-			startDate, endDate := PrevYears(current, tc.countYears)
+			startDate, endDate := PrevYears(tc.current, tc.countYears)
 
 			if tc.wantErr == false && tc.startDate != startDate.Format(yyyymmdd) {
 				t.Errorf("Expected startDate %v, actual %v", tc.startDate, startDate)

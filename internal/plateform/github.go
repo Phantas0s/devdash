@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Phantas0s/devdash/totime"
 	"github.com/google/go-github/github"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
@@ -263,8 +262,9 @@ func (g *Github) TrafficView(repository string, days int) ([]string, []int, erro
 	return dimension, counts, nil
 }
 
-// TODO refactoring / finding a better solution
-func (g *Github) CommitCounts(repository string, weeks_ago int) ([]string, []int, error) {
+// TODO refactoring!!
+// TODO needs to reverse the bars... from older to newest result (left to right)
+func (g *Github) CommitCounts(repository string, startWeek int64, endWeek int64, endDate time.Time) ([]string, []int, error) {
 	c, err := g.fetchCommitCount(repository)
 	if err != nil {
 		return nil, nil, err
@@ -282,28 +282,26 @@ func (g *Github) CommitCounts(repository string, weeks_ago int) ([]string, []int
 	}
 
 	dimension := []string{}
+	ed := endDate
 	for k, _ := range c.Owner {
-		sw, _ := totime.ThisWeek(time.Now())
-		sd, _ := totime.PrevWeeks(sw, k)
-		// Week begins the sunday... so we go one day back before Monday.
-		sd = sd.AddDate(0, 0, -1)
-		dimension = append(dimension, sd.Format("01-02"))
+		// Since the endDate is the end of the week, we need to come back to the first day of it and then go through each week in reverse
+		e := ed.AddDate(0, 0, -1-(k*7))
+		dimension = append(dimension, e.Format("01-02"))
 	}
 
 	// reverse the count of commits (from DESC to ASC)
-	for i := len(counts)/2 - 1; i >= 0; i-- {
-		opp := len(counts) - 1 - i
-		counts[i], counts[opp] = counts[opp], counts[i]
-	}
+	// for i := len(counts)/2 - 1; i >= 0; i-- {
+	// 	opp := len(counts) - 1 - i
+	// 	counts[i], counts[opp] = counts[opp], counts[i]
+	// }
 
-	// reverse the dimension (from DESC to ASC)
-	for i := len(dimension)/2 - 1; i >= 0; i-- {
-		opp := len(dimension) - 1 - i
-		dimension[i], dimension[opp] = dimension[opp], dimension[i]
-	}
+	// // reverse the dimension (from DESC to ASC)
+	// for i := len(dimension)/2 - 1; i >= 0; i-- {
+	// 	opp := len(dimension) - 1 - i
+	// 	dimension[i], dimension[opp] = dimension[opp], dimension[i]
+	// }
 
-	// Week displayed configurable (from 2nd week to 32th week for example).
-	return dimension[25:], counts[25:], nil
+	return dimension[startWeek:endWeek], counts[startWeek:endWeek], nil
 }
 
 // Fetch the whole repo per widget since we need to fetch the data during a regular time interval.
