@@ -221,14 +221,16 @@ The repository is not mandatory. However, you will need to precise the repositor
 
 ### Widgets available
 
-| Name                          | Description                                                                      |
-| ----------------------------- | -------------------------------------------------------------------------------- |
-| github.box_stars              | Number of stars of a precise repository                                          |
-| github.box_watchers           | Number of watchers of a precise repository                                       |
-| github.box_open_issues        | Number of open issues of a precise repository                                    |
-| github.table_branches         | All branches of a precise repository                                             |
-| github.table_issues           | All issues (and their states) of a precise repository                            |
-| github.table_repositories     | Table of all repositories with count different information (see `metrics` option)|
+| Name                      | Description                                                                       | Comment                                                                       |
+| ------------------------  | --------------------------------------------------------------------------------  | ----------------------------------------------------------------------------- |
+| github.box_stars          | Number of stars of a precise repository                                           |                                                                               |
+| github.box_watchers       | Number of watchers of a precise repository                                        |                                                                               |
+| github.box_open_issues    | Number of open issues of a precise repository                                     |                                                                               |
+| github.table_branches     | All branches of a precise repository                                              |                                                                               |
+| github.table_issues       | All issues (and their states) of a precise repository                             |                                                                               |
+| github.table_repositories | Table of all repositories with count different information (see `metrics` option) |                                                                               |
+| github.bar_traffic_view   | Github traffic of the repository's page the last 14 days                          | Doesn't accept start_date / end_date option                                   |
+| github.bar_commits        | Give the number of commit per week (maximum last 52 weeks)                        | stard_date / end_date option must be "x_weeks_go" or "today". x must be < 52  |
 
 ### Widget Options
 
@@ -250,6 +252,30 @@ The repository is not mandatory. However, you will need to precise the repositor
 | title_color        | Title color      | `Default color`                 | `yellow`, `red` (see [colors](#colors))       |
 | border_color       | Border color     | `Default color`                 | `yellow`, `red` (see [colors](#colors))       |
 | text_color         | Text color       | `Default color`                 | `yellow`, `red` (see [colors](#colors))       |
+
+#### Bar Widgets
+
+##### Data Options
+
+| Name            | Description                                                                   | Default value     | Examples                                 | Not available for                                        |
+| --------------- | ----------------------------------------------------------------------------- | ----------------- | ---------------------------------------- | -------------------------------------------------------- |
+| start_date      | Start date of time period                                                     | `7_days_ago`      | `2018-01-01`, `2_weeks_ago`              | github.bar_traffic_view                                  |
+| end_date        | End date of time period                                                       | `today`           | `2018-01-31`, `2_weeks_ago`              | github.bar_traffic_view                                  |
+
+##### Display Options
+
+| Name              | Description                                                   | Default value                 | Examples                                    |
+| ----------------- | ------------------------------------------------------------- | ----------------------------- | ------------------------------------------- |
+| title             | Title                                                         | `Depending on the widget`     | `Users `                                    |
+| border_color      | Border color                                                  | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| height            | Height                                                        | `10`                          | `5`                                         |
+| title_color       | Title color                                                   | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| text_color        | Text color                                                    | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| num_color         | Color of numerical data                                       | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| empty_num_color   | Color of numerical data when the bar is too small to appear   | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| bar_color         | Bar color                                                     | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| bar_gap           | Gap size between the bars                                     | `0`                           | `5`, `10`                                   |
+| bar_width         | Bar width                                                     | `6`                           | `5`, `10`                                   |
 
 ## Google Analytics
 

@@ -262,14 +262,23 @@ func (g *Github) TrafficView(repository string, days int) ([]string, []int, erro
 	return dimension, counts, nil
 }
 
-// TODO refactoring!!
-// TODO needs to reverse the bars... from older to newest result (left to right)
-func (g *Github) CommitCounts(repository string, startWeek int64, endWeek int64, endDate time.Time) ([]string, []int, error) {
+func (g *Github) CommitCounts(repository string, startWeek int64, endWeek int64, startDate time.Time) ([]string, []int, error) {
 	c, err := g.fetchCommitCount(repository)
 	if err != nil {
 		return nil, nil, err
 	}
 
+	d, co := formatCommitCounts(c, startWeek, endWeek, startDate)
+
+	return d, co, nil
+}
+
+func formatCommitCounts(
+	c *github.RepositoryParticipation,
+	startWeek int64,
+	endWeek int64,
+	startDate time.Time,
+) ([]string, []int) {
 	// reverse the count of commits (from ASC to DESC)
 	for i := len(c.Owner)/2 - 1; i >= 0; i-- {
 		opp := len(c.Owner) - 1 - i
@@ -282,26 +291,35 @@ func (g *Github) CommitCounts(repository string, startWeek int64, endWeek int64,
 	}
 
 	dimension := []string{}
-	ed := endDate
 	for k, _ := range c.Owner {
-		// Since the endDate is the end of the week, we need to come back to the first day of it and then go through each week in reverse
-		e := ed.AddDate(0, 0, -1-(k*7))
-		dimension = append(dimension, e.Format("01-02"))
+		// Since the startDate is the end of the week,
+		// we need to come back to the first day of it
+		// and then go back to the number of week (7 days)
+		// specified in start date.
+
+		weekDay := int(startDate.Weekday())
+		s := startDate.AddDate(0, 0, (-(weekDay) - (7 * k)))
+		if weekDay == 0 && k == 0 {
+			s = startDate
+		}
+		dimension = append(dimension, s.Format("01-02"))
 	}
 
+	d := dimension[endWeek:startWeek]
+	co := counts[endWeek:startWeek]
+
 	// reverse the count of commits (from DESC to ASC)
-	// for i := len(counts)/2 - 1; i >= 0; i-- {
-	// 	opp := len(counts) - 1 - i
-	// 	counts[i], counts[opp] = counts[opp], counts[i]
-	// }
+	for i := len(co)/2 - 1; i >= 0; i-- {
+		opp := len(co) - 1 - i
+		co[i], co[opp] = co[opp], co[i]
+	}
 
-	// // reverse the dimension (from DESC to ASC)
-	// for i := len(dimension)/2 - 1; i >= 0; i-- {
-	// 	opp := len(dimension) - 1 - i
-	// 	dimension[i], dimension[opp] = dimension[opp], dimension[i]
-	// }
-
-	return dimension[startWeek:endWeek], counts[startWeek:endWeek], nil
+	// reverse the dimensions (from DESC to ASC)
+	for i := len(d)/2 - 1; i >= 0; i-- {
+		opp := len(d) - 1 - i
+		d[i], d[opp] = d[opp], d[i]
+	}
+	return d, co
 }
 
 // Fetch the whole repo per widget since we need to fetch the data during a regular time interval.
@@ -339,11 +357,12 @@ func (g *Github) fetchCommitCount(repository string) (*github.RepositoryParticip
 	if err != nil {
 		return nil, errors.Wrapf(err, "can't find repo %s of owner %s", repo, g.owner)
 	}
+	// j, _ := json.Marshal(p)
+	// fmt.Println(string(j))
 
 	return p, nil
 }
 
-// TODO data can be breakdown by day or week
 func (g *Github) fetchTrafficViews(repository string) (*github.TrafficViews, error) {
 	repo := g.repo
 	if repository != "" {

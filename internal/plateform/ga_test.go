@@ -63,7 +63,6 @@ func Test_Format(t *testing.T) {
 	}
 }
 
-// TODO simplify the test (less data)... but keep this two month period
 func Test_FormatNewReturning(t *testing.T) {
 	testCases := []struct {
 		name        string
