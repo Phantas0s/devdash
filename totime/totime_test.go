@@ -12,35 +12,28 @@ func Test_ThisWeek(t *testing.T) {
 		name      string
 		startDate string
 		endDate   string
-		year      int
-		month     time.Month
-		day       int
+		current   time.Time
 		wantErr   bool
 	}{
 		{
 			name:      "monday",
 			startDate: "2019-03-11",
 			endDate:   "2019-03-17",
-			year:      2019,
-			month:     03,
-			day:       11,
+			current:   time.Date(2019, 03, 11, 00, 00, 00, 00, time.UTC),
 			wantErr:   false,
 		},
 		{
 			name:      "another day",
 			startDate: "2019-03-11",
 			endDate:   "2019-03-17",
-			year:      2019,
-			month:     03,
-			day:       14,
+			current:   time.Date(2019, 03, 14, 00, 00, 00, 00, time.UTC),
 			wantErr:   false,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			current := time.Date(tc.year, tc.month, tc.day, 00, 00, 00, 00, time.UTC)
-			startDate, endDate := ThisWeek(current)
+			startDate, endDate := ThisWeek(tc.current)
 
 			if tc.wantErr == false && tc.startDate != startDate.Format(yyyymmdd) {
 				t.Errorf("Expected startDate %v, actual %v", tc.startDate, startDate)
@@ -57,9 +50,7 @@ func Test_NextWeeks(t *testing.T) {
 		name         string
 		startDate    string
 		endDate      string
-		year         int
-		month        time.Month
-		day          int
+		current      time.Time
 		weekInFuture int
 		wantErr      bool
 	}{
@@ -67,9 +58,7 @@ func Test_NextWeeks(t *testing.T) {
 			name:         "monday",
 			startDate:    "2019-03-18",
 			endDate:      "2019-03-24",
-			year:         2019,
-			month:        03,
-			day:          11,
+			current:      time.Date(2019, 03, 11, 00, 00, 00, 00, time.UTC),
 			weekInFuture: 1,
 			wantErr:      false,
 		},
@@ -77,9 +66,7 @@ func Test_NextWeeks(t *testing.T) {
 			name:         "middle of week",
 			startDate:    "2019-03-18",
 			endDate:      "2019-03-24",
-			year:         2019,
-			month:        03,
-			day:          13,
+			current:      time.Date(2019, 03, 13, 00, 00, 00, 00, time.UTC),
 			weekInFuture: 1,
 			wantErr:      false,
 		},
@@ -87,9 +74,7 @@ func Test_NextWeeks(t *testing.T) {
 			name:         "end of month",
 			startDate:    "2019-04-01",
 			endDate:      "2019-04-07",
-			year:         2019,
-			month:        03,
-			day:          28,
+			current:      time.Date(2019, 03, 28, 00, 00, 00, 00, time.UTC),
 			weekInFuture: 1,
 			wantErr:      false,
 		},
@@ -97,9 +82,7 @@ func Test_NextWeeks(t *testing.T) {
 			name:         "end of year",
 			startDate:    "2018-12-31",
 			endDate:      "2019-01-06",
-			year:         2018,
-			month:        12,
-			day:          25,
+			current:      time.Date(2018, 12, 25, 00, 00, 00, 00, time.UTC),
 			weekInFuture: 1,
 			wantErr:      false,
 		},
@@ -107,9 +90,7 @@ func Test_NextWeeks(t *testing.T) {
 			name:         "end of year multiple weeks",
 			startDate:    "2019-01-14",
 			endDate:      "2019-01-20",
-			year:         2018,
-			month:        12,
-			day:          25,
+			current:      time.Date(2018, 12, 25, 00, 00, 00, 00, time.UTC),
 			weekInFuture: 3,
 			wantErr:      false,
 		},
@@ -117,8 +98,7 @@ func Test_NextWeeks(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			current := time.Date(tc.year, tc.month, tc.day, 00, 00, 00, 00, time.UTC)
-			startDate, endDate := NextWeeks(current, tc.weekInFuture)
+			startDate, endDate := NextWeeks(tc.current, tc.weekInFuture)
 
 			if tc.wantErr == false && tc.startDate != startDate.Format(yyyymmdd) {
 				t.Errorf("Expected startDate %v, actual %v", tc.startDate, startDate)
@@ -136,9 +116,7 @@ func Test_PrevWeeks(t *testing.T) {
 		name       string
 		startDate  string
 		endDate    string
-		year       int
-		month      time.Month
-		day        int
+		current    time.Time
 		weekInPast int
 		wantErr    bool
 	}{
@@ -146,9 +124,7 @@ func Test_PrevWeeks(t *testing.T) {
 			name:       "monday",
 			startDate:  "2019-03-04",
 			endDate:    "2019-03-10",
-			year:       2019,
-			month:      03,
-			day:        11,
+			current:    time.Date(2019, 03, 11, 00, 00, 00, 00, time.UTC),
 			weekInPast: 1,
 			wantErr:    false,
 		},
@@ -156,9 +132,7 @@ func Test_PrevWeeks(t *testing.T) {
 			name:       "middle of week",
 			startDate:  "2019-03-04",
 			endDate:    "2019-03-10",
-			year:       2019,
-			month:      03,
-			day:        13,
+			current:    time.Date(2019, 03, 13, 00, 00, 00, 00, time.UTC),
 			weekInPast: 1,
 			wantErr:    false,
 		},
@@ -166,9 +140,7 @@ func Test_PrevWeeks(t *testing.T) {
 			name:       "beginning of month",
 			startDate:  "2019-03-25",
 			endDate:    "2019-03-31",
-			year:       2019,
-			month:      04,
-			day:        03,
+			current:    time.Date(2019, 04, 03, 00, 00, 00, 00, time.UTC),
 			weekInPast: 1,
 			wantErr:    false,
 		},
@@ -176,8 +148,7 @@ func Test_PrevWeeks(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			current := time.Date(tc.year, tc.month, tc.day, 00, 00, 00, 00, time.UTC)
-			startDate, endDate := PrevWeeks(current, tc.weekInPast)
+			startDate, endDate := PrevWeeks(tc.current, tc.weekInPast)
 
 			if tc.wantErr == false && tc.startDate != startDate.Format(yyyymmdd) {
 				t.Errorf("Expected startDate %v, actual %v", tc.startDate, startDate)
@@ -195,26 +166,21 @@ func Test_ThisMonth(t *testing.T) {
 		name      string
 		startDate string
 		endDate   string
-		year      int
-		month     time.Month
-		day       int
+		current   time.Time
 		wantErr   bool
 	}{
 		{
 			name:      "monday",
 			startDate: "2019-03-01",
 			endDate:   "2019-03-31",
-			year:      2019,
-			month:     03,
-			day:       11,
+			current:   time.Date(2019, 03, 11, 00, 00, 00, 00, time.UTC),
 			wantErr:   false,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			current := time.Date(tc.year, tc.month, tc.day, 0, 0, 0, 0, time.UTC)
-			startDate, endDate := ThisMonth(current)
+			startDate, endDate := ThisMonth(tc.current)
 
 			if tc.wantErr == false && tc.startDate != startDate.Format(yyyymmdd) {
 				t.Errorf("Expected startDate %v, actual %v", tc.startDate, startDate)
@@ -231,9 +197,7 @@ func Test_PrevMonths(t *testing.T) {
 		name       string
 		startDate  string
 		endDate    string
-		year       int
-		month      time.Month
-		day        int
+		current    time.Time
 		countMonth int
 		wantErr    bool
 	}{
@@ -241,9 +205,7 @@ func Test_PrevMonths(t *testing.T) {
 			name:       "february",
 			startDate:  "2017-02-01",
 			endDate:    "2017-02-28",
-			year:       2017,
-			month:      03,
-			day:        18,
+			current:    time.Date(2017, 03, 18, 00, 00, 00, 00, time.UTC),
 			countMonth: 1,
 			wantErr:    false,
 		},
@@ -251,9 +213,7 @@ func Test_PrevMonths(t *testing.T) {
 			name:       "february bisextile",
 			startDate:  "2008-02-01",
 			endDate:    "2008-02-29",
-			year:       2008,
-			month:      03,
-			day:        18,
+			current:    time.Date(2008, 03, 18, 00, 00, 00, 00, time.UTC),
 			countMonth: 1,
 			wantErr:    false,
 		},
@@ -261,9 +221,7 @@ func Test_PrevMonths(t *testing.T) {
 			name:       "beginning of the year",
 			startDate:  "2017-12-01",
 			endDate:    "2017-12-31",
-			year:       2018,
-			month:      01,
-			day:        18,
+			current:    time.Date(2018, 01, 18, 00, 00, 00, 00, time.UTC),
 			countMonth: 1,
 			wantErr:    false,
 		},
@@ -271,9 +229,7 @@ func Test_PrevMonths(t *testing.T) {
 			name:       "end of the year",
 			startDate:  "2018-11-01",
 			endDate:    "2018-11-30",
-			year:       2018,
-			month:      12,
-			day:        18,
+			current:    time.Date(2018, 12, 18, 00, 00, 00, 00, time.UTC),
 			countMonth: 1,
 			wantErr:    false,
 		},
@@ -281,8 +237,7 @@ func Test_PrevMonths(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			current := time.Date(tc.year, tc.month, tc.day, 00, 00, 00, 00, time.UTC)
-			startDate, endDate := PrevMonths(current, tc.countMonth)
+			startDate, endDate := PrevMonths(tc.current, tc.countMonth)
 
 			if tc.wantErr == false && tc.startDate != startDate.Format(yyyymmdd) {
 				t.Errorf("Expected startDate %v, actual %v", tc.startDate, startDate)
@@ -300,9 +255,7 @@ func Test_NextMonths(t *testing.T) {
 		name       string
 		startDate  string
 		endDate    string
-		year       int
-		month      time.Month
-		day        int
+		current    time.Time
 		countMonth int
 		wantErr    bool
 	}{
@@ -310,9 +263,7 @@ func Test_NextMonths(t *testing.T) {
 			name:       "february",
 			startDate:  "2017-02-01",
 			endDate:    "2017-02-28",
-			year:       2017,
-			month:      01,
-			day:        18,
+			current:    time.Date(2017, 01, 18, 00, 00, 00, 00, time.UTC),
 			countMonth: 1,
 			wantErr:    false,
 		},
@@ -320,9 +271,7 @@ func Test_NextMonths(t *testing.T) {
 			name:       "february bisextile",
 			startDate:  "2008-02-01",
 			endDate:    "2008-02-29",
-			year:       2008,
-			month:      01,
-			day:        18,
+			current:    time.Date(2008, 01, 18, 00, 00, 00, 00, time.UTC),
 			countMonth: 1,
 			wantErr:    false,
 		},
@@ -330,9 +279,7 @@ func Test_NextMonths(t *testing.T) {
 			name:       "end of the year",
 			startDate:  "2018-01-01",
 			endDate:    "2018-01-31",
-			year:       2017,
-			month:      12,
-			day:        18,
+			current:    time.Date(2017, 12, 18, 00, 00, 00, 00, time.UTC),
 			countMonth: 1,
 			wantErr:    false,
 		},
@@ -340,9 +287,7 @@ func Test_NextMonths(t *testing.T) {
 			name:       "this month",
 			startDate:  "2018-01-01",
 			endDate:    "2018-01-31",
-			year:       2018,
-			month:      01,
-			day:        18,
+			current:    time.Date(2018, 01, 18, 00, 00, 00, 00, time.UTC),
 			countMonth: 0,
 			wantErr:    false,
 		},
@@ -350,8 +295,7 @@ func Test_NextMonths(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			current := time.Date(tc.year, tc.month, tc.day, 00, 00, 00, 00, time.UTC)
-			startDate, endDate := NextMonths(current, tc.countMonth)
+			startDate, endDate := NextMonths(tc.current, tc.countMonth)
 
 			if tc.wantErr == false && tc.startDate != startDate.Format(yyyymmdd) {
 				t.Errorf("Expected startDate %v, actual %v", tc.startDate, startDate)
@@ -369,26 +313,21 @@ func Test_ThisYear(t *testing.T) {
 		name      string
 		startDate string
 		endDate   string
-		year      int
-		month     time.Month
-		day       int
+		current   time.Time
 		wantErr   bool
 	}{
 		{
 			name:      "monday",
 			startDate: "2019-01-01",
 			endDate:   "2019-12-31",
-			year:      2019,
-			month:     03,
-			day:       11,
+			current:   time.Date(2019, 03, 11, 00, 00, 00, 00, time.UTC),
 			wantErr:   false,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			current := time.Date(tc.year, tc.month, tc.day, 0, 0, 0, 0, time.UTC)
-			startDate, endDate := ThisYear(current)
+			startDate, endDate := ThisYear(tc.current)
 
 			if tc.wantErr == false && tc.startDate != startDate.Format(yyyymmdd) {
 				t.Errorf("Expected startDate %v, actual %v", tc.startDate, startDate)
@@ -405,9 +344,7 @@ func Test_NextYears(t *testing.T) {
 		name       string
 		startDate  string
 		endDate    string
-		year       int
-		month      time.Month
-		day        int
+		current    time.Time
 		countYears int
 		wantErr    bool
 	}{
@@ -415,9 +352,7 @@ func Test_NextYears(t *testing.T) {
 			name:       "1 year in future",
 			startDate:  "2019-01-01",
 			endDate:    "2019-12-31",
-			year:       2018,
-			month:      01,
-			day:        18,
+			current:    time.Date(2018, 01, 18, 00, 00, 00, 00, time.UTC),
 			countYears: 1,
 			wantErr:    false,
 		},
@@ -425,9 +360,7 @@ func Test_NextYears(t *testing.T) {
 			name:       "5 year in future",
 			startDate:  "2023-01-01",
 			endDate:    "2023-12-31",
-			year:       2018,
-			month:      01,
-			day:        18,
+			current:    time.Date(2018, 01, 18, 00, 00, 00, 00, time.UTC),
 			countYears: 5,
 			wantErr:    false,
 		},
@@ -435,8 +368,7 @@ func Test_NextYears(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			current := time.Date(tc.year, tc.month, tc.day, 00, 00, 00, 00, time.UTC)
-			startDate, endDate := NextYears(current, tc.countYears)
+			startDate, endDate := NextYears(tc.current, tc.countYears)
 
 			if tc.wantErr == false && tc.startDate != startDate.Format(yyyymmdd) {
 				t.Errorf("Expected startDate %v, actual %v", tc.startDate, startDate)

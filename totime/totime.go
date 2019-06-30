@@ -2,9 +2,9 @@
 // The period of time can be this week, this month, previous week, previous month, the month in two months...
 //
 // Examples:
-// We are in January 2019, ThisMonth will return startDate = 2019-01-01, endDate = 2019-01-31
-// We are in January 2019, NextMonth will return startDate = 2019-02-01, endDate = 2019-02-28
-// We are in January 2019, NextMonth with count of 2 will return startDate = 2019-03-01, endDate = 2019-03-31
+// Base time is someday in January 2019, ThisMonth will return startDate = 2019-01-01, endDate = 2019-01-31
+// Base time is someday in January 2019, NextMonth will return startDate = 2019-02-01, endDate = 2019-02-28
+// Base time is someday in January 2019, NextMonth with count of 2 will return startDate = 2019-03-01, endDate = 2019-03-31
 
 package totime
 
@@ -111,20 +111,4 @@ func NextYears(base time.Time, count int) (startDate time.Time, endDate time.Tim
 	endDate = startDate.AddDate(1, 0, -1)
 
 	return
-}
-
-// ISOWeek returns the ISO 8601 year and week number, going back in time for nth weeks (count).
-func PrevISOWeek(base time.Time, count int) int {
-	startDate, _ := PrevWeeks(base, count)
-	_, w := startDate.ISOWeek()
-
-	return w
-}
-
-// ISOWeek returns the ISO 8601 year and week number, going forward in time for nth weeks (count).
-func NextISOWeek(base time.Time, count int) int {
-	startDate, _ := NextWeeks(base, count)
-	_, w := startDate.ISOWeek()
-
-	return w
 }

@@ -1,4 +1,5 @@
 vendor
 goanalytics-*
 cmd/devdash/devdash
+cmd/devdash/devdash.exe
 .devdash*

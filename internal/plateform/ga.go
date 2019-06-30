@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -13,9 +12,14 @@ import (
 	"golang.org/x/oauth2/jwt"
 	gav3 "google.golang.org/api/analytics/v3"
 	ga "google.golang.org/api/analyticsreporting/v4"
+	"google.golang.org/api/option"
 )
 
 const gaPrefix = "ga:"
+
+// To create fixtures for test from the response resp
+// j, _ := json.Marshal(resp)
+// fmt.Println(string(j))
 
 // earliest date google analytics accept for date ranges
 const (
@@ -62,7 +66,6 @@ var mappingOrder = map[string]string{
 
 type Analytics struct {
 	config          *jwt.Config
-	client          *http.Client
 	servicev3       *gav3.Service
 	realtimeService *gav3.DataRealtimeService
 	service         *ga.Service
@@ -83,16 +86,15 @@ func NewAnalyticsClient(keyfile string) (*Analytics, error) {
 		return nil, fmt.Errorf("creating JWT config from json keyfile %q failed: %v", keyfile, err)
 	}
 
-	an.client = an.config.Client(context.Background())
-
 	// analytics reporting v4 service
-	an.service, err = ga.New(an.client)
+
+	an.service, err = ga.NewService(context.Background(), option.WithHTTPClient(an.config.Client(context.Background())))
 	if err != nil {
 		return nil, fmt.Errorf("creating the analytics reporting service v4 object failed: %v", err)
 	}
 
 	// analytics reporting v3 service object.
-	an.servicev3, err = gav3.New(an.client)
+	an.servicev3, err = gav3.NewService(context.Background(), option.WithHTTPClient(an.config.Client(context.Background())))
 	if err != nil {
 		return nil, fmt.Errorf("creating the analytics reporting service v3 object failed: %v", err)
 	}
@@ -207,9 +209,6 @@ func (c *Analytics) BarMetric(
 	}
 
 	resp, err := c.service.Reports.BatchGet(req).Do()
-	// create fixture for tests
-	// j, _ := json.Marshal(resp)
-	// fmt.Println(string(j))
 
 	if err != nil {
 		return nil, nil, errors.Wrapf(
