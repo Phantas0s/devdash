@@ -70,3 +70,51 @@ func Test_CommitCount(t *testing.T) {
 		})
 	}
 }
+
+func Test_FomatListPullRequest(t *testing.T) {
+	testCases := []struct {
+		name        string
+		expected    [][]string
+		fixtureFile string
+		limit       int
+	}{
+		{
+			name: "happy case",
+			expected: [][]string{
+				{
+					"title",
+					"state",
+					"created at",
+					"merged",
+					"commits",
+				},
+				{
+					"super pull request",
+					"closed",
+					"2018-10-19 21:12:25 +0000 UTC",
+					"unknown",
+					"unknown",
+				},
+			},
+			fixtureFile: "./testdata/fixtures/github_list_pull_request.json",
+			limit:       1000000,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			gpr := []*github.PullRequest{}
+			fixtures := ReadFixtureFile(tc.fixtureFile, t)
+			err := json.Unmarshal(fixtures, &gpr)
+			if err != nil {
+				t.Error(err)
+			}
+
+			actual := formatListPullRequests(gpr, tc.limit)
+
+			if !reflect.DeepEqual(tc.expected, actual) {
+				t.Errorf("Expected %v, actual %v", tc.expected, actual)
+			}
+		})
+	}
+}

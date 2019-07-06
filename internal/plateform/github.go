@@ -2,6 +2,7 @@ package plateform
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -189,43 +190,54 @@ func (g *Github) ListIssues(repository string, limit int) ([][]string, error) {
 }
 
 func (g *Github) ListPullRequests(repository string, limit int) ([][]string, error) {
-	headers := []string{"title", "state", "created at", "merged", "commits"}
-
 	is, err := g.fetchPullRequests(repository, limit)
 	if err != nil {
 		return nil, err
 	}
 
+	lpr := formatListPullRequests(is, limit)
+
+	return lpr, nil
+}
+
+func formatListPullRequests(is []*github.PullRequest, limit int) [][]string {
+	// j, _ := json.Marshal(is)
+	// fmt.Println(string(j))
+
+	fmt.Println()
 	if limit > len(is) {
 		limit = len(is)
 	}
 
+	headers := []string{"title", "state", "created at", "merged", "commits"}
+
+	defaultHeader := "unknown"
 	prs := make([][]string, limit+1)
 	prs[0] = headers
 	for k, v := range is {
-		n := "unknown"
+		n := defaultHeader
 		if v.Title != nil {
 			n = *v.Title
 		}
 
-		state := "unknown"
+		state := defaultHeader
 		if v.State != nil {
 			state = *v.State
 		}
 
-		createdAt := "unknown"
+		createdAt := defaultHeader
 		if v.CreatedAt != nil {
 			t := *v.CreatedAt
 			createdAt = t.String()
 		}
 
-		merged := "unknown"
+		merged := defaultHeader
 		if v.Merged != nil {
 			m := *v.Merged
 			merged = strconv.FormatBool(m)
 		}
 
-		commits := "unknown"
+		commits := defaultHeader
 		if v.Commits != nil {
 			c := *v.Commits
 			commits = strconv.FormatInt(int64(c), 10)
@@ -240,7 +252,7 @@ func (g *Github) ListPullRequests(repository string, limit int) ([][]string, err
 		}
 	}
 
-	return prs, nil
+	return prs
 }
 
 func (g *Github) TrafficView(repository string, days int) ([]string, []int, error) {
@@ -279,7 +291,7 @@ func formatCommitCounts(
 	endWeek int64,
 	startDate time.Time,
 ) ([]string, []int) {
-	// reverse the count of commits (from ASC to DESC)
+	// Reverse the count of commits (from ASC to DESC).
 	for i := len(c.Owner)/2 - 1; i >= 0; i-- {
 		opp := len(c.Owner) - 1 - i
 		c.Owner[i], c.Owner[opp] = c.Owner[opp], c.Owner[i]
@@ -296,7 +308,6 @@ func formatCommitCounts(
 		// we need to come back to the first day of it
 		// and then go back to the number of week (7 days)
 		// specified in start date.
-
 		weekDay := int(startDate.Weekday())
 		s := startDate.AddDate(0, 0, (-(weekDay) - (7 * k)))
 		if weekDay == 0 && k == 0 {
@@ -357,8 +368,6 @@ func (g *Github) fetchCommitCount(repository string) (*github.RepositoryParticip
 	if err != nil {
 		return nil, errors.Wrapf(err, "can't find repo %s of owner %s", repo, g.owner)
 	}
-	// j, _ := json.Marshal(p)
-	// fmt.Println(string(j))
 
 	return p, nil
 }
