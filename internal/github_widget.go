@@ -20,6 +20,7 @@ const (
 	githubTablePullRequests = "github.table_pull_requests"
 	githubBarTrafficView    = "github.bar_traffic_view"
 	githubBarCommits        = "github.bar_commits"
+	githubCurveStars        = "github.curve_stars"
 )
 
 type githubWidget struct {
@@ -59,6 +60,8 @@ func (g *githubWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 		err = g.barTrafficView(widget)
 	case githubBarCommits:
 		err = g.barCommits(widget)
+	case githubCurveStars:
+		err = g.curveStars(widget)
 	default:
 		return errors.Errorf("can't find the widget %s for service github", widget.Name)
 	}
@@ -340,6 +343,27 @@ func (g *githubWidget) barCommits(widget Widget) (err error) {
 	}
 
 	dim, counts, err := g.client.CommitCounts(repo, sw, ew, time.Now())
+	if err != nil {
+		return err
+	}
+
+	g.tui.AddBarChart(counts, dim, title, widget.Options)
+
+	return nil
+}
+
+func (g *githubWidget) curveStars(widget Widget) (err error) {
+	var repo string
+	if _, ok := widget.Options[optionRepository]; ok {
+		repo = widget.Options[optionRepository]
+	}
+
+	title := " Stars "
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	dim, counts, err := g.client.CountStars(repo)
 	if err != nil {
 		return err
 	}

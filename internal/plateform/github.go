@@ -1,8 +1,12 @@
+// To get fixtures to test
+// j, _ := json.Marshal(is)
+// fmt.Println(string(j))
+
 package plateform
 
 import (
 	"context"
-	"fmt"
+	"sort"
 	"strconv"
 	"time"
 
@@ -201,10 +205,6 @@ func (g *Github) ListPullRequests(repository string, limit int) ([][]string, err
 }
 
 func formatListPullRequests(is []*github.PullRequest, limit int) [][]string {
-	// j, _ := json.Marshal(is)
-	// fmt.Println(string(j))
-
-	fmt.Println()
 	if limit > len(is) {
 		limit = len(is)
 	}
@@ -331,6 +331,70 @@ func formatCommitCounts(
 		d[i], d[opp] = d[opp], d[i]
 	}
 	return d, co
+}
+
+func (g *Github) CountStars(repository string) (dim []string, val []int, err error) {
+	se, err := g.fetchStars(repository)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	sort.SliceStable(se, func(i, j int) bool {
+		return se[i].StarredAt.Time.Before(se[j].StarredAt.Time)
+	})
+
+	t := map[string]int{}
+	for _, v := range se {
+		d := v.StarredAt.Time.Format("01-02")
+		if _, ok := t[d]; !ok {
+			t[d] = 1
+		} else {
+			t[d] += 1
+		}
+	}
+
+	// TODO map is not in the good order...
+	for k, v := range t {
+		dim = append(dim, k)
+		val = append(val, v)
+	}
+
+	// fmt.Println(dim)
+	// fmt.Println(val)
+
+	return
+}
+
+// Fetch all events for a repo
+func (g *Github) fetchStars(repository string) (s []*github.Stargazer, err error) {
+	repo := g.repo
+	if repository != "" {
+		repo = repository
+	}
+
+	if repo == "" {
+		return nil, errors.New("you need to specify a repository in the github service or in the widget")
+	}
+
+	// TODO implement goroutine here
+	count := 1
+	for {
+		e, _, err := g.client.Activity.ListStargazers(context.Background(), g.owner, repo, &github.ListOptions{
+			Page:    count,
+			PerPage: 100,
+		})
+		if err != nil {
+			return nil, errors.Wrapf(err, "can't find repo %s of owner %s", repo, g.owner)
+		}
+
+		s = append(s, e...)
+
+		if len(e) < 100 {
+			return s, nil
+		}
+
+		count++
+	}
 }
 
 // Fetch the whole repo per widget since we need to fetch the data during a regular time interval.

@@ -10,7 +10,7 @@ import (
 )
 
 // StartDate is normally the current date
-func Test_CommitCount(t *testing.T) {
+func Test_formatCommitCount(t *testing.T) {
 	testCases := []struct {
 		name        string
 		fixtureFile string
