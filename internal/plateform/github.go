@@ -343,24 +343,23 @@ func (g *Github) CountStars(repository string) (dim []string, val []int, err err
 		return se[i].StarredAt.Time.Before(se[j].StarredAt.Time)
 	})
 
-	t := map[string]int{}
-	for _, v := range se {
+	var t string
+	var w int
+	// create ordered dim and val slices
+	// TODO add 0 value for dates which are not in the results
+	for k, v := range se {
 		d := v.StarredAt.Time.Format("01-02")
-		if _, ok := t[d]; !ok {
-			t[d] = 1
+		if t != "" && t == d {
+			w++
 		} else {
-			t[d] += 1
+			if k != 0 {
+				val = append(val, w)
+			}
+			dim = append(dim, d)
+			w = 1
+			t = v.StarredAt.Time.Format("01-02")
 		}
 	}
-
-	// TODO map is not in the good order...
-	for k, v := range t {
-		dim = append(dim, k)
-		val = append(val, v)
-	}
-
-	// fmt.Println(dim)
-	// fmt.Println(val)
 
 	return
 }
