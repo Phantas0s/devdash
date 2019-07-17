@@ -10,6 +10,45 @@ import (
 )
 
 // StartDate is normally the current date
+func Test_formatCountStars(t *testing.T) {
+	testCases := []struct {
+		name        string
+		fixtureFile string
+		expectedDim []string
+		expectedVal []int
+	}{
+		// TODO wrong result...
+		{
+			name:        "happy case",
+			expectedVal: []int{36, 21, 23},
+			expectedDim: []string{"05-28", "05-29", "05-30", "06-10"},
+			fixtureFile: "./testdata/fixtures/github_start_count.json",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			sg1 := []*github.Stargazer{}
+			fixtures := ReadFixtureFile(tc.fixtureFile, t)
+			err := json.Unmarshal(fixtures, &sg1)
+			if err != nil {
+				t.Error(err)
+			}
+
+			dim, val := formatCountStars(sg1)
+
+			if !reflect.DeepEqual(dim, tc.expectedDim) {
+				t.Errorf("Expected %v, actual %v", tc.expectedDim, dim)
+			}
+
+			if !reflect.DeepEqual(val, tc.expectedVal) {
+				t.Errorf("Expected %v, actual %v", tc.expectedVal, val)
+			}
+		})
+	}
+}
+
+// StartDate is normally the current date
 func Test_formatCommitCount(t *testing.T) {
 	testCases := []struct {
 		name        string

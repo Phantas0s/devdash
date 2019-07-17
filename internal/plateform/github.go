@@ -6,6 +6,8 @@ package plateform
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"sort"
 	"strconv"
 	"time"
@@ -274,6 +276,7 @@ func (g *Github) TrafficView(repository string, days int) ([]string, []int, erro
 	return dimension, counts, nil
 }
 
+// TODO rename countCommits
 func (g *Github) CommitCounts(repository string, startWeek int64, endWeek int64, startDate time.Time) ([]string, []int, error) {
 	c, err := g.fetchCommitCount(repository)
 	if err != nil {
@@ -285,6 +288,7 @@ func (g *Github) CommitCounts(repository string, startWeek int64, endWeek int64,
 	return d, co, nil
 }
 
+// TODO rename formatCountCommits
 func formatCommitCounts(
 	c *github.RepositoryParticipation,
 	startWeek int64,
@@ -338,16 +342,25 @@ func (g *Github) CountStars(repository string) (dim []string, val []int, err err
 	if err != nil {
 		return nil, nil, err
 	}
+	j, _ := json.Marshal(se)
+	fmt.Println(string(j))
 
-	sort.SliceStable(se, func(i, j int) bool {
-		return se[i].StarredAt.Time.Before(se[j].StarredAt.Time)
+	// dim, val = formatCountStars(se)
+
+	return
+	// return dim, val, nil
+}
+
+func formatCountStars(stargazers []*github.Stargazer) (dim []string, val []int) {
+	sort.SliceStable(stargazers, func(i, j int) bool {
+		return stargazers[i].StarredAt.Time.Before(stargazers[j].StarredAt.Time)
 	})
 
 	var t string
 	var w int
 	// create ordered dim and val slices
 	// TODO add 0 value for dates which are not in the results
-	for k, v := range se {
+	for k, v := range stargazers {
 		d := v.StarredAt.Time.Format("01-02")
 		if t != "" && t == d {
 			w++
@@ -388,7 +401,7 @@ func (g *Github) fetchStars(repository string) (s []*github.Stargazer, err error
 
 		s = append(s, e...)
 
-		if len(e) < 100 {
+		if count == 2 {
 			return s, nil
 		}
 

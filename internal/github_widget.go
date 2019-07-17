@@ -317,9 +317,7 @@ func (g *githubWidget) barCommits(widget Widget) (err error) {
 	}
 
 	var sw int64 = 0
-	if strings.Contains(sd, "today") {
-		sw = 0
-	} else if strings.Contains(sd, "weeks_ago") {
+	if strings.Contains(sd, "weeks_ago") {
 		t := strings.Split(sd, "_")
 		sw, err = strconv.ParseInt(t[0], 0, 0)
 		if err != nil {
@@ -330,9 +328,7 @@ func (g *githubWidget) barCommits(widget Widget) (err error) {
 	}
 
 	var ew int64 = 0
-	if strings.Contains(ed, "today") {
-		ew = 0
-	} else if strings.Contains(ed, "weeks_ago") {
+	if strings.Contains(ed, "weeks_ago") {
 		t := strings.Split(ed, "_")
 		ew, err = strconv.ParseInt(t[0], 0, 0)
 		if err != nil {
