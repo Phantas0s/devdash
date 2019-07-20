@@ -1,4 +1,4 @@
-// To get fixtures to test
+// To get fixtures in order to write tests
 // j, _ := json.Marshal(is)
 // fmt.Println(string(j))
 
@@ -6,13 +6,11 @@ package plateform
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"sort"
 	"strconv"
 	"time"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v27/github"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 )
@@ -342,15 +340,14 @@ func (g *Github) CountStars(repository string) (dim []string, val []int, err err
 	if err != nil {
 		return nil, nil, err
 	}
-	j, _ := json.Marshal(se)
-	fmt.Println(string(j))
 
-	// dim, val = formatCountStars(se)
+	dim, val = formatCountStars(se)
 
-	return
-	// return dim, val, nil
+	return dim, val, nil
 }
 
+// create ordered dim and val slices
+// TODO add 0 value for dates which are not in the results
 func formatCountStars(stargazers []*github.Stargazer) (dim []string, val []int) {
 	sort.SliceStable(stargazers, func(i, j int) bool {
 		return stargazers[i].StarredAt.Time.Before(stargazers[j].StarredAt.Time)
@@ -358,8 +355,6 @@ func formatCountStars(stargazers []*github.Stargazer) (dim []string, val []int) 
 
 	var t string
 	var w int
-	// create ordered dim and val slices
-	// TODO add 0 value for dates which are not in the results
 	for k, v := range stargazers {
 		d := v.StarredAt.Time.Format("01-02")
 		if t != "" && t == d {
@@ -373,6 +368,7 @@ func formatCountStars(stargazers []*github.Stargazer) (dim []string, val []int) 
 			t = v.StarredAt.Time.Format("01-02")
 		}
 	}
+	val = append(val, w)
 
 	return
 }
@@ -401,7 +397,7 @@ func (g *Github) fetchStars(repository string) (s []*github.Stargazer, err error
 
 		s = append(s, e...)
 
-		if count == 2 {
+		if len(e) < 100 {
 			return s, nil
 		}
 

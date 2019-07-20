@@ -1,0 +1,39 @@
+module github.com/Phantas0s/devdash
+
+go 1.12
+
+require (
+	cloud.google.com/go v0.40.0
+	github.com/Phantas0s/termui v0.0.0-20190604143135-fccf6e189984
+	github.com/fsnotify/fsnotify v1.4.7
+	github.com/golang/protobuf v1.3.1
+	github.com/google/go-github v17.0.0+incompatible
+	github.com/google/go-github/v27 v27.0.1
+	github.com/google/go-querystring v1.0.0
+	github.com/hashicorp/golang-lru v0.5.1
+	github.com/hashicorp/hcl v1.0.0
+	github.com/magiconair/properties v1.8.1
+	github.com/maruel/panicparse v0.0.0-20190605183613-89bde6284d10
+	github.com/mattn/go-runewidth v0.0.4
+	github.com/mitchellh/go-wordwrap v1.0.0
+	github.com/mitchellh/mapstructure v1.1.2
+	github.com/nsf/termbox-go v0.0.0-20190325093121-288510b9734e
+	github.com/pelletier/go-toml v1.4.0
+	github.com/pkg/errors v0.8.1
+	github.com/sparrc/go-ping v0.0.0-20190613174326-4e5b6552494c
+	github.com/spf13/afero v1.2.2
+	github.com/spf13/cast v1.3.0
+	github.com/spf13/jwalterweatherman v1.1.0
+	github.com/spf13/pflag v1.0.3
+	github.com/spf13/viper v1.4.0
+	go.opencensus.io v0.22.0
+	golang.org/x/net v0.0.0-20190620200207-3b0461eec859
+	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
+	golang.org/x/sys v0.0.0-20190621203818-d432491b9138
+	golang.org/x/text v0.3.2
+	google.golang.org/api v0.6.0
+	google.golang.org/appengine v1.6.1
+	google.golang.org/genproto v0.0.0-20190620144150-6af8c5fc6601
+	google.golang.org/grpc v1.21.1
+	gopkg.in/yaml.v2 v2.2.2
+)

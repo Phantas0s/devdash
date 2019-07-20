@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v27/github"
 )
 
 // StartDate is normally the current date
@@ -20,7 +20,7 @@ func Test_formatCountStars(t *testing.T) {
 		// TODO wrong result...
 		{
 			name:        "happy case",
-			expectedVal: []int{36, 21, 23},
+			expectedVal: []int{36, 21, 23, 3},
 			expectedDim: []string{"05-28", "05-29", "05-30", "06-10"},
 			fixtureFile: "./testdata/fixtures/github_start_count.json",
 		},
