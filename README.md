@@ -368,7 +368,7 @@ The repository is not mandatory. However, you will need to precise the repositor
 | ------------------- | --------------------------------------------------------------------------------------- |
 | gsc.table_pages     | Display clicks, impressions, ctr, position for pages                                    |
 | gsc.table_queries   | Display clicks, impressions, ctr, position for queries                                  |
-| ga.table            | Display theoretically any dimension from Google Search Console on a given time period   |
+| gsc.table            | Display theoretically any dimension from Google Search Console on a given time period   |
 
 ### Widget Options
 
