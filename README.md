@@ -1,6 +1,6 @@
-![travis CLI](https://travis-ci.org/Phantas0s/devdash.svg?branch=master&style=for-the-badge) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ec1e19b08f3b40d19f3acaf93e3e186b)](https://www.codacy.com/app/Phantas0s/devdash?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Phantas0s/devdash&amp;utm_campaign=Badge_Grade) [![Hits-of-Code](https://hitsofcode.com/github/phantas0s/devdash)](https://hitsofcode.com/view/github/phantas0s/devdash) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![GitSpo Mentions](https://gitspo.com/badges/mentions/Phantas0s/devdash?style=flat-square)](https://gitspo.com/mentions/Phantas0s/devdash)
+![travis CLI](https://travis-ci.org/Phantas0s/devdash.svg?branch=master&style=for-the-badge) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ec1e19b08f3b40d19f3acaf93e3e186b)](https://www.codacy.com/app/Phantas0s/devdash?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Phantas0s/devdash&amp;utm_campaign=Badge_Grade)  [![Go Report Card](https://goreportcard.com/badge/github.com/Phantas0s/devdash)](https://goreportcard.com/report/github.com/Phantas0s/devdash) [![Hits-of-Code](https://hitsofcode.com/github/phantas0s/devdash)](https://hitsofcode.com/view/github/phantas0s/devdash) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![downloads](https://img.shields.io/github/downloads/phantas0s/devdash/total.svg?color=blue)
 ![logo of devdash with a gopher](./doc/img/logo.jpg) 
-[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/T6T4W5K0)
+[![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=DevDash%20-%20Highly%20Configurable%20Terminal%20Dashboard%20For%20Developers:&url=https%3A%2F%2Fgithub.com%2Fphantas0s%2Fdevdash&hashtags=developers,dashboard,terminal,CLI,golang) [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/T6T4W5K0)
 
 DevDash is a terminal dashboard for developers who want the most up-to-date data they need, per project, at one place.
 
@@ -395,7 +395,7 @@ The repository is not mandatory. However, you will need to precise the repositor
 | ------------------- | --------------------------------------------------------------------------------------- |
 | gsc.table_pages     | Display clicks, impressions, ctr, position for pages                                    |
 | gsc.table_queries   | Display clicks, impressions, ctr, position for queries                                  |
-| ga.table            | Display theoretically any dimension from Google Search Console on a given time period   |
+| gsc.table            | Display theoretically any dimension from Google Search Console on a given time period   |
 
 ### Widget Options
 
