@@ -61,5 +61,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Display and Grid system
 * YAML configuration system
 
-[0.1.1]: https://github.com/Phantas0s/devdash/releases/tag/0.1.1
-[0.1.0]: https://github.com/Phantas0s/devdash/releases/tag/0.1.0
+[0.1.1]: https://github.com/Phantas0s/devdash/releases/tag/v0.1.1
+[0.1.0]: https://github.com/Phantas0s/devdash/releases/tag/v0.1.0
