@@ -108,7 +108,8 @@ func (p *project) Render(tui *Tui, d bool) (err error) {
 				switch serviceID {
 				case "ga":
 					if p.gaWidget == nil {
-						return errors.Errorf("can't use the widget %s without the service GoogleAnalytics - please fix your configuration file.", w.Name)
+						displayError(tui, errors.Errorf("can't use the widget %s without the service GoogleAnalytics - please fix your configuration file.", w.Name))
+						continue
 					}
 
 					if err = p.gaWidget.CreateWidgets(w, tui); err != nil {
@@ -116,7 +117,8 @@ func (p *project) Render(tui *Tui, d bool) (err error) {
 					}
 				case "mon":
 					if p.monitorWidget == nil {
-						return errors.Errorf("can't use the widget %s without the service Monitor - please fix your configuration file.", w.Name)
+						displayError(tui, errors.Errorf("can't use the widget %s without the service Monitor - please fix your configuration file.", w.Name))
+						continue
 					}
 
 					if err = p.monitorWidget.CreateWidgets(w, tui); err != nil {
@@ -124,7 +126,8 @@ func (p *project) Render(tui *Tui, d bool) (err error) {
 					}
 				case "gsc":
 					if p.gscWidget == nil {
-						return errors.Errorf("can't use the widget %s without the service Google Search Console - please fix your configuration file.", w.Name)
+						displayError(tui, errors.Errorf("can't use the widget %s without the service Google Search Console - please fix your configuration file.", w.Name))
+						continue
 					}
 
 					if err = p.gscWidget.CreateWidgets(w, tui); err != nil {
@@ -132,14 +135,15 @@ func (p *project) Render(tui *Tui, d bool) (err error) {
 					}
 				case "github":
 					if p.githubWidget == nil {
-						return errors.Errorf("can't use the widget %s without the service Github - please fix your configuration file.", w.Name)
+						displayError(tui, errors.Errorf("can't use the widget %s without the service Github - please fix your configuration file.", w.Name))
+						continue
 					}
 
 					if err = p.githubWidget.CreateWidgets(w, tui); err != nil {
 						return err
 					}
 				default:
-					return errors.Errorf("could not find the service for widget %s - wrong name - please verify your configuration file", w.Name)
+					displayError(tui, errors.Errorf("The service %s doesn't exist (yet) - please verify your configuration file.", w.Name))
 				}
 			}
 			if len(col) > 0 {
