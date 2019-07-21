@@ -2,3 +2,4 @@ vendor
 goanalytics-*
 cmd/devdash/devdash*
 .devdash*
+.goreleaser.yml
