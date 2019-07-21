@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"time"
 
 	"github.com/Phantas0s/devdash/internal"
@@ -18,7 +19,11 @@ func main() {
 	debug = flag.Bool("debug", false, "Debug mode")
 	flag.Parse()
 
+	project := cfg.Projects{}
+	if _, err := os.Stat(*file); os.IsNotExist(err) {
+	}
 	cfg, tui, err := loadFile(*file)
+
 	if err != nil {
 		fmt.Println(err)
 	}
