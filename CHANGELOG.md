@@ -14,11 +14,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * Count commits overtime
     * Display issues
     * Display repositories in table with information
-* Add Go Module
-* Write README documentation
+
+## [0.1.1] - 2018-07-21
+
+### Added
+
+* Go Module
 
 ## [0.1.0] - 2018-05-28
+
 ### Added
+
 * Write README documentation
 * Add Github widgets
     * github.box_stars
@@ -55,4 +61,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Display and Grid system
 * YAML configuration system
 
-[0.0.1]: https://github.com/Phantas0s/devdash/releases/tag/0.1.0
+[0.1.1]: https://github.com/Phantas0s/devdash/releases/tag/0.1.1
+[0.1.0]: https://github.com/Phantas0s/devdash/releases/tag/0.1.0
