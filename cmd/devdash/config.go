@@ -23,6 +23,15 @@ type General struct {
 	Refresh int64             `mapstructure:"refresh"`
 }
 
+// RefreshTime return the duration before refreshing the data of all widgets, in seconds.
+func (c config) RefreshTime() int64 {
+	if c.General.Refresh == 0 {
+		return 60
+	}
+
+	return c.General.Refresh
+}
+
 type Project struct {
 	Name         string            `mapstructure:"name"`
 	Services     Services          `mapstructure:"services"`
@@ -74,9 +83,9 @@ type Github struct {
 }
 
 // OrderWidgets add the widgets to a three dimensional slice.
-// First dimension: index of the rows (ir or indexRows)
-// Second dimension: index of the columns (ic or indexColumn)
-// Third dimension: index of the widget
+// First dimension: index of the rows (ir or indexRows).
+// Second dimension: index of the columns (ic or indexColumn).
+// Third dimension: index of the widget.
 func (p Project) OrderWidgets() ([][][]internal.Widget, [][]string) {
 	rowLen := len(p.Widgets)
 

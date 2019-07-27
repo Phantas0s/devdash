@@ -19,10 +19,10 @@ func main() {
 	debug = flag.Bool("debug", false, "Debug mode")
 	flag.Parse()
 
-	project := cfg.Projects{}
-	if _, err := os.Stat(*file); os.IsNotExist(err) {
-	}
 	cfg, tui, err := loadFile(*file)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	if err != nil {
 		fmt.Println(err)
@@ -34,31 +34,42 @@ func main() {
 		fmt.Println(err)
 	}
 
-	ticker := time.NewTicker(time.Duration(cfg.General.Refresh) * time.Second)
-	go func() {
-		for range ticker.C {
-			tui.Clean()
-
-			err = run(cfg.Projects, tui)
-			if err != nil {
-				fmt.Println(err)
-			}
+	if _, err := os.Stat(*file); os.IsNotExist(err) {
+		internal.DisplayNoFile(tui)
+		err := tui.AddCol("XXL")
+		if err != nil {
+			fmt.Println(err)
 		}
-	}()
+
+		tui.AddRow()
+		tui.Render()
+	} else {
+		ticker := time.NewTicker(time.Duration(cfg.RefreshTime()) * time.Second)
+		go func() {
+			for range ticker.C {
+				tui.Clean()
+
+				err = run(cfg.Projects, tui)
+				if err != nil {
+					fmt.Println(err)
+				}
+			}
+		}()
+	}
 
 	tui.Loop()
 }
 
+// TODO To refactor - SRP violated here.
 func loadFile(file string) (config, *internal.Tui, error) {
-	data, _ := ioutil.ReadFile(file)
-	cfg := mapConfig(data)
-
 	termui, err := plateform.NewTermUI(*debug)
 	if err != nil {
 		return config{}, nil, err
 	}
 
 	tui := internal.NewTUI(termui)
+	data, _ := ioutil.ReadFile(file)
+	cfg := mapConfig(data)
 	tui.AddKQuit(cfg.KQuit())
 
 	return cfg, tui, nil

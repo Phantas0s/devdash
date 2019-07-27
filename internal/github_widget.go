@@ -294,7 +294,7 @@ func (g *githubWidget) barTrafficView(widget Widget) (err error) {
 	return nil
 }
 
-// TODO refactoring
+// TODO to refactor
 func (g *githubWidget) barCommits(widget Widget) (err error) {
 	var repo string
 	if _, ok := widget.Options[optionRepository]; ok {
@@ -316,26 +316,24 @@ func (g *githubWidget) barCommits(widget Widget) (err error) {
 		ed = widget.Options[optionEndDate]
 	}
 
-	var sw int64 = 0
-	if strings.Contains(sd, "weeks_ago") {
-		t := strings.Split(sd, "_")
-		sw, err = strconv.ParseInt(t[0], 0, 0)
-		if err != nil {
-			return errors.Wrapf(err, "%s is not a valid date", sd)
-		}
-	} else {
+	if !strings.Contains(sd, "weeks_ago") {
 		return errors.New("the widget bar_commits require you to indicate a week range, ie startDate: 5_weeks_ago, endDate: 0_weeks_ago ")
 	}
 
-	var ew int64 = 0
-	if strings.Contains(ed, "weeks_ago") {
-		t := strings.Split(ed, "_")
-		ew, err = strconv.ParseInt(t[0], 0, 0)
-		if err != nil {
-			return errors.Wrapf(err, "%s is not a valid date", ed)
-		}
-	} else {
+	t := strings.Split(sd, "_")
+	sw, err := strconv.ParseInt(t[0], 0, 0)
+	if err != nil {
+		return errors.Wrapf(err, "%s is not a valid date", sd)
+	}
+
+	if !strings.Contains(ed, "weeks_ago") {
 		return errors.New("the widget bar_commits require you to indicate a week range, ie startDate: 5_weeks_ago, endDate: 0_weeks_ago ")
+	}
+
+	t = strings.Split(ed, "_")
+	ew, err := strconv.ParseInt(t[0], 0, 0)
+	if err != nil {
+		return errors.Wrapf(err, "%s is not a valid date", ed)
 	}
 
 	dim, counts, err := g.client.CommitCounts(repo, sw, ew, time.Now())

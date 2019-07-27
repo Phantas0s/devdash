@@ -13,11 +13,13 @@ import (
 	sc "google.golang.org/api/webmasters/v3"
 )
 
+// Search console connect to the Google Search Console API to fetch the data needed.
 type SearchConsole struct {
 	config  *jwt.Config
 	service *sc.Service
 }
 
+// Response returned after requesting the API.
 type SearchConsoleResponse struct {
 	Dimension   string
 	Clicks      float64

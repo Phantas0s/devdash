@@ -17,13 +17,12 @@ import (
 
 const gaPrefix = "ga:"
 
-// To create fixtures for test from the response resp
+// To create fixtures in order to test the data formatting.
 // j, _ := json.Marshal(resp)
 // fmt.Println(string(j))
 
-// earliest date google analytics accept for date ranges
 const (
-	earliestDate     = "2005-01-01"
+	earliestDate     = "2005-01-01" // This is the earliest date Google Analytics accepts.
 	newVisitor       = "New Visitor"
 	returningVisitor = "Returning Visitor"
 )

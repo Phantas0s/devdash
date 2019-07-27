@@ -12,23 +12,23 @@ import (
 const (
 	today     = "today"
 	yesterday = "yesterday"
-	days_ago  = "days_ago"
+	daysAgo   = "days_ago"
 
-	this_week = "this_week"
-	last_week = "last_week"
-	weeks_ago = "weeks_ago"
+	thisWeek = "this_week"
+	lastWeek = "last_week"
+	weeksAgo = "weeks_ago"
 
-	this_month = "this_month"
-	last_month = "last_month"
-	months_ago = "months_ago"
+	thisMonth = "this_month"
+	lastMonth = "last_month"
+	monthsAgo = "months_ago"
 
-	this_year = "this_year"
-	last_year = "last_year"
-	years_ago = "years_ago"
+	thisYear = "this_year"
+	lastYear = "last_year"
+	yearsAgo = "years_ago"
 )
 
-// ConvertDates from config string values to normally formatted start date / end date.
-// "next_month" => 2019-01-01 / 2019-01-31
+// ConvertDates from configuration string values to formatted start date / end date with layout.
+// Example: "next_month" => startDate "2019-01-01", endDate "2019-01-31".
 func ConvertDates(
 	base time.Time,
 	startDate string,
@@ -55,7 +55,7 @@ func convertStartDate(base time.Time, startDate string) (time.Time, error) {
 		return base, nil
 	}
 
-	if strings.Contains(startDate, days_ago) {
+	if strings.Contains(startDate, daysAgo) {
 		t := strings.Split(startDate, "_")
 		days, err := strconv.ParseInt(t[0], 0, 0)
 		if err != nil {
@@ -65,12 +65,12 @@ func convertStartDate(base time.Time, startDate string) (time.Time, error) {
 		return base.AddDate(0, 0, -int(days)), nil
 	}
 
-	if strings.Contains(startDate, this_week) {
+	if strings.Contains(startDate, thisWeek) {
 		startDate, _ := totime.ThisWeek(base)
 		return startDate, nil
 	}
 
-	if strings.Contains(startDate, weeks_ago) {
+	if strings.Contains(startDate, weeksAgo) {
 		t := strings.Split(startDate, "_")
 		weeks, err := strconv.ParseInt(t[0], 0, 0)
 		if err != nil {
@@ -82,12 +82,12 @@ func convertStartDate(base time.Time, startDate string) (time.Time, error) {
 		return startDate, nil
 	}
 
-	if strings.Contains(startDate, this_month) {
+	if strings.Contains(startDate, thisMonth) {
 		startDate, _ := totime.ThisMonth(base)
 		return startDate, nil
 	}
 
-	if strings.Contains(startDate, months_ago) {
+	if strings.Contains(startDate, monthsAgo) {
 		t := strings.Split(startDate, "_")
 		months, err := strconv.ParseInt(t[0], 0, 0)
 		if err != nil {
@@ -99,12 +99,12 @@ func convertStartDate(base time.Time, startDate string) (time.Time, error) {
 		return startDate, nil
 	}
 
-	if strings.Contains(startDate, this_year) {
+	if strings.Contains(startDate, thisYear) {
 		startDate, _ := totime.ThisYear(base)
 		return startDate, nil
 	}
 
-	if strings.Contains(startDate, years_ago) {
+	if strings.Contains(startDate, yearsAgo) {
 		t := strings.Split(startDate, "_")
 		years, err := strconv.ParseInt(t[0], 0, 0)
 		if err != nil {
@@ -124,7 +124,7 @@ func convertEndDate(base time.Time, endDate string) (time.Time, error) {
 		return base, nil
 	}
 
-	if strings.Contains(endDate, days_ago) {
+	if strings.Contains(endDate, daysAgo) {
 		t := strings.Split(endDate, "_")
 		days, err := strconv.ParseInt(t[0], 0, 0)
 		if err != nil {
@@ -134,12 +134,12 @@ func convertEndDate(base time.Time, endDate string) (time.Time, error) {
 		return base.AddDate(0, 0, -int(days)), nil
 	}
 
-	if strings.Contains(endDate, this_week) {
+	if strings.Contains(endDate, thisWeek) {
 		_, endDate := totime.ThisWeek(base)
 		return endDate, nil
 	}
 
-	if strings.Contains(endDate, weeks_ago) {
+	if strings.Contains(endDate, weeksAgo) {
 		t := strings.Split(endDate, "_")
 		weeks, err := strconv.ParseInt(t[0], 0, 0)
 		if err != nil {
@@ -151,12 +151,12 @@ func convertEndDate(base time.Time, endDate string) (time.Time, error) {
 		return endDate, nil
 	}
 
-	if strings.Contains(endDate, this_month) {
+	if strings.Contains(endDate, thisMonth) {
 		_, endDate := totime.ThisMonth(base)
 		return endDate, nil
 	}
 
-	if strings.Contains(endDate, months_ago) {
+	if strings.Contains(endDate, monthsAgo) {
 		t := strings.Split(endDate, "_")
 		months, err := strconv.ParseInt(t[0], 0, 0)
 		if err != nil {
@@ -168,12 +168,12 @@ func convertEndDate(base time.Time, endDate string) (time.Time, error) {
 		return endDate, nil
 	}
 
-	if strings.Contains(endDate, this_year) {
+	if strings.Contains(endDate, thisYear) {
 		endDate, _ := totime.ThisYear(base)
 		return endDate, nil
 	}
 
-	if strings.Contains(endDate, years_ago) {
+	if strings.Contains(endDate, yearsAgo) {
 		t := strings.Split(endDate, "_")
 		years, err := strconv.ParseInt(t[0], 0, 0)
 		if err != nil {
@@ -193,15 +193,15 @@ func resolveAlias(date string) string {
 		return "1_days_ago"
 	}
 
-	if strings.Contains(date, last_week) {
+	if strings.Contains(date, lastWeek) {
 		return "1_weeks_ago"
 	}
 
-	if strings.Contains(date, last_month) {
+	if strings.Contains(date, lastMonth) {
 		return "1_months_ago"
 	}
 
-	if strings.Contains(date, last_year) {
+	if strings.Contains(date, lastYear) {
 		return "1_years_ago"
 	}
 

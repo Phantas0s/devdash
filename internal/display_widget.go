@@ -8,8 +8,8 @@ func displayError(tui *Tui, err error) {
 	})
 }
 
-func displayNoFile(tui *Tui) {
-	tui.AddTextBox("There is no file!", " No configuration file found ", map[string]string{
+func DisplayNoFile(tui *Tui) {
+	tui.AddTextBox(" There is no file! ", " No configuration file found ", map[string]string{
 		optionBorderColor: "red",
 		optionTextColor:   "red",
 		optionTitleColor:  "red",

@@ -435,6 +435,7 @@ func (t *Tui) AddTable(data [][]string, title string, options map[string]string)
 	)
 }
 
+// Add keyboard shortcut from the config to quit DevDash. Default Control C.
 func (t *Tui) AddKQuit(key string) {
 	t.instance.KQuit(key)
 }
