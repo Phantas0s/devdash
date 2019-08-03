@@ -16,13 +16,14 @@ func Test_formatCountStars(t *testing.T) {
 		fixtureFile string
 		expectedDim []string
 		expectedVal []int
+		timeLayout  string
 	}{
-		// TODO wrong result...
 		{
 			name:        "happy case",
 			expectedVal: []int{36, 21, 23, 3},
 			expectedDim: []string{"05-28", "05-29", "05-30", "06-10"},
 			fixtureFile: "./testdata/fixtures/github_start_count.json",
+			timeLayout:  "01-02",
 		},
 	}
 
@@ -35,7 +36,7 @@ func Test_formatCountStars(t *testing.T) {
 				t.Error(err)
 			}
 
-			dim, val := formatCountStars(sg1)
+			dim, val := formatCountStars(sg1, tc.timeLayout, false)
 
 			if !reflect.DeepEqual(dim, tc.expectedDim) {
 				t.Errorf("Expected %v, actual %v", tc.expectedDim, dim)

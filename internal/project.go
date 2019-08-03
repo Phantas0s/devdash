@@ -6,8 +6,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-var debug bool = false
-
 const (
 	// Widget config options
 
@@ -35,8 +33,7 @@ const (
 	optionOrder = "order"
 
 	// Filtering
-	optionMustContain = "must_contain"
-	optionFilters     = "filters"
+	optionFilters = "filters"
 
 	// Repository
 	optionRepository = "repository"
@@ -93,9 +90,8 @@ func (p *project) WithGithub(github *githubWidget) {
 	p.githubWidget = github
 }
 
-func (p *project) Render(tui *Tui, d bool) (err error) {
-	debug = d
-
+// TODO to test
+func (p *project) Render(tui *Tui, debug bool) (err error) {
 	err = p.addTitle(tui)
 	if err != nil {
 		return errors.Wrapf(err, "can't add project title %s", p.name)
@@ -107,43 +103,15 @@ func (p *project) Render(tui *Tui, d bool) (err error) {
 				serviceID := strings.Split(w.Name, ".")[0]
 				switch serviceID {
 				case "ga":
-					if p.gaWidget == nil {
-						displayError(tui, errors.Errorf("can't use the widget %s without the service GoogleAnalytics - please fix your configuration file.", w.Name))
-						continue
-					}
-
-					if err = p.gaWidget.CreateWidgets(w, tui); err != nil {
-						return err
-					}
+					createWidget(p.gaWidget, "Google Analytics", w, tui)
 				case "mon":
-					if p.monitorWidget == nil {
-						displayError(tui, errors.Errorf("can't use the widget %s without the service Monitor - please fix your configuration file.", w.Name))
-						continue
-					}
-
-					if err = p.monitorWidget.CreateWidgets(w, tui); err != nil {
-						return err
-					}
+					createWidget(p.monitorWidget, "Monitor", w, tui)
 				case "gsc":
-					if p.gscWidget == nil {
-						displayError(tui, errors.Errorf("can't use the widget %s without the service Google Search Console - please fix your configuration file.", w.Name))
-						continue
-					}
-
-					if err = p.gscWidget.CreateWidgets(w, tui); err != nil {
-						return err
-					}
+					createWidget(p.gscWidget, "Google Search Console", w, tui)
 				case "github":
-					if p.githubWidget == nil {
-						displayError(tui, errors.Errorf("can't use the widget %s without the service Github - please fix your configuration file.", w.Name))
-						continue
-					}
-
-					if err = p.githubWidget.CreateWidgets(w, tui); err != nil {
-						return err
-					}
+					createWidget(p.githubWidget, "Githug", w, tui)
 				default:
-					displayError(tui, errors.Errorf("The service %s doesn't exist (yet) - please verify your configuration file.", w.Name))
+					displayError(tui, errors.Errorf("The service %s doesn't exist (yet?)", w.Name))
 				}
 			}
 			if len(col) > 0 {
@@ -163,4 +131,12 @@ func (p *project) Render(tui *Tui, d bool) (err error) {
 
 func (p *project) addTitle(tui *Tui) error {
 	return tui.AddProjectTitle(p.name, p.titleOptions)
+}
+
+func createWidget(s service, name string, w Widget, tui *Tui) {
+	if s == nil {
+		displayError(tui, errors.Errorf("Configuration error - you can't use the widget %s without the service %s.", w.Name, name))
+	} else if err := s.CreateWidgets(w, tui); err != nil {
+		displayError(tui, err)
+	}
 }

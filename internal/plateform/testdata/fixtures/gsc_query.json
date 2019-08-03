@@ -1,0 +1,32 @@
+{
+    "responseAggregationType": "byProperty",
+    "rows": [
+        {
+            "clicks": 71,
+            "ctr": 0.3901098901098901,
+            "impressions": 182,
+            "keys": [
+                "php compare datetime"
+            ],
+            "position": 1.7142857142857144
+        },
+        {
+            "clicks": 41,
+            "ctr": 0.37272727272727274,
+            "impressions": 110,
+            "keys": [
+                "php datetime compare"
+            ],
+            "position": 1.518181818181818
+        },
+        {
+            "clicks": 34,
+            "ctr": 0.0774487471526196,
+            "impressions": 439,
+            "keys": [
+                "php compare dates"
+            ],
+            "position": 3.5261958997722096
+        }
+    ]
+}

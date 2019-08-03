@@ -18,9 +18,9 @@ const (
 	githubTableBranches     = "github.table_branches"
 	githubTableIssues       = "github.table_issues"
 	githubTablePullRequests = "github.table_pull_requests"
-	githubBarTrafficView    = "github.bar_traffic_view"
+	githubBarViews          = "github.bar_views"
 	githubBarCommits        = "github.bar_commits"
-	githubCurveStars        = "github.curve_stars"
+	githubBarStars          = "github.bar_stars"
 )
 
 type githubWidget struct {
@@ -56,12 +56,12 @@ func (g *githubWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 		err = g.tableIssues(widget)
 	case githubTablePullRequests:
 		err = g.tablePullRequests(widget)
-	case githubBarTrafficView:
-		err = g.barTrafficView(widget)
+	case githubBarViews:
+		err = g.barViews(widget)
 	case githubBarCommits:
 		err = g.barCommits(widget)
-	case githubCurveStars:
-		err = g.curveStars(widget)
+	case githubBarStars:
+		err = g.barStars(widget)
 	default:
 		return errors.Errorf("can't find the widget %s for service github", widget.Name)
 	}
@@ -273,18 +273,18 @@ func (g *githubWidget) tablePullRequests(widget Widget) (err error) {
 	return nil
 }
 
-func (g *githubWidget) barTrafficView(widget Widget) (err error) {
+func (g *githubWidget) barViews(widget Widget) (err error) {
 	var repo string
 	if _, ok := widget.Options[optionRepository]; ok {
 		repo = widget.Options[optionRepository]
 	}
 
-	title := " Github Traffic Views "
+	title := " Github Views "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}
 
-	dim, counts, err := g.client.TrafficView(repo, 0)
+	dim, counts, err := g.client.Views(repo, 0)
 	if err != nil {
 		return err
 	}
@@ -346,7 +346,7 @@ func (g *githubWidget) barCommits(widget Widget) (err error) {
 	return nil
 }
 
-func (g *githubWidget) curveStars(widget Widget) (err error) {
+func (g *githubWidget) barStars(widget Widget) (err error) {
 	var repo string
 	if _, ok := widget.Options[optionRepository]; ok {
 		repo = widget.Options[optionRepository]

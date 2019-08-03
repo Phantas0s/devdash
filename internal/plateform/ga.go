@@ -70,6 +70,20 @@ type Analytics struct {
 	service         *ga.Service
 }
 
+// Possible values to send to Google Analytics API
+type AnalyticValues struct {
+	ViewID     string
+	StartDate  string
+	EndDate    string
+	TimePeriod string
+	Global     bool
+	Metrics    []string
+	Dimensions []string
+	Filters    []string
+	Orders     []string
+	RowLimit   int64
+}
+
 // New takes a keyfile for authentication and
 // returns a new Google Analytics Reporting Client struct.
 func NewAnalyticsClient(keyfile string) (*Analytics, error) {
@@ -104,23 +118,15 @@ func NewAnalyticsClient(keyfile string) (*Analytics, error) {
 }
 
 // SimpleMetric of one quantitative value.
-func (c *Analytics) SimpleMetric(
-	viewID,
-	metric,
-	startDate,
-	endDate string,
-	global bool,
-) (string, error) {
+func (c *Analytics) SimpleMetric(val AnalyticValues) (string, error) {
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
-				ViewId: viewID,
+				ViewId: val.ViewID,
 				DateRanges: []*ga.DateRange{
-					{StartDate: startDate, EndDate: endDate},
+					{StartDate: val.StartDate, EndDate: val.EndDate},
 				},
-				Metrics: []*ga.Metric{
-					{Expression: mapMetric(metric)},
-				},
+				Metrics:          mapMetrics(val.Metrics),
 				IncludeEmptyRows: true,
 			},
 		},
@@ -131,8 +137,8 @@ func (c *Analytics) SimpleMetric(
 		return "", errors.Wrapf(
 			err,
 			"can't get total metric data from google analytics with start data %s / end_date %s",
-			startDate,
-			endDate,
+			val.StartDate,
+			val.EndDate,
 		)
 	}
 
@@ -144,24 +150,16 @@ func (c *Analytics) SimpleMetric(
 }
 
 // BarMetric provides a bar display with one qualitative dimension and one quantitative value.
-func (c *Analytics) BarMetric(
-	viewID string,
-	startDate string,
-	endDate string,
-	metric string,
-	dimensions []string,
-	timePeriod string,
-	filters []string,
-) ([]string, []int, error) {
-	// Add the time dimension to the first two index of the slice (0, 1)
-	tm := mapTimePeriod(timePeriod)
+func (c *Analytics) BarMetric(val AnalyticValues) ([]string, []int, error) {
+	// Add the time dimension to the first two indexes of the slice (0, 1)
+	tm := mapTimePeriod(val.TimePeriod)
 	dim := []*ga.Dimension{}
 	for _, v := range tm {
 		dim = append(dim, &ga.Dimension{Name: v})
 	}
 
 	formater := formatBar
-	for _, v := range dimensions {
+	for _, v := range val.Dimensions {
 		if v == "user_returning" {
 			formater = formatBarReturning
 		}
@@ -169,11 +167,11 @@ func (c *Analytics) BarMetric(
 	}
 
 	fi := []*ga.DimensionFilter{}
-	if len(dimensions) == 1 {
+	if len(val.Dimensions) == 1 {
 		fi = append(fi, &ga.DimensionFilter{
 			CaseSensitive: false,
-			DimensionName: mapDimension(dimensions[0]),
-			Expressions:   filters,
+			DimensionName: mapDimension(val.Dimensions[0]),
+			Expressions:   val.Filters,
 			Not:           false,
 			Operator:      "PARTIAL",
 		})
@@ -182,13 +180,11 @@ func (c *Analytics) BarMetric(
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
-				ViewId: viewID,
+				ViewId: val.ViewID,
 				DateRanges: []*ga.DateRange{
-					{StartDate: startDate, EndDate: endDate},
+					{StartDate: val.StartDate, EndDate: val.EndDate},
 				},
-				Metrics: []*ga.Metric{
-					{Expression: mapMetric(metric)},
-				},
+				Metrics:    mapMetrics(val.Metrics),
 				Dimensions: dim,
 				OrderBys: []*ga.OrderBy{
 					{
@@ -213,8 +209,8 @@ func (c *Analytics) BarMetric(
 		return nil, nil, errors.Wrapf(
 			err,
 			"can't get users data from google analytics with start data %s / end_date %s",
-			startDate,
-			endDate,
+			val.StartDate,
+			val.EndDate,
 		)
 	}
 
@@ -242,56 +238,55 @@ func (c *Analytics) RealTimeUsers(viewID string) (string, error) {
 }
 
 // Table shaped analytics.
-// Headers on the first row are qualitative dimensions, value can be qualitative or quantitative.
+// Headers on the first row are qualitative dimensions, anue can be qualitative or quantitative.
 func (c *Analytics) Table(
-	viewID string,
-	startDate string,
-	endDate string,
-	global bool,
-	metrics []string,
-	dimension string,
-	orders []string,
+	an AnalyticValues,
 	firstHeader string,
-	filters []string,
 ) (headers []string, dim []string, u [][]string, err error) {
 
 	dateRange := []*ga.DateRange{
-		{StartDate: startDate, EndDate: endDate},
+		{StartDate: an.StartDate, EndDate: an.EndDate},
 	}
 
-	if global {
+	if an.Global {
 		dateRange = []*ga.DateRange{
-			{StartDate: earliestDate, EndDate: endDate},
+			{StartDate: earliestDate, EndDate: an.EndDate},
 		}
 	}
 
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
-				ViewId:     viewID,
-				DateRanges: dateRange,
-				Metrics:    mapMetrics(metrics),
-				Dimensions: []*ga.Dimension{
-					{Name: mapDimension(dimension)},
-				},
-				OrderBys:         mapOrderBy(orders),
+				ViewId:           an.ViewID,
+				DateRanges:       dateRange,
+				Metrics:          mapMetrics(an.Metrics),
+				Dimensions:       mapDimensions(an.Dimensions),
+				OrderBys:         mapOrderBy(an.Orders),
 				IncludeEmptyRows: true,
+				PageSize:         an.RowLimit,
 			},
 		},
 	}
 
-	if len(filters) > 0 {
+	if len(an.Filters) > 0 {
+
+		// TODO now only one filter is possible for one dimension.
+		// If there are more than one dimension, the same set of filter is applied.
+		// Possibility to make it multiple filters for multipme dimension?
+		filters := []*ga.DimensionFilter{}
+		for _, v := range an.Dimensions {
+			filters = append(filters, &ga.DimensionFilter{
+				CaseSensitive: false,
+				DimensionName: v,
+				Expressions:   an.Filters,
+				Not:           false,
+				Operator:      "PARTIAL",
+			})
+		}
+
 		req.ReportRequests[0].DimensionFilterClauses = []*ga.DimensionFilterClause{
 			{
-				Filters: []*ga.DimensionFilter{
-					{
-						CaseSensitive: false,
-						DimensionName: mapDimension(dimension),
-						Expressions:   filters,
-						Not:           false,
-						Operator:      "PARTIAL",
-					},
-				},
+				Filters:  filters,
 				Operator: "AND",
 			},
 		}
@@ -302,8 +297,8 @@ func (c *Analytics) Table(
 		return nil, nil, nil, errors.Wrapf(
 			err,
 			"can't get table data from google analytics with start data %s / end_date %s",
-			startDate,
-			endDate,
+			an.StartDate,
+			an.EndDate,
 		)
 	}
 
@@ -311,26 +306,17 @@ func (c *Analytics) Table(
 		return dim[0]
 	}
 
-	headers = mapHeaders(firstHeader, metrics)
+	headers = mapHeaders(firstHeader, an.Metrics)
 	dim, u = formatTable(resp.Reports, formater)
 	return
 }
 
 // NewVsReturning users.
-func (c *Analytics) StackedBar(
-	viewID string,
-	startDate string,
-	endDate string,
-	metric string,
-	timePeriod string,
-	dimensions []string,
-) (dim []string, new []int, ret []int, err error) {
+func (c *Analytics) StackedBar(an AnalyticValues) (dim []string, new []int, ret []int, err error) {
+	d := mapDimensions(an.Dimensions)
+	tm := mapTimePeriod(an.TimePeriod)
+
 	// Add the time dimensions to the slice (index 1,2)
-	d := []*ga.Dimension{}
-	for _, v := range dimensions {
-		d = append(d, &ga.Dimension{Name: mapDimension(v)})
-	}
-	tm := mapTimePeriod(timePeriod)
 	for _, v := range tm {
 		d = append(d, &ga.Dimension{Name: v})
 	}
@@ -338,13 +324,11 @@ func (c *Analytics) StackedBar(
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
-				ViewId: viewID,
+				ViewId: an.ViewID,
 				DateRanges: []*ga.DateRange{
-					{StartDate: startDate, EndDate: endDate},
+					{StartDate: an.StartDate, EndDate: an.EndDate},
 				},
-				Metrics: []*ga.Metric{
-					{Expression: mapMetric(metric)},
-				},
+				Metrics:    mapMetrics(an.Metrics),
 				Dimensions: d,
 				OrderBys: []*ga.OrderBy{
 					{
@@ -363,8 +347,8 @@ func (c *Analytics) StackedBar(
 		return nil, nil, nil, errors.Wrapf(
 			err,
 			"can't get stacked bar data from google analytics with start data %s / end_date %s",
-			startDate,
-			endDate,
+			an.StartDate,
+			an.EndDate,
 		)
 	}
 
@@ -539,6 +523,15 @@ func mapDimension(dim string) string {
 	}
 
 	return strings.TrimSpace(d)
+}
+
+func mapDimensions(dimensions []string) []*ga.Dimension {
+	d := []*ga.Dimension{}
+	for _, v := range dimensions {
+		d = append(d, &ga.Dimension{Name: mapDimension(v)})
+	}
+
+	return d
 }
 
 func mapOrderBy(o []string) []*ga.OrderBy {

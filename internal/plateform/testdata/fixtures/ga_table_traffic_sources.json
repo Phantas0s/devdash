@@ -1,0 +1,111 @@
+{
+    "reports": [
+        {
+            "columnHeader": {
+                "dimensions": [
+                    "ga:source"
+                ],
+                "metricHeader": {
+                    "metricHeaderEntries": [
+                        {
+                            "name": "ga:sessions",
+                            "type": "INTEGER"
+                        },
+                        {
+                            "name": "ga:pageViews",
+                            "type": "INTEGER"
+                        },
+                        {
+                            "name": "ga:entrances",
+                            "type": "INTEGER"
+                        },
+                        {
+                            "name": "ga:uniquePageviews",
+                            "type": "INTEGER"
+                        }
+                    ]
+                }
+            },
+            "data": {
+                "maximums": [
+                    {
+                        "values": [
+                            "453",
+                            "485",
+                            "453",
+                            "462"
+                        ]
+                    }
+                ],
+                "minimums": [
+                    {
+                        "values": [
+                            "1",
+                            "1",
+                            "1",
+                            "1"
+                        ]
+                    }
+                ],
+                "rowCount": 17,
+                "rows": [
+                    {
+                        "dimensions": [
+                            "google"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "453",
+                                    "485",
+                                    "453",
+                                    "462"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "(direct)"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "132",
+                                    "180",
+                                    "132",
+                                    "155"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "indiehackers.com"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "15",
+                                    "29",
+                                    "15",
+                                    "27"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "totals": [
+                    {
+                        "values": [
+                            "628",
+                            "726",
+                            "628",
+                            "675"
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

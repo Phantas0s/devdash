@@ -233,7 +233,7 @@ The repository is not mandatory. However, you will need to precise the repositor
 | github.table_branches     | All branches of a precise repository                                              |                                                                               |
 | github.table_issues       | All issues (and their states) of a precise repository                             |                                                                               |
 | github.table_repositories | Table of all repositories with count different information (see `metrics` option) |                                                                               |
-| github.bar_traffic_view   | Github traffic of the repository's page the last 14 days                          | Doesn't accept start_date / end_date option                                   |
+| github.bar_views   | Github traffic of the repository's page the last 14 days                          | Doesn't accept start_date / end_date option                                   |
 | github.bar_commits        | Give the number of commit per week (maximum last 52 weeks)                        | stard_date / end_date option must be "x_weeks_go" or "today". x must be < 52  |
 
 ### Widget Options
@@ -263,8 +263,8 @@ The repository is not mandatory. However, you will need to precise the repositor
 
 | Name            | Description                                                                   | Default value     | Examples                                 | Not available for                                        |
 | --------------- | ----------------------------------------------------------------------------- | ----------------- | ---------------------------------------- | -------------------------------------------------------- |
-| start_date      | Start date of time period                                                     | `7_days_ago`      | `2018-01-01`, `2_weeks_ago`              | github.bar_traffic_view                                  |
-| end_date        | End date of time period                                                       | `today`           | `2018-01-31`, `2_weeks_ago`              | github.bar_traffic_view                                  |
+| start_date      | Start date of time period                                                     | `7_days_ago`      | `2018-01-01`, `2_weeks_ago`              | github.bar_views                                  |
+| end_date        | End date of time period                                                       | `today`           | `2018-01-31`, `2_weeks_ago`              | github.bar_views                                  |
 
 ##### Display Options
 
@@ -352,7 +352,7 @@ The repository is not mandatory. However, you will need to precise the repositor
 | orders            | Order of the result. Multiple value possible separated with a comma         | `sessions desc`                                     | `sessions desc,page_views asc`. `page_views`   |                              |
 | filters           | Query filter (prefix `-` to exclude)                                        |                                                     | `value`, `-value`                              |                              |
 | row_limit         | Limit the number of rows                                                    | 5                                                   | 5, 100                                         |                              |
-| character_limit   | Limit the number of characters of the dimension column                      | 1000                                                | 100, 200                                       |                              |
+| character_limit   | Limit the number of characters of the dimension column                      | 20                                                  | 100, 200                                       |                              |
 
 ##### Display Options
 

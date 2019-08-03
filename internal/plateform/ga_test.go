@@ -171,6 +171,49 @@ func Test_FormatBarReturning(t *testing.T) {
 	}
 }
 
+func Test_formatTable(t *testing.T) {
+	testCases := []struct {
+		name        string
+		expectedDim []string
+		expectedVal [][]string
+		fixtureFile string
+		formater    func([]string) string
+	}{
+		{
+			name:        "format new vs returning",
+			expectedDim: []string{"google", "(direct)", "indiehackers.com"},
+			expectedVal: [][]string{
+				{"453", "485", "453", "462"},
+				{"132", "180", "132", "155"},
+				{"15", "29", "15", "27"},
+			},
+			fixtureFile: "./testdata/fixtures/ga_table_traffic_sources.json",
+			formater:    func(dim []string) string { return dim[0] },
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ret := &ga.GetReportsResponse{}
+			fixtures := ReadFixtureFile(tc.fixtureFile, t)
+			err := json.Unmarshal(fixtures, ret)
+			if err != nil {
+				t.Error(err)
+			}
+
+			dim, val := formatTable(ret.Reports, tc.formater)
+
+			if !reflect.DeepEqual(dim, tc.expectedDim) {
+				t.Errorf("Expected %v, actual %v", tc.expectedDim, dim)
+			}
+
+			if !reflect.DeepEqual(val, tc.expectedVal) {
+				t.Errorf("Expected %v, actual %v", tc.expectedVal, val)
+			}
+		})
+	}
+}
+
 func ReadFixtureFile(file string, t *testing.T) (data []byte) {
 	data, err := ioutil.ReadFile(file)
 	if err != nil {

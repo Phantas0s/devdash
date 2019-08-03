@@ -255,8 +255,8 @@ func formatListPullRequests(is []*github.PullRequest, limit int) [][]string {
 	return prs
 }
 
-func (g *Github) TrafficView(repository string, days int) ([]string, []int, error) {
-	tv, err := g.fetchTrafficViews(repository)
+func (g *Github) Views(repository string, days int) ([]string, []int, error) {
+	tv, err := g.fetchViews(repository)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -341,31 +341,43 @@ func (g *Github) CountStars(repository string) (dim []string, val []int, err err
 		return nil, nil, err
 	}
 
-	dim, val = formatCountStars(se)
-
+	dim, val = formatCountStars(se, "01-02", false)
 	return dim, val, nil
 }
 
+func formatCountStars(stargazers []*github.Stargazer, timeLayout string, addMissingDates bool) (dim []string, val []int) {
+	d, val := aggregateStarResults(stargazers)
+	if addMissingDates {
+		d = fillMissingDates(d)
+	}
+
+	for _, v := range d {
+		dim = append(dim, v.Format(timeLayout))
+	}
+
+	return dim, val
+}
+
 // create ordered dim and val slices
-// TODO add 0 value for dates which are not in the results
-func formatCountStars(stargazers []*github.Stargazer) (dim []string, val []int) {
+func aggregateStarResults(stargazers []*github.Stargazer) (dim []time.Time, val []int) {
 	sort.SliceStable(stargazers, func(i, j int) bool {
 		return stargazers[i].StarredAt.Time.Before(stargazers[j].StarredAt.Time)
 	})
 
+	// TODO to refactor. Recursion looks simpler here
 	var t string
 	var w int
 	for k, v := range stargazers {
-		d := v.StarredAt.Time.Format("01-02")
+		d := v.StarredAt.Time.Format("2006-01-02")
 		if t != "" && t == d {
 			w++
 		} else {
 			if k != 0 {
 				val = append(val, w)
 			}
-			dim = append(dim, d)
+			dim = append(dim, v.StarredAt.Time)
 			w = 1
-			t = v.StarredAt.Time.Format("01-02")
+			t = v.StarredAt.Time.Format("2006-01-02")
 		}
 	}
 	val = append(val, w)
@@ -384,7 +396,7 @@ func (g *Github) fetchStars(repository string) (s []*github.Stargazer, err error
 		return nil, errors.New("you need to specify a repository in the github service or in the widget")
 	}
 
-	// TODO implement goroutine here
+	// TODO implement goroutines here
 	count := 1
 	for {
 		e, _, err := g.client.Activity.ListStargazers(context.Background(), g.owner, repo, &github.ListOptions{
@@ -444,7 +456,7 @@ func (g *Github) fetchCommitCount(repository string) (*github.RepositoryParticip
 	return p, nil
 }
 
-func (g *Github) fetchTrafficViews(repository string) (*github.TrafficViews, error) {
+func (g *Github) fetchViews(repository string) (*github.TrafficViews, error) {
 	repo := g.repo
 	if repository != "" {
 		repo = repository

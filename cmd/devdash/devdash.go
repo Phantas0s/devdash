@@ -9,6 +9,7 @@ import (
 
 	"github.com/Phantas0s/devdash/internal"
 	"github.com/Phantas0s/devdash/internal/plateform"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // debug mode
@@ -17,7 +18,14 @@ var debug *bool
 func main() {
 	file := flag.String("config", ".devdash.yml", "The config file")
 	debug = flag.Bool("debug", false, "Debug mode")
+	term := flag.Bool("term", false, "Display terminal dimensions")
 	flag.Parse()
+
+	if *term {
+		width, height, _ := terminal.GetSize(0)
+		fmt.Printf("Width: %d, Height: %d", width, height)
+		return
+	}
 
 	cfg, tui, err := loadFile(*file)
 	if err != nil {
@@ -36,7 +44,7 @@ func main() {
 
 	if _, err := os.Stat(*file); os.IsNotExist(err) {
 		internal.DisplayNoFile(tui)
-		err := tui.AddCol("XXL")
+		err := tui.AddCol("5")
 		if err != nil {
 			fmt.Println(err)
 		}
