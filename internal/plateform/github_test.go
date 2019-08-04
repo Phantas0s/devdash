@@ -190,6 +190,35 @@ func Test_fillMissingDays(t *testing.T) {
 				15,
 			},
 		},
+		{
+			name: "more complex case",
+			expected: []time.Time{
+				time.Date(2019, time.January, 01, 0, 0, 0, 0, time.Now().Location()),
+				time.Date(2019, time.January, 02, 0, 0, 0, 0, time.Now().Location()),
+				time.Date(2019, time.January, 03, 0, 0, 0, 0, time.Now().Location()),
+				time.Date(2019, time.January, 04, 0, 0, 0, 0, time.Now().Location()),
+				time.Date(2019, time.January, 05, 0, 0, 0, 0, time.Now().Location()),
+				time.Date(2019, time.January, 06, 0, 0, 0, 0, time.Now().Location()),
+			},
+			dim: []time.Time{
+				time.Date(2019, time.January, 01, 0, 0, 0, 0, time.Now().Location()),
+				time.Date(2019, time.January, 04, 0, 0, 0, 0, time.Now().Location()),
+				time.Date(2019, time.January, 06, 0, 0, 0, 0, time.Now().Location()),
+			},
+			values: []int{
+				12,
+				15,
+				18,
+			},
+			expectedValues: []int{
+				12,
+				0,
+				0,
+				15,
+				0,
+				18,
+			},
+		},
 	}
 
 	for _, tc := range testCases {
