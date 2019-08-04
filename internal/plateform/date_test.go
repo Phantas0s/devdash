@@ -1,7 +1,6 @@
 package plateform
 
 import (
-	"reflect"
 	"testing"
 	"time"
 )
@@ -112,38 +111,6 @@ func Test_ConvertStartDate(t *testing.T) {
 
 			if tc.wantErr == false && tc.expectedEndDate != end.Format("2006-01-02") {
 				t.Errorf("Expected end date%v, actual %v", tc.expectedEndDate, end)
-			}
-		})
-	}
-}
-
-func Test_fillMissingDates(t *testing.T) {
-	testCases := []struct {
-		name     string
-		expected []time.Time
-		dim      []time.Time
-	}{
-		{
-			name: "happy case",
-			expected: []time.Time{
-				time.Date(2019, time.January, 01, 0, 0, 0, 0, time.Now().Location()),
-				time.Date(2019, time.January, 02, 0, 0, 0, 0, time.Now().Location()),
-				time.Date(2019, time.January, 03, 0, 0, 0, 0, time.Now().Location()),
-				time.Date(2019, time.January, 04, 0, 0, 0, 0, time.Now().Location()),
-			},
-			dim: []time.Time{
-				time.Date(2019, time.January, 01, 0, 0, 0, 0, time.Now().Location()),
-				time.Date(2019, time.January, 04, 0, 0, 0, 0, time.Now().Location()),
-			},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			actual := fillMissingDates(tc.dim)
-
-			if !reflect.DeepEqual(actual, tc.expected) {
-				t.Errorf("Expected %v, actual %v", tc.expected, actual)
 			}
 		})
 	}

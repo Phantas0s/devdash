@@ -208,22 +208,6 @@ func resolveAlias(date string) string {
 	return date
 }
 
-func fillMissingDates(dates []time.Time) []time.Time {
-	d := []time.Time{}
-	for k, v := range dates {
-		d = append(d, v)
-
-		if len(dates) <= k+1 {
-			return d
-		}
-
-		nextDate := dates[k+1]
-		d = append(d, missingDays(v, nextDate)...)
-	}
-
-	return d
-}
-
 // missingDays between two dates.
 // Example: start 2019-01-01, end 2019-01-03, return 2019-01-02.
 func missingDays(start time.Time, end time.Time) []time.Time {

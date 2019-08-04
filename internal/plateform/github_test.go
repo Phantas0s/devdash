@@ -158,3 +158,51 @@ func Test_FomatListPullRequest(t *testing.T) {
 		})
 	}
 }
+
+func Test_fillMissingDays(t *testing.T) {
+	testCases := []struct {
+		name           string
+		expected       []time.Time
+		dim            []time.Time
+		values         []int
+		expectedValues []int
+	}{
+		{
+			name: "happy case",
+			expected: []time.Time{
+				time.Date(2019, time.January, 01, 0, 0, 0, 0, time.Now().Location()),
+				time.Date(2019, time.January, 02, 0, 0, 0, 0, time.Now().Location()),
+				time.Date(2019, time.January, 03, 0, 0, 0, 0, time.Now().Location()),
+				time.Date(2019, time.January, 04, 0, 0, 0, 0, time.Now().Location()),
+			},
+			dim: []time.Time{
+				time.Date(2019, time.January, 01, 0, 0, 0, 0, time.Now().Location()),
+				time.Date(2019, time.January, 04, 0, 0, 0, 0, time.Now().Location()),
+			},
+			values: []int{
+				12,
+				15,
+			},
+			expectedValues: []int{
+				12,
+				0,
+				0,
+				15,
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual, val := fillMissingDays(tc.dim, tc.values)
+
+			if !reflect.DeepEqual(actual, tc.expected) {
+				t.Errorf("Expected dates %v, actual %v", tc.expected, actual)
+			}
+
+			if !reflect.DeepEqual(val, tc.expectedValues) {
+				t.Errorf("Expected values %v, actual %v", tc.expectedValues, val)
+			}
+		})
+	}
+}

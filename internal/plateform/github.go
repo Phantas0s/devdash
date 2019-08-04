@@ -341,14 +341,14 @@ func (g *Github) CountStars(repository string) (dim []string, val []int, err err
 		return nil, nil, err
 	}
 
-	dim, val = formatCountStars(se, "01-02", false)
+	dim, val = formatCountStars(se, "01-02", true)
 	return dim, val, nil
 }
 
-func formatCountStars(stargazers []*github.Stargazer, timeLayout string, addMissingDates bool) (dim []string, val []int) {
+func formatCountStars(stargazers []*github.Stargazer, timeLayout string, addMissingDays bool) (dim []string, val []int) {
 	d, val := aggregateStarResults(stargazers)
-	if addMissingDates {
-		d = fillMissingDates(d)
+	if addMissingDays {
+		d, val = fillMissingDays(d, val)
 	}
 
 	for _, v := range d {
@@ -555,4 +555,27 @@ func contains(slice []string, value string) bool {
 	}
 
 	return false
+}
+
+// fillMissingDays add the missing dates between two dates and add 0 values
+func fillMissingDays(dates []time.Time, values []int) ([]time.Time, []int) {
+	d := []time.Time{}
+	val := []int{}
+	for k, v := range dates {
+		d = append(d, v)
+		val = append(val, values[k])
+
+		if len(dates) <= k+1 {
+			return d, val
+		}
+
+		nextDate := dates[k+1]
+		mg := missingDays(v, nextDate)
+		for _, _ = range mg {
+			val = append(val, 0)
+		}
+		d = append(d, mg...)
+	}
+
+	return d, val
 }
