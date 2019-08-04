@@ -346,6 +346,9 @@ func (g *Github) CountStars(repository string) (dim []string, val []int, err err
 }
 
 func formatCountStars(stargazers []*github.Stargazer, timeLayout string, addMissingDays bool) (dim []string, val []int) {
+	sort.SliceStable(stargazers, func(i, j int) bool {
+		return stargazers[i].StarredAt.Time.Before(stargazers[j].StarredAt.Time)
+	})
 	d, val := aggregateStarResults(stargazers)
 	if addMissingDays {
 		d, val = fillMissingDays(d, val)
@@ -358,29 +361,31 @@ func formatCountStars(stargazers []*github.Stargazer, timeLayout string, addMiss
 	return dim, val
 }
 
-// create ordered dim and val slices
+// aggregateStarResults from Github. We look ahead of one element while the array is parsed, and add up
+// if the date is the same as the current element of the array.
+// If not, we add the date and value to the returning dimension and value slices.
 func aggregateStarResults(stargazers []*github.Stargazer) (dim []time.Time, val []int) {
-	sort.SliceStable(stargazers, func(i, j int) bool {
-		return stargazers[i].StarredAt.Time.Before(stargazers[j].StarredAt.Time)
-	})
-
-	// TODO to refactor. Recursion looks simpler here
-	var t string
-	var w int
+	var count int
 	for k, v := range stargazers {
-		d := v.StarredAt.Time.Format("2006-01-02")
-		if t != "" && t == d {
-			w++
-		} else {
-			if k != 0 {
-				val = append(val, w)
-			}
+
+		count++
+
+		// If last element of the slice processed
+		if len(stargazers) == k+1 {
 			dim = append(dim, v.StarredAt.Time)
-			w = 1
-			t = v.StarredAt.Time.Format("2006-01-02")
+			val = append(val, count)
+			return
+		}
+
+		processingDate := v.StarredAt.Time.Format("2006-01-02")
+		nextDate := stargazers[k+1].StarredAt.Time.Format("2006-01-02")
+
+		if processingDate != nextDate {
+			dim = append(dim, v.StarredAt.Time)
+			val = append(val, count)
+			count = 0
 		}
 	}
-	val = append(val, w)
 
 	return
 }
