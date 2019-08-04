@@ -341,7 +341,8 @@ func (g *Github) CountStars(repository string) (dim []string, val []int, err err
 		return nil, nil, err
 	}
 
-	dim, val = formatCountStars(se, "01-02", true)
+	// TODO do something with the missing day algorithm? Make that available via config?
+	dim, val = formatCountStars(se, "01-02", false)
 	return dim, val, nil
 }
 

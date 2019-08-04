@@ -294,7 +294,7 @@ func (g *githubWidget) barViews(widget Widget) (err error) {
 	return nil
 }
 
-// TODO to refactor
+// TODO to refactor - transforming any date statement (weeks_ago, month_ago) into days ago in plateform.date, and plugt it in.
 func (g *githubWidget) barCommits(widget Widget) (err error) {
 	var repo string
 	if _, ok := widget.Options[optionRepository]; ok {
