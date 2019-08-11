@@ -2,19 +2,19 @@
 ![logo of devdash with a gopher](./doc/img/logo.jpg) 
 [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=DevDash%20-%20Highly%20Configurable%20Terminal%20Dashboard%20For%20Developers:&url=https%3A%2F%2Fgithub.com%2Fphantas0s%2Fdevdash&hashtags=developers,dashboard,terminal,CLI,golang) [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/T6T4W5K0)
 
-DevDash is a terminal dashboard for developers who want the most up-to-date data they need, per project, at one place.
+DevDash is a highly configurable terminal dashboard for developers, who want to choose the most up-to-date metrics they need, at one place.
 
 # Why using DevDash?
 
-* All the metrics you specifically need, at one place.
+* *Choose* the metrics you specifically need.
+* All the important data in your cosy terminal.
 * Pull data from Github, Google Analytics or Google Search Console. More services to come!
 * Unlimited amount of different dashboards with different configurations.
 * Widgets' data refreshed automatically.
 * A huge amount of flexibility compared to other terminal dashboards:
   * Choose the widgets you want.
   * Place your widgets where you want.
-  * Choose the color, the data and a lot of other things for each widget.
-* It's in the terminal so it's cool!
+  * Choose the data you want to display, the colors you want to use, and a lot of other things for each widget.
 
 # Menu
 
