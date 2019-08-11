@@ -29,18 +29,12 @@ func main() {
 
 	cfg, tui, err := loadFile(*file)
 	if err != nil {
-		fmt.Println(err)
+		internal.DisplayError(tui, err)
 	}
 
-	if err != nil {
-		fmt.Println(err)
-	}
 	defer tui.Close()
 
-	err = run(cfg.Projects, tui)
-	if err != nil {
-		fmt.Println(err)
-	}
+	run(cfg.Projects, tui)
 
 	if _, err := os.Stat(*file); os.IsNotExist(err) {
 		internal.DisplayNoFile(tui)
@@ -56,11 +50,7 @@ func main() {
 		go func() {
 			for range ticker.C {
 				tui.Clean()
-
-				err = run(cfg.Projects, tui)
-				if err != nil {
-					fmt.Println(err)
-				}
+				run(cfg.Projects, tui)
 			}
 		}()
 	}
@@ -83,28 +73,25 @@ func loadFile(file string) (config, *internal.Tui, error) {
 	return cfg, tui, nil
 }
 
-func run(projects []Project, tui *internal.Tui) (err error) {
+func run(projects []Project, tui *internal.Tui) {
 	for _, p := range projects {
 		rows, sizes := p.OrderWidgets()
-		if err != nil {
-			return err
-		}
-		project := internal.NewProject(p.Name, p.TitleOptions, rows, sizes)
+		project := internal.NewProject(p.Name, p.TitleOptions, rows, sizes, p.Themes)
 
 		gaService := p.Services.GoogleAnalytics
 		if !gaService.empty() {
 			gaWidget, err := internal.NewGaWidget(gaService.Keyfile, gaService.ViewID)
 			if err != nil {
-				return err
+				internal.DisplayError(tui, err)
 			}
 			project.WithGa(gaWidget)
 		}
 
 		gscService := p.Services.GoogleSearchConsole
 		if !gscService.empty() {
-			gscWidget, err := internal.NewGscWidget(gscService.Keyfile, gscService.ViewID, gscService.Address)
+			gscWidget, err := internal.NewGscWidget(gscService.Keyfile, gscService.Address)
 			if err != nil {
-				return err
+				internal.DisplayError(tui, err)
 			}
 			project.WithGoogleSearchConsole(gscWidget)
 		}
@@ -113,7 +100,7 @@ func run(projects []Project, tui *internal.Tui) (err error) {
 		if !monService.empty() {
 			monWidget, err := internal.NewMonitorWidget(monService.Address)
 			if err != nil {
-				return err
+				internal.DisplayError(tui, err)
 			}
 			project.WithMonitor(monWidget)
 		}
@@ -126,16 +113,11 @@ func run(projects []Project, tui *internal.Tui) (err error) {
 				githubService.Repository,
 			)
 			if err != nil {
-				return err
+				internal.DisplayError(tui, err)
 			}
 			project.WithGithub(githubWidget)
 		}
 
-		err = project.Render(tui, *debug)
-		if err != nil {
-			return err
-		}
+		project.Render(tui, *debug)
 	}
-
-	return nil
 }

@@ -10,14 +10,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Branch:** `feature/github-widgets`
 
 * Add Github widgets
-  * Count stars overtime
-  * Count commits overtime
+  * Display count stars overtime
+  * Display count commits overtime
   * Display issues
   * Display repositories in table with information
+  * Display last week traffic on Github page
+
+* Add themes to simplify the configuration - possibility to use same options defined once for multiple widgets
 
 ## [0.1.1] - 2018-07-21
 
 ### Added
+
+* use goreleaser for relases
 
 ## [0.1.0] - 2018-05-28
 

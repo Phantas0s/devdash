@@ -23,7 +23,6 @@ const (
 type gscWidget struct {
 	tui     *Tui
 	client  *plateform.SearchConsole
-	viewID  string
 	address string
 }
 
@@ -32,7 +31,7 @@ var mappingGscHeader = map[string]string{
 	"query": "Query",
 }
 
-func NewGscWidget(keyfile string, viewID string, address string) (*gscWidget, error) {
+func NewGscWidget(keyfile string, address string) (*gscWidget, error) {
 	sc, err := plateform.NewSearchConsoleClient(keyfile)
 	if err != nil {
 		return nil, err
@@ -40,7 +39,6 @@ func NewGscWidget(keyfile string, viewID string, address string) (*gscWidget, er
 
 	return &gscWidget{
 		client:  sc,
-		viewID:  viewID,
 		address: address,
 	}, nil
 }
@@ -134,7 +132,6 @@ func (s *gscWidget) table(widget Widget) (err error) {
 	}
 
 	results, err := s.client.Table(
-		s.viewID,
 		startDate.Format(gscTimeFormat),
 		endDate.Format(gscTimeFormat),
 		rowLimit,

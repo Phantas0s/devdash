@@ -22,6 +22,16 @@ func Test_OrderWidgets(t *testing.T) {
 			name: "1 row 2 col 3 widgets",
 			project: Project{
 				Name: "test",
+				Themes: map[string]map[string]string{
+					"bar": {
+						"border_color": "blue",
+						"text_color":   "green",
+					},
+					"super_theme": {
+						"border_color": "green",
+						"text_color":   "blue",
+					},
+				},
 				Widgets: []Row{
 					Row{
 						Row: []Column{
@@ -242,13 +252,14 @@ func Test_OrderWidgets(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			actualRows, actualSizes := tc.project.OrderWidgets()
 
+			if tc.wantErr == false && !reflect.DeepEqual(actualRows, tc.expectedRows) {
+				t.Errorf("Expected rows %v, actual %v", tc.expectedRows, actualRows)
+			}
+
 			if tc.wantErr == false && !reflect.DeepEqual(actualSizes, tc.expectedSizes) {
 				t.Errorf("Expected sizes %v, actual %v", tc.expectedSizes, actualSizes)
 			}
 
-			if tc.wantErr == false && !reflect.DeepEqual(actualRows, tc.expectedRows) {
-				t.Errorf("Expected rows %v, actual %v", tc.expectedRows, actualRows)
-			}
 		})
 	}
 }

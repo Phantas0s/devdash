@@ -33,10 +33,11 @@ func (c config) RefreshTime() int64 {
 }
 
 type Project struct {
-	Name         string            `mapstructure:"name"`
-	Services     Services          `mapstructure:"services"`
-	Widgets      []Row             `mapstructure:"widgets"`
-	TitleOptions map[string]string `mapstructure:"title_options"`
+	Name         string                       `mapstructure:"name"`
+	Services     Services                     `mapstructure:"services"`
+	Themes       map[string]map[string]string `mapstructure:"themes"`
+	Widgets      []Row                        `mapstructure:"widgets"`
+	TitleOptions map[string]string            `mapstructure:"title_options"`
 }
 
 // Row is constitued of columns
@@ -68,7 +69,6 @@ type GoogleAnalytics struct {
 
 type SearchConsole struct {
 	Keyfile string `mapstructure:"keyfile"`
-	ViewID  string `mapstructure:"view_id"`
 	Address string `mapstructure:"address"`
 }
 

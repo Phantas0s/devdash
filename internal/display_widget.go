@@ -1,6 +1,6 @@
 package internal
 
-func displayError(tui *Tui, err error) {
+func DisplayError(tui *Tui, err error) {
 	tui.AddTextBox(err.Error(), " ERROR ", map[string]string{
 		optionBorderColor: "red",
 		optionTextColor:   "red",

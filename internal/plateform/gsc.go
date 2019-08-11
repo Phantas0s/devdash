@@ -51,7 +51,6 @@ func NewSearchConsoleClient(keyfile string) (*SearchConsole, error) {
 }
 
 func (w *SearchConsole) Table(
-	viewID string,
 	startDate string,
 	endDate string,
 	limit int64,
