@@ -87,8 +87,9 @@ func (m *monitorWidget) availabilityWidget(widget Widget) error {
 			statusCode = res.StatusCode
 		}
 		status = "offline"
+	} else {
+		defer res.Body.Close()
 	}
-	defer res.Body.Close()
 
 	title := " Availability "
 	if _, ok := widget.Options[optionTitle]; ok {

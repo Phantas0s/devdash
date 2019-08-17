@@ -59,6 +59,7 @@ func Test_formatCommitCount(t *testing.T) {
 		startWeek   int64
 		endWeek     int64
 		startDate   time.Time
+		scope       string
 	}{
 		{
 			name:        "format commit counts 6_weeks_ago to today",
@@ -68,6 +69,7 @@ func Test_formatCommitCount(t *testing.T) {
 			startWeek:   6,                                                 // 6_weeks_ago
 			endWeek:     0,                                                 // today
 			startDate:   time.Date(2019, 06, 30, 00, 00, 00, 00, time.UTC), // Sunday 30 June 2019
+			scope:       githubScopeOwner,
 		},
 		{
 			name:        "format commit counts 6_weeks_ago to today, beginning by Thursday",
@@ -77,6 +79,7 @@ func Test_formatCommitCount(t *testing.T) {
 			startWeek:   6,                                                 // 6_weeks_ago
 			endWeek:     0,                                                 // today
 			startDate:   time.Date(2019, 06, 27, 00, 00, 00, 00, time.UTC), // Thursday 27 June 2019
+			scope:       githubScopeOwner,
 		},
 		{
 			name:        "format commit counts 5_weeks_ago to 1_weeks_ago",
@@ -86,6 +89,7 @@ func Test_formatCommitCount(t *testing.T) {
 			startWeek:   5,                                                 // 5_weeks_ago
 			endWeek:     1,                                                 // 1_weeks_ago
 			startDate:   time.Date(2019, 06, 30, 00, 00, 00, 00, time.UTC), // Sunday 30 June 2019
+			scope:       githubScopeOwner,
 		},
 	}
 
@@ -98,7 +102,12 @@ func Test_formatCommitCount(t *testing.T) {
 				t.Error(err)
 			}
 
-			dim, val := formatCommitCounts(part, tc.startWeek, tc.endWeek, tc.startDate)
+			p := part.Owner
+			if tc.scope == githubScopeAll {
+				p = part.All
+			}
+
+			dim, val := formatCountCommits(p, tc.startWeek, tc.endWeek, tc.startDate)
 
 			if !reflect.DeepEqual(dim, tc.expectedDim) {
 				t.Errorf("Expected %v, actual %v", tc.expectedDim, dim)

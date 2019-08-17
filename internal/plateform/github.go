@@ -20,6 +20,9 @@ const (
 	githubRepoWatchers   = "watchers"
 	githubRepoForks      = "forks"
 	githubRepoOpenIssues = "open_issues"
+
+	githubScopeOwner = "owner"
+	githubScopeAll   = "all"
 )
 
 type Github struct {
@@ -275,44 +278,52 @@ func (g *Github) Views(repository string, days int) ([]string, []int, error) {
 }
 
 // TODO rename countCommits
-func (g *Github) CommitCounts(repository string, startWeek int64, endWeek int64, startDate time.Time) ([]string, []int, error) {
+func (g *Github) CommitCounts(
+	repository string,
+	scope string,
+	startWeek int64,
+	endWeek int64,
+	startDate time.Time,
+) ([]string, []int, error) {
 	c, err := g.fetchCommitCount(repository)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	d, co := formatCommitCounts(c, startWeek, endWeek, startDate)
+	cm := c.Owner
+	if scope == githubScopeAll {
+		cm = c.All
+	}
+
+	d, co := formatCountCommits(cm, startWeek, endWeek, startDate)
 
 	return d, co, nil
 }
 
-// TODO rename formatCountCommits
-func formatCommitCounts(
-	c *github.RepositoryParticipation,
+func formatCountCommits(
+	c []int,
 	startWeek int64,
 	endWeek int64,
 	startDate time.Time,
 ) ([]string, []int) {
 	// Reverse the count of commits (from ASC to DESC).
-	for i := len(c.Owner)/2 - 1; i >= 0; i-- {
-		opp := len(c.Owner) - 1 - i
-		c.Owner[i], c.Owner[opp] = c.Owner[opp], c.Owner[i]
+	for i := len(c)/2 - 1; i >= 0; i-- {
+		opp := len(c) - 1 - i
+		c[i], c[opp] = c[opp], c[i]
 	}
 
 	counts := []int{}
-	for _, v := range c.Owner {
+	for _, v := range c {
 		counts = append(counts, v)
 	}
 
 	dimension := []string{}
-	for k, _ := range c.Owner {
-		// Since the startDate is the end of the week,
-		// we need to come back to the first day of it
-		// and then go back to the number of week (7 days)
-		// specified in start date.
-		weekDay := int(startDate.Weekday())
-		s := startDate.AddDate(0, 0, (-(weekDay) - (7 * k)))
-		if weekDay == 0 && k == 0 {
+	for k, _ := range c {
+		startWeekDay := int(startDate.Weekday())
+		beginningOfWeek := -(startWeekDay)
+		weekBefore := (7 * k)
+		s := startDate.AddDate(0, 0, (beginningOfWeek - weekBefore))
+		if startWeekDay == int(time.Sunday) && k == 0 {
 			s = startDate
 		}
 		dimension = append(dimension, s.Format("01-02"))

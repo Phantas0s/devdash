@@ -15,10 +15,9 @@ import (
 func ThisWeek(base time.Time) (startDate time.Time, endDate time.Time) {
 	startDate = time.Time{}
 
-	// 1 = Monday
 	weekDay := int(base.Weekday())
 	startDate = base.AddDate(0, 0, -(weekDay - 1))
-	if weekDay == 0 {
+	if weekDay == int(time.Sunday) {
 		startDate = base.AddDate(0, 0, -(weekDay + 1))
 	}
 
@@ -33,7 +32,7 @@ func PrevWeeks(base time.Time, count int) (startDate time.Time, endDate time.Tim
 	// 1 = Monday
 	weekDay := int(base.Weekday())
 	startDate = base.AddDate(0, 0, (-(weekDay - 1) - (7 * count)))
-	if weekDay == 0 {
+	if weekDay == int(time.Sunday) {
 		startDate = base.AddDate(0, 0, (-(weekDay + 1) - (7 * count)))
 	}
 
@@ -46,7 +45,7 @@ func NextWeeks(base time.Time, count int) (startDate time.Time, endDate time.Tim
 	// 1 = Monday
 	weekDay := int(base.Weekday())
 	startDate = base.AddDate(0, 0, (-(weekDay - 1) + (7 * count)))
-	if weekDay == 0 {
+	if weekDay == int(time.Sunday) {
 		startDate = base.AddDate(0, 0, (-(weekDay + 1) + (7 * count)))
 	}
 

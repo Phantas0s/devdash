@@ -33,6 +33,12 @@ const (
 
 	// Repository
 	optionRepository = "repository"
+
+	// Owner / all
+	optionScope = ownerScope
+
+	ownerScope = "owner"
+	// allScope   = "all"
 )
 
 type Widget struct {

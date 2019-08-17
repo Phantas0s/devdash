@@ -58,7 +58,6 @@ func main() {
 	tui.Loop()
 }
 
-// TODO To refactor - SRP violated here.
 func loadFile(file string) (config, *internal.Tui, error) {
 	termui, err := plateform.NewTermUI(*debug)
 	if err != nil {

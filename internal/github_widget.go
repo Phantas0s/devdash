@@ -294,7 +294,7 @@ func (g *githubWidget) barViews(widget Widget) (err error) {
 	return nil
 }
 
-// TODO to refactor - transforming any date statement (weeks_ago, month_ago) into days ago in plateform.date, and plugt it in.
+// TODO to refactor - transforming any date statement (weeks_ago, month_ago) into days weeks_ago in plateform.date, and plugt it in.
 func (g *githubWidget) barCommits(widget Widget) (err error) {
 	var repo string
 	if _, ok := widget.Options[optionRepository]; ok {
@@ -316,27 +316,26 @@ func (g *githubWidget) barCommits(widget Widget) (err error) {
 		ed = widget.Options[optionEndDate]
 	}
 
-	if !strings.Contains(sd, "weeks_ago") {
-		return errors.New("the widget bar_commits require you to indicate a week range, ie startDate: 5_weeks_ago, endDate: 0_weeks_ago ")
+	scope := ownerScope
+	if _, ok := widget.Options[optionScope]; ok {
+		scope = widget.Options[optionScope]
 	}
 
-	t := strings.Split(sd, "_")
-	sw, err := strconv.ParseInt(t[0], 0, 0)
+	if !strings.Contains(sd, "weeks_ago") || !strings.Contains(ed, "weeks_ago") {
+		return errors.New("The widget github.bar_commits require you to indicate a week range, ie startDate: 5_weeks_ago, endDate: 1_weeks_ago ")
+	}
+
+	sw, err := plateform.ExtractCountPeriod(sd)
 	if err != nil {
-		return errors.Wrapf(err, "%s is not a valid date", sd)
+		return err
 	}
 
-	if !strings.Contains(ed, "weeks_ago") {
-		return errors.New("the widget bar_commits require you to indicate a week range, ie startDate: 5_weeks_ago, endDate: 0_weeks_ago ")
-	}
-
-	t = strings.Split(ed, "_")
-	ew, err := strconv.ParseInt(t[0], 0, 0)
+	ew, err := plateform.ExtractCountPeriod(ed)
 	if err != nil {
-		return errors.Wrapf(err, "%s is not a valid date", ed)
+		return err
 	}
 
-	dim, counts, err := g.client.CommitCounts(repo, sw, ew, time.Now())
+	dim, counts, err := g.client.CommitCounts(repo, scope, sw, ew, time.Now())
 	if err != nil {
 		return err
 	}

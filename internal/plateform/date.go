@@ -56,10 +56,9 @@ func convertStartDate(base time.Time, startDate string) (time.Time, error) {
 	}
 
 	if strings.Contains(startDate, daysAgo) {
-		t := strings.Split(startDate, "_")
-		days, err := strconv.ParseInt(t[0], 0, 0)
+		days, err := ExtractCountPeriod(startDate)
 		if err != nil {
-			return time.Time{}, errors.Wrapf(err, "%s is not a valid date", startDate)
+			return time.Time{}, err
 		}
 
 		return base.AddDate(0, 0, -int(days)), nil
@@ -71,10 +70,9 @@ func convertStartDate(base time.Time, startDate string) (time.Time, error) {
 	}
 
 	if strings.Contains(startDate, weeksAgo) {
-		t := strings.Split(startDate, "_")
-		weeks, err := strconv.ParseInt(t[0], 0, 0)
+		weeks, err := ExtractCountPeriod(startDate)
 		if err != nil {
-			return time.Time{}, errors.Wrapf(err, "%s is not a valid date", startDate)
+			return time.Time{}, err
 		}
 
 		startDate, _ := totime.PrevWeeks(base, int(weeks))
@@ -88,10 +86,9 @@ func convertStartDate(base time.Time, startDate string) (time.Time, error) {
 	}
 
 	if strings.Contains(startDate, monthsAgo) {
-		t := strings.Split(startDate, "_")
-		months, err := strconv.ParseInt(t[0], 0, 0)
+		months, err := ExtractCountPeriod(startDate)
 		if err != nil {
-			return time.Time{}, errors.Wrapf(err, "%s is not a valid date", startDate)
+			return time.Time{}, err
 		}
 
 		startDate, _ := totime.PrevMonths(base, int(months))
@@ -105,8 +102,7 @@ func convertStartDate(base time.Time, startDate string) (time.Time, error) {
 	}
 
 	if strings.Contains(startDate, yearsAgo) {
-		t := strings.Split(startDate, "_")
-		years, err := strconv.ParseInt(t[0], 0, 0)
+		years, err := ExtractCountPeriod(startDate)
 		if err != nil {
 			return time.Time{}, errors.Wrapf(err, "%s is not a valid date", startDate)
 		}
@@ -125,10 +121,9 @@ func convertEndDate(base time.Time, endDate string) (time.Time, error) {
 	}
 
 	if strings.Contains(endDate, daysAgo) {
-		t := strings.Split(endDate, "_")
-		days, err := strconv.ParseInt(t[0], 0, 0)
+		days, err := ExtractCountPeriod(endDate)
 		if err != nil {
-			return time.Time{}, errors.Wrapf(err, "%s is not a valid date", endDate)
+			return time.Time{}, err
 		}
 
 		return base.AddDate(0, 0, -int(days)), nil
@@ -140,10 +135,9 @@ func convertEndDate(base time.Time, endDate string) (time.Time, error) {
 	}
 
 	if strings.Contains(endDate, weeksAgo) {
-		t := strings.Split(endDate, "_")
-		weeks, err := strconv.ParseInt(t[0], 0, 0)
+		weeks, err := ExtractCountPeriod(endDate)
 		if err != nil {
-			return time.Time{}, errors.Wrapf(err, "%s is not a valid date", endDate)
+			return time.Time{}, err
 		}
 
 		_, endDate := totime.PrevWeeks(base, int(weeks))
@@ -157,10 +151,9 @@ func convertEndDate(base time.Time, endDate string) (time.Time, error) {
 	}
 
 	if strings.Contains(endDate, monthsAgo) {
-		t := strings.Split(endDate, "_")
-		months, err := strconv.ParseInt(t[0], 0, 0)
+		months, err := ExtractCountPeriod(endDate)
 		if err != nil {
-			return time.Time{}, errors.Wrapf(err, "%s is not a valid date", endDate)
+			return time.Time{}, err
 		}
 
 		_, endDate := totime.PrevMonths(base, int(months))
@@ -174,10 +167,9 @@ func convertEndDate(base time.Time, endDate string) (time.Time, error) {
 	}
 
 	if strings.Contains(endDate, yearsAgo) {
-		t := strings.Split(endDate, "_")
-		years, err := strconv.ParseInt(t[0], 0, 0)
+		years, err := ExtractCountPeriod(endDate)
 		if err != nil {
-			return time.Time{}, errors.Wrapf(err, "%s is not a valid date", endDate)
+			return time.Time{}, err
 		}
 
 		endDate, _ := totime.PrevYears(base, int(years))
@@ -206,6 +198,16 @@ func resolveAlias(date string) string {
 	}
 
 	return date
+}
+
+func ExtractCountPeriod(period string) (int64, error) {
+	t := strings.Split(period, "_")
+	p, err := strconv.ParseInt(t[0], 0, 0)
+	if err != nil {
+		return 0, errors.Wrapf(err, "%v is from %s not a valid number", t[0], period)
+	}
+
+	return p, nil
 }
 
 // missingDays between two dates.
