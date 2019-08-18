@@ -6,13 +6,16 @@ package plateform
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/google/go-github/v27/github"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
+	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -23,17 +26,20 @@ const (
 
 	githubScopeOwner = "owner"
 	githubScopeAll   = "all"
+
+	githubMaxPerPage = 100
 )
 
 // Github structure connects to the Github API.
 type Github struct {
-	client *github.Client
-	repo   string
-	owner  string
+	client   *github.Client
+	repo     *github.Repository
+	repoName string
+	owner    string
 }
 
 // GithubClient to fetch Github related data.
-func NewGithubClient(token string, owner string, repo string) (*Github, error) {
+func NewGithubClient(token string, owner string, repoName string) (*Github, error) {
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
 		&oauth2.Token{AccessToken: token},
@@ -44,9 +50,9 @@ func NewGithubClient(token string, owner string, repo string) (*Github, error) {
 	client := github.NewClient(tc)
 
 	return &Github{
-		client: client,
-		repo:   repo,
-		owner:  owner,
+		client:   client,
+		repoName: repoName,
+		owner:    owner,
 	}, nil
 }
 
@@ -410,9 +416,10 @@ func aggregateStarResults(stargazers []*github.Stargazer) (dim []time.Time, val 
 	return
 }
 
-// TODO reformat that
+// fetchStars from the Github API. Every stars are fetched.
+// Unfortunatelly, perPage is limited to 100, so we need multiple requests.
 func (g *Github) fetchStars(repository string) (s []*github.Stargazer, err error) {
-	repo := g.repo
+	repo := g.repoName
 	if repository != "" {
 		repo = repository
 	}
@@ -421,29 +428,56 @@ func (g *Github) fetchStars(repository string) (s []*github.Stargazer, err error
 		return nil, errors.New("you need to specify a repository in the github service or in the widget")
 	}
 
-	// TODO implement goroutines here
-	count := 1
-	for {
-		e, _, err := g.client.Activity.ListStargazers(context.Background(), g.owner, repo, &github.ListOptions{
-			Page:    count,
-			PerPage: 100,
-		})
-		if err != nil {
-			return nil, errors.Wrapf(err, "can't find repo %s of owner %s", repo, g.owner)
-		}
-
-		s = append(s, e...)
-
-		if len(e) < 100 {
-			return s, nil
-		}
-
-		count++
+	r, err := g.fetchRepo(repository)
+	if err != nil {
+		return nil, err
 	}
+
+	pages := (*r.StargazersCount / githubMaxPerPage)
+	if *r.StargazersCount%100 != 0 {
+		pages += 1
+	}
+	fmt.Println(pages)
+
+	var lock sync.Mutex
+	var eg errgroup.Group
+	sem := make(chan bool, 4)
+
+	// TODO See if it can be improved
+	for i := 1; i <= pages; i++ {
+		sem <- true
+		page := i
+		eg.Go(func() error {
+			defer func() { <-sem }()
+			e, _, err := g.client.Activity.ListStargazers(context.Background(), g.owner, repo, &github.ListOptions{
+				Page:    page,
+				PerPage: githubMaxPerPage,
+			})
+			if err != nil {
+				return errors.Wrapf(err, "can't find repo %s of owner %s", repo, g.owner)
+			}
+
+			lock.Lock()
+			defer lock.Unlock()
+			s = append(s, e...)
+			return nil
+		})
+	}
+	err = eg.Wait()
+	if err != nil {
+		return nil, err
+	}
+
+	return s, nil
 }
 
 func (g *Github) fetchRepo(repository string) (*github.Repository, error) {
-	repo := g.repo
+	// TODO add a TTL
+	if g.repo != nil {
+		return g.repo, nil
+	}
+
+	repo := g.repoName
 	if repository != "" {
 		repo = repository
 	}
@@ -463,7 +497,7 @@ func (g *Github) fetchRepo(repository string) (*github.Repository, error) {
 
 // TODO possibility to filter by ALL or OWNER
 func (g *Github) fetchCommitCount(repository string) (*github.RepositoryParticipation, error) {
-	repo := g.repo
+	repo := g.repoName
 	if repository != "" {
 		repo = repository
 	}
@@ -481,7 +515,7 @@ func (g *Github) fetchCommitCount(repository string) (*github.RepositoryParticip
 }
 
 func (g *Github) fetchViews(repository string) (*github.TrafficViews, error) {
-	repo := g.repo
+	repo := g.repoName
 	if repository != "" {
 		repo = repository
 	}
@@ -499,7 +533,7 @@ func (g *Github) fetchViews(repository string) (*github.TrafficViews, error) {
 }
 
 func (g *Github) fetchBranches(repository string, limit int) ([]*github.Branch, error) {
-	repo := g.repo
+	repo := g.repoName
 	if repository != "" {
 		repo = repository
 	}
@@ -519,7 +553,7 @@ func (g *Github) fetchBranches(repository string, limit int) ([]*github.Branch, 
 
 // Possibility to add options to filter quite a lot
 func (g *Github) fetchIssues(repository string, limit int) ([]*github.Issue, error) {
-	repo := g.repo
+	repo := g.repoName
 	if repository != "" {
 		repo = repository
 	}
@@ -543,7 +577,7 @@ func (g *Github) fetchIssues(repository string, limit int) ([]*github.Issue, err
 // TODO add sorting
 func (g *Github) fetchPullRequests(repository string, limit int) ([]*github.PullRequest, error) {
 	ctx := context.Background()
-	repo := g.repo
+	repo := g.repoName
 	if repository != "" {
 		repo = repository
 	}
