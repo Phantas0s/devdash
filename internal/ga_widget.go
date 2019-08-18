@@ -35,6 +35,7 @@ type gaWidget struct {
 	viewID    string
 }
 
+// NewGaWidget including all information to connect to the Google Analytics API.
 func NewGaWidget(keyfile string, viewID string) (*gaWidget, error) {
 	an, err := plateform.NewAnalyticsClient(keyfile)
 	if err != nil {
@@ -47,6 +48,7 @@ func NewGaWidget(keyfile string, viewID string) (*gaWidget, error) {
 	}, nil
 }
 
+// CreateWidgets for Google Analytics.
 func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	g.tui = tui
 

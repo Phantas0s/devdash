@@ -41,6 +41,7 @@ const (
 	// allScope   = "all"
 )
 
+// A widget is a representation of a set of data in the screen.
 type Widget struct {
 	Name    string            `mapstructures:"name"`
 	Size    string            `mapstructures:"size"`

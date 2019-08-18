@@ -11,7 +11,7 @@ func DisplayError(tui *Tui, err error) {
 func DisplayNoFile(tui *Tui) {
 	tui.AddTextBox(
 		`
-		In order to use DevDash, you need a configuration file [in the current folder](fg-bold).
+		In order to use DevDash, you need to provide [a configuration file ](fg-bold).
 
 		You can name the configuration file [my-config.yml](fg-blue,fg-bold), and then run [devdash -config my-config.yml](fg-green,fg-bold).
 

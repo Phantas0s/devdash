@@ -63,6 +63,7 @@ var mappingOrder = map[string]string{
 	"desc": "DESCENDING",
 }
 
+// Analytics connect to Google Analytics API.
 type Analytics struct {
 	config          *jwt.Config
 	servicev3       *gav3.Service
@@ -70,7 +71,8 @@ type Analytics struct {
 	service         *ga.Service
 }
 
-// Possible values to send to Google Analytics API
+// AnalyticValues which can be possibly send to the Google Analytics API.
+// This is a pure value object without behavior.
 type AnalyticValues struct {
 	ViewID     string
 	StartDate  string
@@ -84,8 +86,7 @@ type AnalyticValues struct {
 	RowLimit   int64
 }
 
-// New takes a keyfile for authentication and
-// returns a new Google Analytics Reporting Client struct.
+// NewAnalyticsClient to connect to Google Analytics APIs.
 func NewAnalyticsClient(keyfile string) (*Analytics, error) {
 	data, err := ioutil.ReadFile(keyfile)
 	if err != nil {
@@ -117,7 +118,7 @@ func NewAnalyticsClient(keyfile string) (*Analytics, error) {
 
 }
 
-// SimpleMetric of one quantitative value.
+// SimpleMetric get a value depending on Google Analytics metrics.
 func (c *Analytics) SimpleMetric(val AnalyticValues) (string, error) {
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
@@ -149,7 +150,7 @@ func (c *Analytics) SimpleMetric(val AnalyticValues) (string, error) {
 	return "0", nil
 }
 
-// BarMetric provides a bar display with one qualitative dimension and one quantitative value.
+// BarMetric provides a qualitive dimension linked to a quantitative value, for example a date (dimension) with an int.
 func (c *Analytics) BarMetric(val AnalyticValues) ([]string, []int, error) {
 	// Add the time dimension to the first two indexes of the slice (0, 1)
 	tm := mapTimePeriod(val.TimePeriod)
@@ -225,7 +226,7 @@ func (c *Analytics) BarMetric(val AnalyticValues) ([]string, []int, error) {
 	return formater(resp.Reports, f)
 }
 
-// RealTimeUsers on the website (using Google api V3).
+// RealTimeUsers return the number of visitor currently on the website.
 func (c *Analytics) RealTimeUsers(viewID string) (string, error) {
 	metric := "rt:activeUsers"
 
@@ -237,8 +238,8 @@ func (c *Analytics) RealTimeUsers(viewID string) (string, error) {
 	return resp.TotalsForAllResults[metric], nil
 }
 
-// Table shaped analytics.
-// Headers on the first row are qualitative dimensions, anue can be qualitative or quantitative.
+// Table display dimensions and values.
+// The headers on the first row are qualitative dimensions, the values can be qualitative or quantitative.
 func (c *Analytics) Table(
 	an AnalyticValues,
 	firstHeader string,
@@ -311,7 +312,7 @@ func (c *Analytics) Table(
 	return
 }
 
-// NewVsReturning users.
+// StackedBar returns one dimension set linked with multiple values.
 func (c *Analytics) StackedBar(an AnalyticValues) (dim []string, new []int, ret []int, err error) {
 	d := mapDimensions(an.Dimensions)
 	tm := mapTimePeriod(an.TimePeriod)
@@ -359,10 +360,7 @@ func (c *Analytics) StackedBar(an AnalyticValues) (dim []string, new []int, ret 
 	return formatNewReturning(resp.Reports, formater)
 }
 
-// formatBar vizualiser, to return one slice of dimension and one slice of values.
-// The two slices are equals in size.
-// If the same dimension is returned multiple time by the Google API, the data
-// is aggregated not to have duplicated dimensions.
+// formatBar to return one slice of dimension which elements are all linked with the elements of one slice of values.
 func formatBar(reps []*ga.Report, dimFormater func(dim []string) string) (dim []string, u []int, err error) {
 	dimVal := map[string]int{}
 	for _, v := range reps {
@@ -396,7 +394,6 @@ func formatBar(reps []*ga.Report, dimFormater func(dim []string) string) (dim []
 		}
 	}
 
-	// Aggregate value with same dimension.
 	for k, v := range dim {
 		u[k] = dimVal[v]
 	}

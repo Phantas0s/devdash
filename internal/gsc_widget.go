@@ -31,6 +31,7 @@ var mappingGscHeader = map[string]string{
 	"query": "Query",
 }
 
+// NewGscWidget including everything to connect to the Google Search Console API.
 func NewGscWidget(keyfile string, address string) (*gscWidget, error) {
 	sc, err := plateform.NewSearchConsoleClient(keyfile)
 	if err != nil {
@@ -43,6 +44,7 @@ func NewGscWidget(keyfile string, address string) (*gscWidget, error) {
 	}, nil
 }
 
+// CreateWidgets for the Google Search Console API.
 func (s *gscWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	s.tui = tui
 	switch widget.Name {

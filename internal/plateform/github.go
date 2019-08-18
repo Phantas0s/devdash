@@ -25,12 +25,14 @@ const (
 	githubScopeAll   = "all"
 )
 
+// Github structure connects to the Github API.
 type Github struct {
 	client *github.Client
 	repo   string
 	owner  string
 }
 
+// GithubClient to fetch Github related data.
 func NewGithubClient(token string, owner string, repo string) (*Github, error) {
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(
@@ -48,7 +50,8 @@ func NewGithubClient(token string, owner string, repo string) (*Github, error) {
 	}, nil
 }
 
-func (g *Github) Stars(repository string) (int, error) {
+// TotalStars of a repository.
+func (g *Github) TotalStars(repository string) (int, error) {
 	r, err := g.fetchRepo(repository)
 	if err != nil {
 		return 0, err
@@ -57,7 +60,8 @@ func (g *Github) Stars(repository string) (int, error) {
 	return r.GetStargazersCount(), nil
 }
 
-func (g *Github) Watchers(repository string) (int, error) {
+// TotalWatchers of a repository overtime.
+func (g *Github) TotalWatchers(repository string) (int, error) {
 	r, err := g.fetchRepo(repository)
 	if err != nil {
 		return 0, err
@@ -66,7 +70,8 @@ func (g *Github) Watchers(repository string) (int, error) {
 	return r.GetSubscribersCount(), nil
 }
 
-func (g *Github) OpenIssues(repository string) (int, error) {
+// TotalOpenIssues of a repository overtime.
+func (g *Github) TotalOpenIssues(repository string) (int, error) {
 	r, err := g.fetchRepo(repository)
 	if err != nil {
 		return 0, err
@@ -75,6 +80,7 @@ func (g *Github) OpenIssues(repository string) (int, error) {
 	return r.GetOpenIssuesCount(), nil
 }
 
+// ListBranches of a repository.
 func (g *Github) ListBranches(repository string, limit int) ([][]string, error) {
 	headers := []string{"name"}
 
@@ -103,6 +109,7 @@ func (g *Github) ListBranches(repository string, limit int) ([][]string, error) 
 	return branches, nil
 }
 
+// ListRepo of a Github account.
 func (g *Github) ListRepo(limit int, order string, metrics []string) ([][]string, error) {
 	headers := []string{"name"}
 
@@ -162,6 +169,7 @@ func (g *Github) ListRepo(limit int, order string, metrics []string) ([][]string
 	return repos, nil
 }
 
+// ListIssues of a repository.
 func (g *Github) ListIssues(repository string, limit int) ([][]string, error) {
 	headers := []string{"name", "state"}
 
@@ -196,6 +204,7 @@ func (g *Github) ListIssues(repository string, limit int) ([][]string, error) {
 	return issues, nil
 }
 
+// ListPullRequests of a repository.
 func (g *Github) ListPullRequests(repository string, limit int) ([][]string, error) {
 	is, err := g.fetchPullRequests(repository, limit)
 	if err != nil {
@@ -258,6 +267,7 @@ func formatListPullRequests(is []*github.PullRequest, limit int) [][]string {
 	return prs
 }
 
+// Views on a github repository the last 7 days.
 func (g *Github) Views(repository string, days int) ([]string, []int, error) {
 	tv, err := g.fetchViews(repository)
 	if err != nil {
@@ -277,8 +287,8 @@ func (g *Github) Views(repository string, days int) ([]string, []int, error) {
 	return dimension, counts, nil
 }
 
-// TODO rename countCommits
-func (g *Github) CommitCounts(
+// CountCommits of a repository overtime.
+func (g *Github) CountCommits(
 	repository string,
 	scope string,
 	startWeek int64,
@@ -346,6 +356,8 @@ func formatCountCommits(
 	return d, co
 }
 
+// CountStars of a repository overtime.
+// Only on a daily basis for now.
 func (g *Github) CountStars(repository string) (dim []string, val []int, err error) {
 	se, err := g.fetchStars(repository)
 	if err != nil {
@@ -373,19 +385,15 @@ func formatCountStars(stargazers []*github.Stargazer, timeLayout string, addMiss
 	return dim, val
 }
 
-// aggregateStarResults from Github. We look ahead of one element while the array is parsed, and add up
-// if the date is the same as the current element of the array.
-// If not, we add the date and value to the returning dimension and value slices.
 func aggregateStarResults(stargazers []*github.Stargazer) (dim []time.Time, val []int) {
-	var count int
+	var countStar int
 	for k, v := range stargazers {
-
-		count++
+		countStar++
 
 		// If last element of the slice processed
 		if len(stargazers) == k+1 {
 			dim = append(dim, v.StarredAt.Time)
-			val = append(val, count)
+			val = append(val, countStar)
 			return
 		}
 
@@ -394,15 +402,15 @@ func aggregateStarResults(stargazers []*github.Stargazer) (dim []time.Time, val 
 
 		if processingDate != nextDate {
 			dim = append(dim, v.StarredAt.Time)
-			val = append(val, count)
-			count = 0
+			val = append(val, countStar)
+			countStar = 0
 		}
 	}
 
 	return
 }
 
-// Fetch all events for a repo
+// TODO reformat that
 func (g *Github) fetchStars(repository string) (s []*github.Stargazer, err error) {
 	repo := g.repo
 	if repository != "" {
@@ -434,7 +442,6 @@ func (g *Github) fetchStars(repository string) (s []*github.Stargazer, err error
 	}
 }
 
-// Fetch the whole repo per widget since we need to fetch the data during a regular time interval.
 func (g *Github) fetchRepo(repository string) (*github.Repository, error) {
 	repo := g.repo
 	if repository != "" {

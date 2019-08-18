@@ -152,6 +152,7 @@ type manager interface {
 	looper
 }
 
+// AddCol to the TUI grid.
 func (t *Tui) AddCol(size string) error {
 	s, err := MapSize(size)
 	if err != nil {
@@ -162,14 +163,17 @@ func (t *Tui) AddCol(size string) error {
 	return nil
 }
 
+// AddRow to the TUI grid.
 func (t *Tui) AddRow() {
 	t.instance.AddRow()
 }
 
+// Render the TUI.
 func (t *Tui) Render() {
 	t.instance.Render()
 }
 
+// Close the TUI.
 func (t *Tui) Close() {
 	t.instance.Close()
 }
@@ -184,8 +188,8 @@ type Tui struct {
 	instance manager
 }
 
-// Map the size of each column if t-shirt size provided (XXS to XL).
-// Otherwise use the value provided in the config directly.
+// Map the size of each column if t-shirt size is provided (XXS to XL).
+// Otherwise use the numerical value provided in the config directly.
 func MapSize(size string) (int, error) {
 	s := strings.ToLower(size)
 	if size, ok := sizeLookup[s]; ok {
@@ -199,6 +203,7 @@ func MapSize(size string) (int, error) {
 	return int(si), err
 }
 
+// AddProjectTitle to the TUI.
 func (t *Tui) AddProjectTitle(title string, options map[string]string) (err error) {
 	size := "XXL"
 	if _, ok := options[optionSize]; ok {
@@ -245,6 +250,7 @@ func (t *Tui) AddProjectTitle(title string, options map[string]string) (err erro
 	return nil
 }
 
+// AddTextBox to the TUI.
 func (t *Tui) AddTextBox(
 	data string,
 	title string,
@@ -282,6 +288,7 @@ func (t *Tui) AddTextBox(
 
 }
 
+// AddBarChart to the TUI, a representation of the evolution of a dataset overtime.
 func (t *Tui) AddBarChart(
 	data []int,
 	dimensions []string,
@@ -350,6 +357,7 @@ func (t *Tui) AddBarChart(
 	)
 }
 
+// AddStackedBarChart to the TUI, which represent two or more dataset overtime.
 func (t *Tui) AddStackedBarChart(
 	data [8][]int,
 	dimensions []string,
@@ -408,6 +416,7 @@ func (t *Tui) AddStackedBarChart(
 	)
 }
 
+// AddTable to the TUI, with a header and the dataset.
 func (t *Tui) AddTable(data [][]string, title string, options map[string]string) {
 	// defaults
 
@@ -440,10 +449,12 @@ func (t *Tui) AddKQuit(key string) {
 	t.instance.KQuit(key)
 }
 
+// Loop the TUI to receive events.
 func (t *Tui) Loop() {
 	t.instance.Loop()
 }
 
+// Clean and reinitialize the TUI.
 func (t *Tui) Clean() {
 	t.instance.Clean()
 }

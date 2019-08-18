@@ -28,6 +28,7 @@ type githubWidget struct {
 	client *plateform.Github
 }
 
+// NewGithubWidget with all information necessary to connect to the Github API.
 func NewGithubWidget(token string, owner string, repo string) (*githubWidget, error) {
 	g, err := plateform.NewGithubClient(token, owner, repo)
 	if err != nil {
@@ -38,6 +39,7 @@ func NewGithubWidget(token string, owner string, repo string) (*githubWidget, er
 	}, nil
 }
 
+// CreateWidgets for the Github service.
 func (g *githubWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	g.tui = tui
 
@@ -80,7 +82,7 @@ func (g *githubWidget) boxStars(widget Widget) error {
 		title = widget.Options[optionTitle]
 	}
 
-	stars, err := g.client.Stars(repo)
+	stars, err := g.client.TotalStars(repo)
 	if err != nil {
 		return err
 	}
@@ -107,7 +109,7 @@ func (g *githubWidget) boxWatchers(widget Widget) error {
 		repo = widget.Options[optionRepository]
 	}
 
-	w, err := g.client.Watchers(repo)
+	w, err := g.client.TotalWatchers(repo)
 	if err != nil {
 		return err
 	}
@@ -134,7 +136,7 @@ func (g *githubWidget) boxOpenIssues(widget Widget) error {
 		repo = widget.Options[optionRepository]
 	}
 
-	w, err := g.client.OpenIssues(repo)
+	w, err := g.client.TotalOpenIssues(repo)
 	if err != nil {
 		return err
 	}
@@ -335,7 +337,7 @@ func (g *githubWidget) barCommits(widget Widget) (err error) {
 		return err
 	}
 
-	dim, counts, err := g.client.CommitCounts(repo, scope, sw, ew, time.Now())
+	dim, counts, err := g.client.CountCommits(repo, scope, sw, ew, time.Now())
 	if err != nil {
 		return err
 	}

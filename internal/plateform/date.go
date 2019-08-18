@@ -200,6 +200,8 @@ func resolveAlias(date string) string {
 	return date
 }
 
+// ExtractCountPeriod from a period like "5_weeks_ago".
+// Return the count of the period, "5" in the case of "5_weeks_ago".
 func ExtractCountPeriod(period string) (int64, error) {
 	t := strings.Split(period, "_")
 	p, err := strconv.ParseInt(t[0], 0, 0)

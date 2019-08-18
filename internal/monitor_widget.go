@@ -19,12 +19,14 @@ type monitorWidget struct {
 	address string
 }
 
+// NewMonitorWidget with the address of the website to monitor.
 func NewMonitorWidget(address string) (*monitorWidget, error) {
 	return &monitorWidget{
 		address: address,
 	}, nil
 }
 
+// CreateWidgets for the monitor service.
 func (m *monitorWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	m.tui = tui
 
@@ -51,7 +53,6 @@ func (m *monitorWidget) pingWidget(widget Widget) error {
 		return err
 	}
 	pinger.Count = 1
-	// fmt.Printf("PING %s (%s):\n", pinger.Addr(), pinger.IPAddr())
 	pinger.Run()                 // blocks until finished
 	stats := pinger.Statistics() // get send/receive/rtt stats
 

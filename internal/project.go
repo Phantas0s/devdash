@@ -20,6 +20,7 @@ type project struct {
 	githubWidget  service
 }
 
+// NewProject for the dashboard.
 func NewProject(
 	name string,
 	titleOptions map[string]string,
@@ -35,18 +36,23 @@ func NewProject(
 		themes:       themes,
 	}
 }
+
+// WithGa add Google Analytics service to the project.
 func (p *project) WithGa(ga *gaWidget) {
 	p.gaWidget = ga
 }
 
+// WithMonitor add the Monitor service to the project.
 func (p *project) WithMonitor(mon *monitorWidget) {
 	p.monitorWidget = mon
 }
 
+// WithGoogleSearchConsole add the Google Search Console service to the project
 func (p *project) WithGoogleSearchConsole(gsc *gscWidget) {
 	p.gscWidget = gsc
 }
 
+// WithGithub add the Github service to the project
 func (p *project) WithGithub(github *githubWidget) {
 	p.githubWidget = github
 }
@@ -79,6 +85,7 @@ func (p *project) addDefaultTheme(w Widget) Widget {
 	return w
 }
 
+// Render all the services' widgets.
 func (p *project) Render(tui *Tui, debug bool) {
 	err := p.addTitle(tui)
 	if err != nil {

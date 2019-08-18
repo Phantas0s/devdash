@@ -13,13 +13,13 @@ import (
 	sc "google.golang.org/api/webmasters/v3"
 )
 
-// Search console connect to the Google Search Console API to fetch the data needed.
+// SearchConsole connect to the Google Search Console API.
 type SearchConsole struct {
 	config  *jwt.Config
 	service *sc.Service
 }
 
-// Response returned after requesting the API.
+// SearchConsoleResponse returned after requesting the API.
 type SearchConsoleResponse struct {
 	Dimension   string
 	Clicks      float64
@@ -28,6 +28,7 @@ type SearchConsoleResponse struct {
 	Position    float64
 }
 
+// NewSearchConsoleClient create a SearchConsole.
 func NewSearchConsoleClient(keyfile string) (*SearchConsole, error) {
 	data, err := ioutil.ReadFile(keyfile)
 	if err != nil {
@@ -50,6 +51,7 @@ func NewSearchConsoleClient(keyfile string) (*SearchConsole, error) {
 	return web, nil
 }
 
+// Table of Google Search Console with a dimension and its values.
 func (w *SearchConsole) Table(
 	startDate string,
 	endDate string,
