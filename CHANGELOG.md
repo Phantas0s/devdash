@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Display last week traffic on Github page
 
 * Add themes to simplify the configuration - possibility to use same options defined once for multiple widgets
+  * Add color options to have same color for border, title and everything color related for one widget
 
 ## [0.1.1] - 2018-07-21
 
