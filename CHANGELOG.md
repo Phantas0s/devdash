@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Display issues
   * Display repositories in table with information
   * Display last week traffic on Github page
+  * Add color options to have same color for border, title and everything color related for one widget
 
 * Add themes to simplify the configuration - possibility to use same options defined once for multiple widgets
 

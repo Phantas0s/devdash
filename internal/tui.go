@@ -22,6 +22,8 @@ const (
 
 	optionSize = "size"
 
+	optionColor = "color"
+
 	optionBorderColor   = "border_color"
 	optionTextColor     = "text_color"
 	optionNumColor      = "num_color"
@@ -152,6 +154,64 @@ type manager interface {
 	looper
 }
 
+type coloredElements struct {
+	textColor     uint16
+	borderColor   uint16
+	titleColor    uint16
+	numColor      uint16
+	emptyNumColor uint16
+	barColor      uint16
+}
+
+func createColoredElements(options map[string]string) coloredElements {
+	ce := coloredElements{
+		textColor:     defaultC,
+		borderColor:   defaultC,
+		titleColor:    defaultC,
+		numColor:      defaultC,
+		emptyNumColor: defaultC,
+		barColor:      defaultC,
+	}
+
+	if _, ok := options[optionColor]; ok {
+		color := colorLookUp[options[optionColor]]
+		ce = coloredElements{
+			textColor:     color,
+			borderColor:   color,
+			titleColor:    color,
+			numColor:      black,
+			emptyNumColor: color,
+			barColor:      color,
+		}
+	}
+
+	if _, ok := options[optionBorderColor]; ok {
+		ce.borderColor = colorLookUp[options[optionBorderColor]]
+	}
+
+	if _, ok := options[optionTextColor]; ok {
+		ce.textColor = colorLookUp[options[optionTextColor]]
+	}
+
+	if _, ok := options[optionTitleColor]; ok {
+		ce.titleColor = colorLookUp[options[optionTitleColor]]
+	}
+
+	if _, ok := options[optionNumColor]; ok {
+		ce.numColor = colorLookUp[options[optionNumColor]]
+	}
+
+	if _, ok := options[optionEmptyNumColor]; ok {
+		ce.emptyNumColor = colorLookUp[options[optionEmptyNumColor]]
+	}
+
+	if _, ok := options[optionBarColor]; ok {
+		ce.barColor = colorLookUp[options[optionBarColor]]
+	}
+
+	return ce
+}
+
 // AddCol to the TUI grid.
 func (t *Tui) AddCol(size string) error {
 	s, err := MapSize(size)
@@ -210,16 +270,6 @@ func (t *Tui) AddProjectTitle(title string, options map[string]string) (err erro
 		size = options[optionSize]
 	}
 
-	textColor := defaultC
-	if _, ok := options[optionTextColor]; ok {
-		textColor = colorLookUp[options[optionTextColor]]
-	}
-
-	borderColor := defaultC
-	if _, ok := options[optionBorderColor]; ok {
-		borderColor = colorLookUp[options[optionBorderColor]]
-	}
-
 	bold := true
 	if _, ok := options[optionBold]; ok {
 		bold, err = strconv.ParseBool(options[optionBold])
@@ -238,10 +288,11 @@ func (t *Tui) AddProjectTitle(title string, options map[string]string) (err erro
 		return err
 	}
 
+	ce := createColoredElements(options)
 	t.instance.Title(
 		title,
-		textColor,
-		borderColor,
+		ce.textColor,
+		ce.borderColor,
 		bold,
 		int(height),
 		s,
@@ -256,33 +307,19 @@ func (t *Tui) AddTextBox(
 	title string,
 	options map[string]string,
 ) {
-	// defaults
-	borderColor := defaultC
-	if _, ok := options[optionBorderColor]; ok {
-		borderColor = colorLookUp[options[optionBorderColor]]
-	}
-
-	textColor := defaultC
-	if _, ok := options[optionTextColor]; ok {
-		textColor = colorLookUp[options[optionTextColor]]
-	}
-
-	titleColor := defaultC
-	if _, ok := options[optionTitleColor]; ok {
-		titleColor = colorLookUp[options[optionTitleColor]]
-	}
 
 	var height int64 = 3
 	if _, ok := options[optionHeight]; ok {
 		height, _ = strconv.ParseInt(options[optionHeight], 0, 0)
 	}
 
+	ce := createColoredElements(options)
 	t.instance.TextBox(
 		data,
-		textColor,
-		borderColor,
+		ce.textColor,
+		ce.borderColor,
 		title,
-		titleColor,
+		ce.titleColor,
 		int(height),
 	)
 
@@ -295,31 +332,6 @@ func (t *Tui) AddBarChart(
 	title string,
 	options map[string]string,
 ) {
-	// defaults
-	borderColor := defaultC
-	if _, ok := options[optionBorderColor]; ok {
-		borderColor = colorLookUp[options[optionBorderColor]]
-	}
-
-	textColor := defaultC
-	if _, ok := options[optionTextColor]; ok {
-		textColor = colorLookUp[options[optionTextColor]]
-	}
-
-	titleColor := defaultC
-	if _, ok := options[optionTitleColor]; ok {
-		titleColor = colorLookUp[options[optionTitleColor]]
-	}
-
-	numColor := defaultC
-	if _, ok := options[optionNumColor]; ok {
-		numColor = colorLookUp[options[optionNumColor]]
-	}
-
-	emptyNumColor := defaultC
-	if _, ok := options[optionEmptyNumColor]; ok {
-		emptyNumColor = colorLookUp[options[optionEmptyNumColor]]
-	}
 
 	var height int64 = 10
 	if _, ok := options[optionHeight]; ok {
@@ -336,24 +348,20 @@ func (t *Tui) AddBarChart(
 		barWidth, _ = strconv.ParseInt(options[optionBarWidth], 0, 0)
 	}
 
-	var barColor = defaultC
-	if _, ok := options[optionBarColor]; ok {
-		barColor = colorLookUp[options[optionBarColor]]
-	}
-
+	ce := createColoredElements(options)
 	t.instance.BarChart(
 		data,
 		dimensions,
 		title,
-		titleColor,
-		borderColor,
-		textColor,
-		numColor,
-		emptyNumColor,
+		ce.titleColor,
+		ce.borderColor,
+		ce.textColor,
+		ce.numColor,
+		ce.emptyNumColor,
 		int(height),
 		int(gap),
 		int(barWidth),
-		barColor,
+		ce.barColor,
 	)
 }
 
@@ -365,27 +373,6 @@ func (t *Tui) AddStackedBarChart(
 	colors []uint16,
 	options map[string]string,
 ) {
-	// defaults
-	borderColor := blue
-	if _, ok := options[optionBorderColor]; ok {
-		borderColor = colorLookUp[options[optionBorderColor]]
-	}
-
-	textColor := defaultC
-	if _, ok := options[optionTextColor]; ok {
-		textColor = colorLookUp[options[optionTextColor]]
-	}
-
-	titleColor := defaultC
-	if _, ok := options[optionTitleColor]; ok {
-		titleColor = colorLookUp[options[optionTitleColor]]
-	}
-
-	numColor := black
-	if _, ok := options[optionNumColor]; ok {
-		numColor = colorLookUp[options[optionNumColor]]
-	}
-
 	var height int64 = 10
 	if _, ok := options[optionHeight]; ok {
 		height, _ = strconv.ParseInt(options[optionHeight], 0, 0)
@@ -401,15 +388,16 @@ func (t *Tui) AddStackedBarChart(
 		barWidth, _ = strconv.ParseInt(options[optionBarWidth], 0, 0)
 	}
 
+	ce := createColoredElements(options)
 	t.instance.StackedBarChart(
 		data,
 		dimensions,
 		title,
-		titleColor,
+		ce.titleColor,
 		colors,
-		borderColor,
-		textColor,
-		numColor,
+		ce.borderColor,
+		ce.textColor,
+		ce.numColor,
 		int(height),
 		int(gap),
 		int(barWidth),
@@ -418,29 +406,13 @@ func (t *Tui) AddStackedBarChart(
 
 // AddTable to the TUI, with a header and the dataset.
 func (t *Tui) AddTable(data [][]string, title string, options map[string]string) {
-	// defaults
-
-	borderColor := defaultC
-	if _, ok := options[optionBorderColor]; ok {
-		borderColor = colorLookUp[options[optionBorderColor]]
-	}
-
-	textColor := defaultC
-	if _, ok := options[optionTextColor]; ok {
-		textColor = colorLookUp[options[optionTextColor]]
-	}
-
-	titleColor := defaultC
-	if _, ok := options[optionTitleColor]; ok {
-		titleColor = colorLookUp[options[optionTitleColor]]
-	}
-
+	ce := createColoredElements(options)
 	t.instance.Table(
 		data,
 		title,
-		titleColor,
-		borderColor,
-		textColor,
+		ce.titleColor,
+		ce.borderColor,
+		ce.textColor,
 	)
 }
 
