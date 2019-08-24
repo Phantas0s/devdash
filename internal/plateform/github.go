@@ -6,7 +6,6 @@ package plateform
 
 import (
 	"context"
-	"fmt"
 	"sort"
 	"strconv"
 	"sync"
@@ -437,7 +436,6 @@ func (g *Github) fetchStars(repository string) (s []*github.Stargazer, err error
 	if *r.StargazersCount%100 != 0 {
 		pages += 1
 	}
-	fmt.Println(pages)
 
 	var lock sync.Mutex
 	var eg errgroup.Group
