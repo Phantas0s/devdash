@@ -21,6 +21,7 @@ type config struct {
 type General struct {
 	Keys    map[string]string `mapstructure:"keys"`
 	Refresh int64             `mapstructure:"refresh"`
+	Reload  bool              `mapstructure:"reload"`
 }
 
 // RefreshTime return the duration before refreshing the data of all widgets, in seconds.

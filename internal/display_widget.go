@@ -16,8 +16,8 @@ func DisplayNoFile(tui *Tui) {
 
 		You can name the configuration file [my-config.yml](fg-blue,fg-bold), and then run [devdash -config my-config.yml](fg-green,fg-bold).
 
-		There is an example of configuration here: 
-		[https://github.com/Phantas0s/devdash#user-content-getting-started](fg-blue,fg-bold).
+		There are multiple example of configurations there:
+		[https://thedevdash.com/getting-started/](fg-blue,fg-bold).
 
 		More complex configuration examples are available here:
 		[https://github.com/Phantas0s/devdash#configuration-examples](fg-blue,fg-bold).

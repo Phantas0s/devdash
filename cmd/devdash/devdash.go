@@ -16,6 +16,7 @@ import (
 var debug *bool
 
 func main() {
+	// TODO add mor commands + better management of them (cobra?)
 	file := flag.String("config", ".devdash.yml", "The config file")
 	debug = flag.Bool("debug", false, "Debug mode")
 	term := flag.Bool("term", false, "Display terminal dimensions")
@@ -27,14 +28,15 @@ func main() {
 		return
 	}
 
-	cfg, tui, err := loadFile(*file)
+	termui, err := plateform.NewTermUI(*debug)
 	if err != nil {
-		internal.DisplayError(tui, err)
+		fmt.Println(err)
 	}
 
+	tui := internal.NewTUI(termui)
 	defer tui.Close()
 
-	run(cfg.Projects, tui)
+	cfg := loadFile(*file)
 
 	if _, err := os.Stat(*file); os.IsNotExist(err) {
 		internal.DisplayNoFile(tui)
@@ -46,10 +48,17 @@ func main() {
 		tui.AddRow()
 		tui.Render()
 	} else {
+		tui.AddKQuit(cfg.KQuit())
 		ticker := time.NewTicker(time.Duration(cfg.RefreshTime()) * time.Second)
 		go func() {
 			for range ticker.C {
-				tui.Clean()
+				if cfg.General.Reload {
+					// TODO add possibility to press key to reload
+					cfg = hotReload(tui, file)
+				} else {
+					tui.Clean()
+				}
+
 				run(cfg.Projects, tui)
 			}
 		}()
@@ -58,18 +67,18 @@ func main() {
 	tui.Loop()
 }
 
-func loadFile(file string) (config, *internal.Tui, error) {
-	termui, err := plateform.NewTermUI(*debug)
-	if err != nil {
-		return config{}, nil, err
-	}
+func hotReload(tui *internal.Tui, file *string) config {
+	cfg := loadFile(*file)
+	tui.HotReload()
 
-	tui := internal.NewTUI(termui)
+	return cfg
+}
+
+func loadFile(file string) config {
 	data, _ := ioutil.ReadFile(file)
 	cfg := mapConfig(data)
-	tui.AddKQuit(cfg.KQuit())
 
-	return cfg, tui, nil
+	return cfg
 }
 
 func run(projects []Project, tui *internal.Tui) {

@@ -150,11 +150,16 @@ type looper interface {
 	Loop()
 }
 
+type reloader interface {
+	HotReload()
+}
+
 type manager interface {
 	keyManager
 	renderer
 	drawer
 	looper
+	reloader
 }
 
 type coloredElements struct {
@@ -446,4 +451,9 @@ func (t *Tui) Loop() {
 // Clean and reinitialize the TUI.
 func (t *Tui) Clean() {
 	t.instance.Clean()
+}
+
+// Hot reload the whole TUI
+func (t *Tui) HotReload() {
+	t.instance.HotReload()
 }

@@ -6,8 +6,6 @@ import (
 	"github.com/Phantas0s/termui"
 )
 
-var debug bool = false
-
 type termUI struct {
 	body    *termui.Grid
 	widgets []termui.GridBufferer
@@ -17,8 +15,6 @@ type termUI struct {
 
 // NewTermUI returns a new Terminal Interface object with a given output mode.
 func NewTermUI(d bool) (*termUI, error) {
-	debug = d
-
 	if err := termui.Init(); err != nil {
 		return nil, err
 	}
@@ -178,7 +174,7 @@ func (t *termUI) Table(
 }
 
 // KQuit set a key to quit the application.
-func (termUI) KQuit(key string) {
+func (*termUI) KQuit(key string) {
 	termui.Handle(fmt.Sprintf("/sys/kbd/%s", key), func(termui.Event) {
 		termui.StopLoop()
 	})
@@ -208,4 +204,10 @@ func (t *termUI) Clean() {
 	t.body.Y = 0
 	t.body.BgColor = termui.ThemeAttr("bg")
 	t.body.Width = termui.TermWidth()
+}
+
+func (t *termUI) HotReload() {
+	termui.Close()
+	_ = termui.Init()
+	t.Clean()
 }
