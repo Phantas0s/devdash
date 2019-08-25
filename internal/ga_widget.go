@@ -133,11 +133,14 @@ func (g *gaWidget) totalMetric(widget Widget) (err error) {
 		return err
 	}
 
-	g.tui.AddTextBox(
+	err = g.tui.AddTextBox(
 		users,
 		title,
 		widget.Options,
 	)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -154,11 +157,14 @@ func (g *gaWidget) realTimeUser(widget Widget) error {
 		return err
 	}
 
-	g.tui.AddTextBox(
+	err = g.tui.AddTextBox(
 		users,
 		title,
 		widget.Options,
 	)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

@@ -75,7 +75,7 @@ func loadFile(file string) (config, *internal.Tui, error) {
 func run(projects []Project, tui *internal.Tui) {
 	for _, p := range projects {
 		rows, sizes := p.OrderWidgets()
-		project := internal.NewProject(p.Name, p.TitleOptions, rows, sizes, p.Themes)
+		project := internal.NewProject(p.Name, p.NameOptions, rows, sizes, p.Themes)
 
 		gaService := p.Services.GoogleAnalytics
 		if !gaService.empty() {

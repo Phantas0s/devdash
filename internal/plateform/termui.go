@@ -61,6 +61,7 @@ func (t *termUI) TextBox(
 	title string,
 	tc uint16,
 	height int,
+	multiline bool,
 ) {
 	textBox := termui.NewPar(data)
 
@@ -69,6 +70,7 @@ func (t *termUI) TextBox(
 	textBox.BorderLabel = title
 	textBox.BorderLabelFg = termui.Attribute(tc)
 	textBox.Height = height
+	textBox.Multiline = multiline
 
 	t.widgets = append(t.widgets, textBox)
 }

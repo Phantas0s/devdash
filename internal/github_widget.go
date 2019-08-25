@@ -89,11 +89,14 @@ func (g *githubWidget) boxStars(widget Widget) error {
 
 	s := strconv.FormatInt(int64(stars), 10)
 
-	g.tui.AddTextBox(
+	err = g.tui.AddTextBox(
 		s,
 		title,
 		widget.Options,
 	)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -116,11 +119,14 @@ func (g *githubWidget) boxWatchers(widget Widget) error {
 
 	s := strconv.FormatInt(int64(w), 10)
 
-	g.tui.AddTextBox(
+	err = g.tui.AddTextBox(
 		s,
 		title,
 		widget.Options,
 	)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -143,11 +149,14 @@ func (g *githubWidget) boxOpenIssues(widget Widget) error {
 
 	s := strconv.FormatInt(int64(w), 10)
 
-	g.tui.AddTextBox(
+	err = g.tui.AddTextBox(
 		s,
 		title,
 		widget.Options,
 	)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

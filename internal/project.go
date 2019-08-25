@@ -10,7 +10,7 @@ type service interface {
 
 type project struct {
 	name          string
-	titleOptions  map[string]string
+	nameOptions   map[string]string
 	widgets       [][][]Widget
 	sizes         [][]string
 	themes        map[string]map[string]string
@@ -23,17 +23,17 @@ type project struct {
 // NewProject for the dashboard.
 func NewProject(
 	name string,
-	titleOptions map[string]string,
+	nameOptions map[string]string,
 	widgets [][][]Widget,
 	sizes [][]string,
 	themes map[string]map[string]string,
 ) *project {
 	return &project{
-		name:         name,
-		titleOptions: titleOptions,
-		widgets:      widgets,
-		sizes:        sizes,
-		themes:       themes,
+		name:        name,
+		nameOptions: nameOptions,
+		widgets:     widgets,
+		sizes:       sizes,
+		themes:      themes,
 	}
 }
 
@@ -127,7 +127,7 @@ func (p *project) Render(tui *Tui, debug bool) {
 }
 
 func (p *project) addTitle(tui *Tui) error {
-	return tui.AddProjectTitle(p.name, p.titleOptions)
+	return tui.AddProjectTitle(p.name, p.nameOptions)
 }
 
 func displayWidget(s service, name string, w Widget, tui *Tui) {

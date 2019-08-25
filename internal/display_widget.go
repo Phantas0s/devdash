@@ -1,15 +1,16 @@
 package internal
 
 func DisplayError(tui *Tui, err error) {
-	tui.AddTextBox(err.Error(), " ERROR ", map[string]string{
+	_ = tui.AddTextBox(err.Error(), " ERROR ", map[string]string{
 		optionBorderColor: "red",
 		optionTextColor:   "red",
 		optionTitleColor:  "red",
+		optionMultiline:   "true",
 	})
 }
 
 func DisplayNoFile(tui *Tui) {
-	tui.AddTextBox(
+	_ = tui.AddTextBox(
 		`
 		In order to use DevDash, you need to provide [a configuration file ](fg-bold).
 
@@ -28,6 +29,7 @@ func DisplayNoFile(tui *Tui) {
 			optionTextColor:   "default",
 			optionTitleColor:  "yellow",
 			optionHeight:      "14",
+			optionMultiline:   "true",
 		},
 	)
 }

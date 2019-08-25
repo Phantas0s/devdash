@@ -33,11 +33,11 @@ func (c config) RefreshTime() int64 {
 }
 
 type Project struct {
-	Name         string                       `mapstructure:"name"`
-	Services     Services                     `mapstructure:"services"`
-	Themes       map[string]map[string]string `mapstructure:"themes"`
-	Widgets      []Row                        `mapstructure:"widgets"`
-	TitleOptions map[string]string            `mapstructure:"title_options"`
+	Name        string                       `mapstructure:"name"`
+	NameOptions map[string]string            `mapstructure:"name_options"`
+	Services    Services                     `mapstructure:"services"`
+	Themes      map[string]map[string]string `mapstructure:"themes"`
+	Widgets     []Row                        `mapstructure:"widgets"`
 }
 
 // Row is constitued of columns

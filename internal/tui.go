@@ -31,6 +31,8 @@ const (
 
 	optionBold = "bold"
 
+	optionMultiline = "false"
+
 	optionFirstColor  = "first_color"
 	optionSecondColor = "second_color"
 
@@ -98,6 +100,7 @@ type drawer interface {
 		title string,
 		titleColor uint16,
 		height int,
+		multiline bool,
 	)
 	BarChart(
 		data []int,
@@ -306,11 +309,23 @@ func (t *Tui) AddTextBox(
 	data string,
 	title string,
 	options map[string]string,
-) {
+) (err error) {
 
 	var height int64 = 3
 	if _, ok := options[optionHeight]; ok {
 		height, _ = strconv.ParseInt(options[optionHeight], 0, 0)
+	}
+
+	multiline := false
+	if _, ok := options[optionMultiline]; ok {
+		multiline, err = strconv.ParseBool(options[optionMultiline])
+		if err != nil {
+			return errors.Wrapf(
+				err,
+				"can't convert %s to bool - please verify your configuration (correct values: 'true' or 'false')",
+				options[optionMultiline],
+			)
+		}
 	}
 
 	ce := createColoredElements(options)
@@ -321,8 +336,10 @@ func (t *Tui) AddTextBox(
 		title,
 		ce.titleColor,
 		int(height),
+		multiline,
 	)
 
+	return nil
 }
 
 // AddBarChart to the TUI, a representation of the evolution of a dataset overtime.

@@ -61,11 +61,14 @@ func (m *monitorWidget) pingWidget(widget Widget) error {
 		title = widget.Options[optionTitle]
 	}
 
-	m.tui.AddTextBox(
+	err = m.tui.AddTextBox(
 		fmt.Sprintf("Sent: %d / Received: %d / Time: %d", stats.PacketsSent, stats.PacketsRecv, stats.AvgRtt),
 		title,
 		widget.Options,
 	)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -97,11 +100,14 @@ func (m *monitorWidget) availabilityWidget(widget Widget) error {
 		title = widget.Options[optionTitle]
 	}
 
-	m.tui.AddTextBox(
+	err = m.tui.AddTextBox(
 		fmt.Sprintf("%s (%d)", status, statusCode),
 		title,
 		widget.Options,
 	)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
