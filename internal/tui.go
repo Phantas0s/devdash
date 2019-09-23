@@ -1,4 +1,4 @@
-// This package is an abstraction for any Terminal UI you want to use.
+// This package is an abstraction of the Terminal UI itself.
 package internal
 
 import (

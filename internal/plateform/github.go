@@ -363,28 +363,31 @@ func formatCountCommits(
 
 // CountStars of a repository overtime.
 // Only on a daily basis for now.
-func (g *Github) CountStars(repository string) (dim []string, val []int, err error) {
+func (g *Github) CountStars(repository string, startDate, endDate time.Time) (dim []string, val []int, err error) {
 	se, err := g.fetchStars(repository)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	// TODO do something with the missing day algorithm? Make that available via config?
-	dim, val = formatCountStars(se, "01-02", false)
+	// TODO do something with the missing day (day with 0 as value) algorithm? Make that available via config?
+	dim, val = formatCountStars(se, "01-02", startDate, endDate, false)
 	return dim, val, nil
 }
 
-func formatCountStars(stargazers []*github.Stargazer, timeLayout string, addMissingDays bool) (dim []string, val []int) {
+func formatCountStars(stargazers []*github.Stargazer, timeLayout string, startDate, endDate time.Time, addMissingDays bool) (dim []string, val []int) {
 	sort.SliceStable(stargazers, func(i, j int) bool {
 		return stargazers[i].StarredAt.Time.Before(stargazers[j].StarredAt.Time)
 	})
-	d, val := aggregateStarResults(stargazers)
+	d, va := aggregateStarResults(stargazers)
 	if addMissingDays {
-		d, val = fillMissingDays(d, val)
+		d, va = fillMissingDays(d, va)
 	}
 
-	for _, v := range d {
-		dim = append(dim, v.Format(timeLayout))
+	for k, v := range d {
+		if v.Before(endDate) && v.After(startDate) {
+			dim = append(dim, v.Format(timeLayout))
+			val = append(val, va[k])
+		}
 	}
 
 	return dim, val

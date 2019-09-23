@@ -37,6 +37,7 @@ func main() {
 	defer tui.Close()
 
 	cfg := loadFile(*file)
+	run(cfg.Projects, tui)
 
 	if _, err := os.Stat(*file); os.IsNotExist(err) {
 		internal.DisplayNoFile(tui)
@@ -53,7 +54,6 @@ func main() {
 		go func() {
 			for range ticker.C {
 				if cfg.General.Reload {
-					// TODO add possibility to press key to reload
 					cfg = hotReload(tui, file)
 				} else {
 					tui.Clean()

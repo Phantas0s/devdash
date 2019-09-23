@@ -367,7 +367,22 @@ func (g *githubWidget) barStars(widget Widget) (err error) {
 		title = widget.Options[optionTitle]
 	}
 
-	dim, counts, err := g.client.CountStars(repo)
+	startDate := "7_days_ago"
+	if _, ok := widget.Options[optionStartDate]; ok {
+		startDate = widget.Options[optionStartDate]
+	}
+
+	endDate := "today"
+	if _, ok := widget.Options[optionEndDate]; ok {
+		endDate = widget.Options[optionEndDate]
+	}
+
+	sd, ed, err := plateform.ConvertDates(time.Now(), startDate, endDate)
+	if err != nil {
+		return err
+	}
+
+	dim, counts, err := g.client.CountStars(repo, sd, ed)
 	if err != nil {
 		return err
 	}

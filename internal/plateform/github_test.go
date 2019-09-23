@@ -16,12 +16,25 @@ func Test_formatCountStars(t *testing.T) {
 		fixtureFile string
 		expectedDim []string
 		expectedVal []int
+		startDate   time.Time
+		endDate     time.Time
 		timeLayout  string
 	}{
 		{
 			name:        "happy case",
 			expectedVal: []int{36, 21, 23, 3},
 			expectedDim: []string{"05-28", "05-29", "05-30", "06-10"},
+			startDate:   time.Date(2019, 05, 01, 00, 00, 00, 00, time.UTC),
+			endDate:     time.Date(2019, 07, 01, 00, 00, 00, 00, time.UTC),
+			fixtureFile: "./testdata/fixtures/github_start_count.json",
+			timeLayout:  "01-02",
+		},
+		{
+			name:        "time restriction",
+			expectedVal: []int{21, 23},
+			expectedDim: []string{"05-29", "05-30"},
+			startDate:   time.Date(2019, 05, 29, 00, 00, 00, 00, time.UTC),
+			endDate:     time.Date(2019, 06, 01, 00, 00, 00, 00, time.UTC),
 			fixtureFile: "./testdata/fixtures/github_start_count.json",
 			timeLayout:  "01-02",
 		},
@@ -36,7 +49,7 @@ func Test_formatCountStars(t *testing.T) {
 				t.Error(err)
 			}
 
-			dim, val := formatCountStars(sg1, tc.timeLayout, false)
+			dim, val := formatCountStars(sg1, tc.timeLayout, tc.startDate, tc.endDate, false)
 
 			if !reflect.DeepEqual(dim, tc.expectedDim) {
 				t.Errorf("Expected %v, actual %v", tc.expectedDim, dim)
