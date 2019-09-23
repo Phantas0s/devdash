@@ -21,13 +21,24 @@ type config struct {
 type General struct {
 	Keys    map[string]string `mapstructure:"keys"`
 	Refresh int64             `mapstructure:"refresh"`
+	Reload  bool              `mapstructure:"reload"`
+}
+
+// RefreshTime return the duration before refreshing the data of all widgets, in seconds.
+func (c config) RefreshTime() int64 {
+	if c.General.Refresh == 0 {
+		return 60
+	}
+
+	return c.General.Refresh
 }
 
 type Project struct {
-	Name         string            `mapstructure:"name"`
-	Services     Services          `mapstructure:"services"`
-	Widgets      []Row             `mapstructure:"widgets"`
-	TitleOptions map[string]string `mapstructure:"title_options"`
+	Name        string                       `mapstructure:"name"`
+	NameOptions map[string]string            `mapstructure:"name_options"`
+	Services    Services                     `mapstructure:"services"`
+	Themes      map[string]map[string]string `mapstructure:"themes"`
+	Widgets     []Row                        `mapstructure:"widgets"`
 }
 
 // Row is constitued of columns
@@ -59,7 +70,6 @@ type GoogleAnalytics struct {
 
 type SearchConsole struct {
 	Keyfile string `mapstructure:"keyfile"`
-	ViewID  string `mapstructure:"view_id"`
 	Address string `mapstructure:"address"`
 }
 
@@ -74,9 +84,9 @@ type Github struct {
 }
 
 // OrderWidgets add the widgets to a three dimensional slice.
-// First dimension: index of the rows (ir or indexRows)
-// Second dimension: index of the columns (ic or indexColumn)
-// Third dimension: index of the widget
+// First dimension: index of the rows (ir or indexRows).
+// Second dimension: index of the columns (ic or indexColumn).
+// Third dimension: index of the widget.
 func (p Project) OrderWidgets() ([][][]internal.Widget, [][]string) {
 	rowLen := len(p.Widgets)
 

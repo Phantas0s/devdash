@@ -23,7 +23,6 @@ const (
 type gscWidget struct {
 	tui     *Tui
 	client  *plateform.SearchConsole
-	viewID  string
 	address string
 }
 
@@ -32,7 +31,8 @@ var mappingGscHeader = map[string]string{
 	"query": "Query",
 }
 
-func NewGscWidget(keyfile string, viewID string, address string) (*gscWidget, error) {
+// NewGscWidget including everything to connect to the Google Search Console API.
+func NewGscWidget(keyfile string, address string) (*gscWidget, error) {
 	sc, err := plateform.NewSearchConsoleClient(keyfile)
 	if err != nil {
 		return nil, err
@@ -40,11 +40,11 @@ func NewGscWidget(keyfile string, viewID string, address string) (*gscWidget, er
 
 	return &gscWidget{
 		client:  sc,
-		viewID:  viewID,
 		address: address,
 	}, nil
 }
 
+// CreateWidgets for the Google Search Console API.
 func (s *gscWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	s.tui = tui
 	switch widget.Name {
@@ -84,7 +84,7 @@ func (s *gscWidget) table(widget Widget) (err error) {
 		ed = widget.Options[optionEndDate]
 	}
 
-	startDate, endDate, err := ConvertDates(time.Now(), sd, ed)
+	startDate, endDate, err := plateform.ConvertDates(time.Now(), sd, ed)
 	if err != nil {
 		return err
 	}
@@ -134,7 +134,6 @@ func (s *gscWidget) table(widget Widget) (err error) {
 	}
 
 	results, err := s.client.Table(
-		s.viewID,
 		startDate.Format(gscTimeFormat),
 		endDate.Format(gscTimeFormat),
 		rowLimit,
@@ -146,6 +145,15 @@ func (s *gscWidget) table(widget Widget) (err error) {
 		return err
 	}
 
+	table := formatNumerics(results, dimension, metrics)
+	table = formatText(table, charLimit, s.address)
+
+	s.tui.AddTable(table, title, widget.Options)
+
+	return nil
+}
+
+func formatNumerics(results []plateform.SearchConsoleResponse, dimension string, metrics []string) [][]string {
 	table := make([][]string, len(results)+1)
 	table[0] = []string{mappingGscHeader[dimension]}
 	table[0] = append(table[0], metrics...)
@@ -168,20 +176,20 @@ func (s *gscWidget) table(widget Widget) (err error) {
 		}
 	}
 
-	// Shorten the URL of the page.
+	return table
+}
+
+func formatText(table [][]string, charLimit int, trimPrefix string) [][]string {
 	// Begins the loop to 1 not to shorten the headers.
 	for i := 1; i < len(table); i++ {
-		URL := strings.TrimPrefix(table[i][0], s.address)
+		text := strings.TrimPrefix(table[i][0], trimPrefix)
 
-		if charLimit < len(URL) {
-			URL = URL[:charLimit]
+		if charLimit < len(text) {
+			text = text[:charLimit]
 		}
 
-		table[i][0] = URL
+		table[i][0] = text
 	}
 
-	s.tui.AddTable(table, title, widget.Options)
-
-	return nil
-
+	return table
 }

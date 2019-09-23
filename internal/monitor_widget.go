@@ -19,12 +19,14 @@ type monitorWidget struct {
 	address string
 }
 
+// NewMonitorWidget with the address of the website to monitor.
 func NewMonitorWidget(address string) (*monitorWidget, error) {
 	return &monitorWidget{
 		address: address,
 	}, nil
 }
 
+// CreateWidgets for the monitor service.
 func (m *monitorWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	m.tui = tui
 
@@ -51,7 +53,6 @@ func (m *monitorWidget) pingWidget(widget Widget) error {
 		return err
 	}
 	pinger.Count = 1
-	// fmt.Printf("PING %s (%s):\n", pinger.Addr(), pinger.IPAddr())
 	pinger.Run()                 // blocks until finished
 	stats := pinger.Statistics() // get send/receive/rtt stats
 
@@ -60,11 +61,14 @@ func (m *monitorWidget) pingWidget(widget Widget) error {
 		title = widget.Options[optionTitle]
 	}
 
-	m.tui.AddTextBox(
+	err = m.tui.AddTextBox(
 		fmt.Sprintf("Sent: %d / Received: %d / Time: %d", stats.PacketsSent, stats.PacketsRecv, stats.AvgRtt),
 		title,
 		widget.Options,
 	)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -87,19 +91,23 @@ func (m *monitorWidget) availabilityWidget(widget Widget) error {
 			statusCode = res.StatusCode
 		}
 		status = "offline"
+	} else {
+		defer res.Body.Close()
 	}
-	defer res.Body.Close()
 
 	title := " Availability "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}
 
-	m.tui.AddTextBox(
+	err = m.tui.AddTextBox(
 		fmt.Sprintf("%s (%d)", status, statusCode),
 		title,
 		widget.Options,
 	)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

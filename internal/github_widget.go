@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/Phantas0s/devdash/internal/plateform"
 	"github.com/pkg/errors"
@@ -17,6 +18,9 @@ const (
 	githubTableBranches     = "github.table_branches"
 	githubTableIssues       = "github.table_issues"
 	githubTablePullRequests = "github.table_pull_requests"
+	githubBarViews          = "github.bar_views"
+	githubBarCommits        = "github.bar_commits"
+	githubBarStars          = "github.bar_stars"
 )
 
 type githubWidget struct {
@@ -24,6 +28,7 @@ type githubWidget struct {
 	client *plateform.Github
 }
 
+// NewGithubWidget with all information necessary to connect to the Github API.
 func NewGithubWidget(token string, owner string, repo string) (*githubWidget, error) {
 	g, err := plateform.NewGithubClient(token, owner, repo)
 	if err != nil {
@@ -34,6 +39,7 @@ func NewGithubWidget(token string, owner string, repo string) (*githubWidget, er
 	}, nil
 }
 
+// CreateWidgets for the Github service.
 func (g *githubWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	g.tui = tui
 
@@ -52,6 +58,12 @@ func (g *githubWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 		err = g.tableIssues(widget)
 	case githubTablePullRequests:
 		err = g.tablePullRequests(widget)
+	case githubBarViews:
+		err = g.barViews(widget)
+	case githubBarCommits:
+		err = g.barCommits(widget)
+	case githubBarStars:
+		err = g.barStars(widget)
 	default:
 		return errors.Errorf("can't find the widget %s for service github", widget.Name)
 	}
@@ -70,18 +82,21 @@ func (g *githubWidget) boxStars(widget Widget) error {
 		title = widget.Options[optionTitle]
 	}
 
-	stars, err := g.client.Stars(repo)
+	stars, err := g.client.TotalStars(repo)
 	if err != nil {
 		return err
 	}
 
 	s := strconv.FormatInt(int64(stars), 10)
 
-	g.tui.AddTextBox(
+	err = g.tui.AddTextBox(
 		s,
 		title,
 		widget.Options,
 	)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -97,18 +112,21 @@ func (g *githubWidget) boxWatchers(widget Widget) error {
 		repo = widget.Options[optionRepository]
 	}
 
-	w, err := g.client.Watchers(repo)
+	w, err := g.client.TotalWatchers(repo)
 	if err != nil {
 		return err
 	}
 
 	s := strconv.FormatInt(int64(w), 10)
 
-	g.tui.AddTextBox(
+	err = g.tui.AddTextBox(
 		s,
 		title,
 		widget.Options,
 	)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -124,18 +142,21 @@ func (g *githubWidget) boxOpenIssues(widget Widget) error {
 		repo = widget.Options[optionRepository]
 	}
 
-	w, err := g.client.OpenIssues(repo)
+	w, err := g.client.TotalOpenIssues(repo)
 	if err != nil {
 		return err
 	}
 
 	s := strconv.FormatInt(int64(w), 10)
 
-	g.tui.AddTextBox(
+	err = g.tui.AddTextBox(
 		s,
 		title,
 		widget.Options,
 	)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -154,7 +175,7 @@ func (g *githubWidget) tableRepo(widget Widget) (err error) {
 		}
 	}
 
-	metrics := []string{"name", "stars", "watchers", "forks", "open issues"}
+	metrics := []string{"name", "stars", "watchers", "forks", "open_issues"}
 	if _, ok := widget.Options[optionMetrics]; ok {
 		if len(widget.Options[optionMetrics]) > 0 {
 			metrics = strings.Split(strings.TrimSpace(widget.Options[optionMetrics]), ",")
@@ -259,6 +280,114 @@ func (g *githubWidget) tablePullRequests(widget Widget) (err error) {
 	}
 
 	g.tui.AddTable(is, title, widget.Options)
+
+	return nil
+}
+
+func (g *githubWidget) barViews(widget Widget) (err error) {
+	var repo string
+	if _, ok := widget.Options[optionRepository]; ok {
+		repo = widget.Options[optionRepository]
+	}
+
+	title := " Github Views "
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	dim, counts, err := g.client.Views(repo, 0)
+	if err != nil {
+		return err
+	}
+
+	g.tui.AddBarChart(counts, dim, title, widget.Options)
+
+	return nil
+}
+
+// TODO to refactor - transforming any date statement (weeks_ago, month_ago) into days weeks_ago in plateform.date, and plugt it in.
+func (g *githubWidget) barCommits(widget Widget) (err error) {
+	var repo string
+	if _, ok := widget.Options[optionRepository]; ok {
+		repo = widget.Options[optionRepository]
+	}
+
+	title := " Github Commit Per Week "
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	sd := "7_weeks_ago"
+	if _, ok := widget.Options[optionStartDate]; ok {
+		sd = widget.Options[optionStartDate]
+	}
+
+	ed := "0_weeks_ago"
+	if _, ok := widget.Options[optionEndDate]; ok {
+		ed = widget.Options[optionEndDate]
+	}
+
+	scope := ownerScope
+	if _, ok := widget.Options[optionScope]; ok {
+		scope = widget.Options[optionScope]
+	}
+
+	if !strings.Contains(sd, "weeks_ago") || !strings.Contains(ed, "weeks_ago") {
+		return errors.New("The widget github.bar_commits require you to indicate a week range, ie startDate: 5_weeks_ago, endDate: 1_weeks_ago ")
+	}
+
+	sw, err := plateform.ExtractCountPeriod(sd)
+	if err != nil {
+		return err
+	}
+
+	ew, err := plateform.ExtractCountPeriod(ed)
+	if err != nil {
+		return err
+	}
+
+	dim, counts, err := g.client.CountCommits(repo, scope, sw, ew, time.Now())
+	if err != nil {
+		return err
+	}
+
+	g.tui.AddBarChart(counts, dim, title, widget.Options)
+
+	return nil
+}
+
+func (g *githubWidget) barStars(widget Widget) (err error) {
+	var repo string
+	if _, ok := widget.Options[optionRepository]; ok {
+		repo = widget.Options[optionRepository]
+	}
+
+	title := " Stars "
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	startDate := "7_days_ago"
+	if _, ok := widget.Options[optionStartDate]; ok {
+		startDate = widget.Options[optionStartDate]
+	}
+
+	endDate := "today"
+	if _, ok := widget.Options[optionEndDate]; ok {
+		endDate = widget.Options[optionEndDate]
+	}
+
+	sd, ed, err := plateform.ConvertDates(time.Now(), startDate, endDate)
+	if err != nil {
+		return err
+	}
+
+	dim, counts, err := g.client.CountStars(repo, sd, ed)
+	if err != nil {
+		return err
+	}
+
+	g.tui.AddBarChart(counts, dim, title, widget.Options)
 
 	return nil
 }

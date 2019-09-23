@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -13,13 +12,17 @@ import (
 	"golang.org/x/oauth2/jwt"
 	gav3 "google.golang.org/api/analytics/v3"
 	ga "google.golang.org/api/analyticsreporting/v4"
+	"google.golang.org/api/option"
 )
 
 const gaPrefix = "ga:"
 
-// earliest date google analytics accept for date ranges
+// To create fixtures in order to test the data formatting.
+// j, _ := json.Marshal(resp)
+// fmt.Println(string(j))
+
 const (
-	earliestDate     = "2005-01-01"
+	earliestDate     = "2005-01-01" // This is the earliest date Google Analytics accepts.
 	newVisitor       = "New Visitor"
 	returningVisitor = "Returning Visitor"
 )
@@ -60,16 +63,30 @@ var mappingOrder = map[string]string{
 	"desc": "DESCENDING",
 }
 
+// Analytics connect to Google Analytics API.
 type Analytics struct {
 	config          *jwt.Config
-	client          *http.Client
 	servicev3       *gav3.Service
 	realtimeService *gav3.DataRealtimeService
 	service         *ga.Service
 }
 
-// New takes a keyfile for authentication and
-// returns a new Google Analytics Reporting Client struct.
+// AnalyticValues which can be possibly send to the Google Analytics API.
+// This is a pure value object without behavior.
+type AnalyticValues struct {
+	ViewID     string
+	StartDate  string
+	EndDate    string
+	TimePeriod string
+	Global     bool
+	Metrics    []string
+	Dimensions []string
+	Filters    []string
+	Orders     []string
+	RowLimit   int64
+}
+
+// NewAnalyticsClient to connect to Google Analytics APIs.
 func NewAnalyticsClient(keyfile string) (*Analytics, error) {
 	data, err := ioutil.ReadFile(keyfile)
 	if err != nil {
@@ -83,16 +100,15 @@ func NewAnalyticsClient(keyfile string) (*Analytics, error) {
 		return nil, fmt.Errorf("creating JWT config from json keyfile %q failed: %v", keyfile, err)
 	}
 
-	an.client = an.config.Client(context.Background())
-
 	// analytics reporting v4 service
-	an.service, err = ga.New(an.client)
+
+	an.service, err = ga.NewService(context.Background(), option.WithHTTPClient(an.config.Client(context.Background())))
 	if err != nil {
 		return nil, fmt.Errorf("creating the analytics reporting service v4 object failed: %v", err)
 	}
 
 	// analytics reporting v3 service object.
-	an.servicev3, err = gav3.New(an.client)
+	an.servicev3, err = gav3.NewService(context.Background(), option.WithHTTPClient(an.config.Client(context.Background())))
 	if err != nil {
 		return nil, fmt.Errorf("creating the analytics reporting service v3 object failed: %v", err)
 	}
@@ -102,24 +118,16 @@ func NewAnalyticsClient(keyfile string) (*Analytics, error) {
 
 }
 
-// SimpleMetric of one quantitative value.
-func (c *Analytics) SimpleMetric(
-	viewID,
-	metric,
-	startDate,
-	endDate string,
-	global bool,
-) (string, error) {
+// SimpleMetric get a value depending on Google Analytics metrics.
+func (c *Analytics) SimpleMetric(val AnalyticValues) (string, error) {
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
-				ViewId: viewID,
+				ViewId: val.ViewID,
 				DateRanges: []*ga.DateRange{
-					{StartDate: startDate, EndDate: endDate},
+					{StartDate: val.StartDate, EndDate: val.EndDate},
 				},
-				Metrics: []*ga.Metric{
-					{Expression: mapMetric(metric)},
-				},
+				Metrics:          mapMetrics(val.Metrics),
 				IncludeEmptyRows: true,
 			},
 		},
@@ -130,8 +138,8 @@ func (c *Analytics) SimpleMetric(
 		return "", errors.Wrapf(
 			err,
 			"can't get total metric data from google analytics with start data %s / end_date %s",
-			startDate,
-			endDate,
+			val.StartDate,
+			val.EndDate,
 		)
 	}
 
@@ -142,25 +150,17 @@ func (c *Analytics) SimpleMetric(
 	return "0", nil
 }
 
-// BarMetric provides a bar display with one qualitative dimension and one quantitative value.
-func (c *Analytics) BarMetric(
-	viewID string,
-	startDate string,
-	endDate string,
-	metric string,
-	dimensions []string,
-	timePeriod string,
-	filters []string,
-) ([]string, []int, error) {
-	// Add the time dimension to the first two index of the slice (0, 1)
-	tm := mapTimePeriod(timePeriod)
+// BarMetric provides a qualitive dimension linked to a quantitative value, for example a date (dimension) with an int.
+func (c *Analytics) BarMetric(val AnalyticValues) ([]string, []int, error) {
+	// Add the time dimension to the first two indexes of the slice (0, 1)
+	tm := mapTimePeriod(val.TimePeriod)
 	dim := []*ga.Dimension{}
 	for _, v := range tm {
 		dim = append(dim, &ga.Dimension{Name: v})
 	}
 
 	formater := formatBar
-	for _, v := range dimensions {
+	for _, v := range val.Dimensions {
 		if v == "user_returning" {
 			formater = formatBarReturning
 		}
@@ -168,11 +168,11 @@ func (c *Analytics) BarMetric(
 	}
 
 	fi := []*ga.DimensionFilter{}
-	if len(dimensions) == 1 {
+	if len(val.Dimensions) == 1 {
 		fi = append(fi, &ga.DimensionFilter{
 			CaseSensitive: false,
-			DimensionName: mapDimension(dimensions[0]),
-			Expressions:   filters,
+			DimensionName: mapDimension(val.Dimensions[0]),
+			Expressions:   val.Filters,
 			Not:           false,
 			Operator:      "PARTIAL",
 		})
@@ -181,13 +181,11 @@ func (c *Analytics) BarMetric(
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
-				ViewId: viewID,
+				ViewId: val.ViewID,
 				DateRanges: []*ga.DateRange{
-					{StartDate: startDate, EndDate: endDate},
+					{StartDate: val.StartDate, EndDate: val.EndDate},
 				},
-				Metrics: []*ga.Metric{
-					{Expression: mapMetric(metric)},
-				},
+				Metrics:    mapMetrics(val.Metrics),
 				Dimensions: dim,
 				OrderBys: []*ga.OrderBy{
 					{
@@ -207,16 +205,13 @@ func (c *Analytics) BarMetric(
 	}
 
 	resp, err := c.service.Reports.BatchGet(req).Do()
-	// create fixture for tests
-	// j, _ := json.Marshal(resp)
-	// fmt.Println(string(j))
 
 	if err != nil {
 		return nil, nil, errors.Wrapf(
 			err,
 			"can't get users data from google analytics with start data %s / end_date %s",
-			startDate,
-			endDate,
+			val.StartDate,
+			val.EndDate,
 		)
 	}
 
@@ -231,7 +226,7 @@ func (c *Analytics) BarMetric(
 	return formater(resp.Reports, f)
 }
 
-// RealTimeUsers on the website (using Google api V3).
+// RealTimeUsers return the number of visitor currently on the website.
 func (c *Analytics) RealTimeUsers(viewID string) (string, error) {
 	metric := "rt:activeUsers"
 
@@ -243,57 +238,56 @@ func (c *Analytics) RealTimeUsers(viewID string) (string, error) {
 	return resp.TotalsForAllResults[metric], nil
 }
 
-// Table shaped analytics.
-// Headers on the first row are qualitative dimensions, value can be qualitative or quantitative.
+// Table display dimensions and values.
+// The headers on the first row are qualitative dimensions, the values can be qualitative or quantitative.
 func (c *Analytics) Table(
-	viewID string,
-	startDate string,
-	endDate string,
-	global bool,
-	metrics []string,
-	dimension string,
-	orders []string,
+	an AnalyticValues,
 	firstHeader string,
-	filters []string,
 ) (headers []string, dim []string, u [][]string, err error) {
 
 	dateRange := []*ga.DateRange{
-		{StartDate: startDate, EndDate: endDate},
+		{StartDate: an.StartDate, EndDate: an.EndDate},
 	}
 
-	if global {
+	if an.Global {
 		dateRange = []*ga.DateRange{
-			{StartDate: earliestDate, EndDate: endDate},
+			{StartDate: earliestDate, EndDate: an.EndDate},
 		}
 	}
 
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
-				ViewId:     viewID,
-				DateRanges: dateRange,
-				Metrics:    mapMetrics(metrics),
-				Dimensions: []*ga.Dimension{
-					{Name: mapDimension(dimension)},
-				},
-				OrderBys:         mapOrderBy(orders),
+				ViewId:           an.ViewID,
+				DateRanges:       dateRange,
+				Metrics:          mapMetrics(an.Metrics),
+				Dimensions:       mapDimensions(an.Dimensions),
+				OrderBys:         mapOrderBy(an.Orders),
 				IncludeEmptyRows: true,
+				PageSize:         an.RowLimit,
 			},
 		},
 	}
 
-	if len(filters) > 0 {
+	if len(an.Filters) > 0 {
+
+		// TODO now only one filter is possible for one dimension.
+		// If there are more than one dimension, the same set of filter is applied.
+		// Possibility to make it multiple filters for multipme dimension?
+		filters := []*ga.DimensionFilter{}
+		for _, v := range an.Dimensions {
+			filters = append(filters, &ga.DimensionFilter{
+				CaseSensitive: false,
+				DimensionName: v,
+				Expressions:   an.Filters,
+				Not:           false,
+				Operator:      "PARTIAL",
+			})
+		}
+
 		req.ReportRequests[0].DimensionFilterClauses = []*ga.DimensionFilterClause{
 			{
-				Filters: []*ga.DimensionFilter{
-					{
-						CaseSensitive: false,
-						DimensionName: mapDimension(dimension),
-						Expressions:   filters,
-						Not:           false,
-						Operator:      "PARTIAL",
-					},
-				},
+				Filters:  filters,
 				Operator: "AND",
 			},
 		}
@@ -304,8 +298,8 @@ func (c *Analytics) Table(
 		return nil, nil, nil, errors.Wrapf(
 			err,
 			"can't get table data from google analytics with start data %s / end_date %s",
-			startDate,
-			endDate,
+			an.StartDate,
+			an.EndDate,
 		)
 	}
 
@@ -313,26 +307,17 @@ func (c *Analytics) Table(
 		return dim[0]
 	}
 
-	headers = mapHeaders(firstHeader, metrics)
+	headers = mapHeaders(firstHeader, an.Metrics)
 	dim, u = formatTable(resp.Reports, formater)
 	return
 }
 
-// NewVsReturning users.
-func (c *Analytics) StackedBar(
-	viewID string,
-	startDate string,
-	endDate string,
-	metric string,
-	timePeriod string,
-	dimensions []string,
-) (dim []string, new []int, ret []int, err error) {
+// StackedBar returns one dimension set linked with multiple values.
+func (c *Analytics) StackedBar(an AnalyticValues) (dim []string, new []int, ret []int, err error) {
+	d := mapDimensions(an.Dimensions)
+	tm := mapTimePeriod(an.TimePeriod)
+
 	// Add the time dimensions to the slice (index 1,2)
-	d := []*ga.Dimension{}
-	for _, v := range dimensions {
-		d = append(d, &ga.Dimension{Name: mapDimension(v)})
-	}
-	tm := mapTimePeriod(timePeriod)
 	for _, v := range tm {
 		d = append(d, &ga.Dimension{Name: v})
 	}
@@ -340,13 +325,11 @@ func (c *Analytics) StackedBar(
 	req := &ga.GetReportsRequest{
 		ReportRequests: []*ga.ReportRequest{
 			{
-				ViewId: viewID,
+				ViewId: an.ViewID,
 				DateRanges: []*ga.DateRange{
-					{StartDate: startDate, EndDate: endDate},
+					{StartDate: an.StartDate, EndDate: an.EndDate},
 				},
-				Metrics: []*ga.Metric{
-					{Expression: mapMetric(metric)},
-				},
+				Metrics:    mapMetrics(an.Metrics),
 				Dimensions: d,
 				OrderBys: []*ga.OrderBy{
 					{
@@ -365,8 +348,8 @@ func (c *Analytics) StackedBar(
 		return nil, nil, nil, errors.Wrapf(
 			err,
 			"can't get stacked bar data from google analytics with start data %s / end_date %s",
-			startDate,
-			endDate,
+			an.StartDate,
+			an.EndDate,
 		)
 	}
 
@@ -377,10 +360,7 @@ func (c *Analytics) StackedBar(
 	return formatNewReturning(resp.Reports, formater)
 }
 
-// formatBar vizualiser, to return one slice of dimension and one slice of values.
-// The two slices are equals in size.
-// If the same dimension is returned multiple time by the Google API, the data
-// is aggregated not to have duplicated dimensions.
+// formatBar to return one slice of dimension which elements are all linked with the elements of one slice of values.
 func formatBar(reps []*ga.Report, dimFormater func(dim []string) string) (dim []string, u []int, err error) {
 	dimVal := map[string]int{}
 	for _, v := range reps {
@@ -414,7 +394,6 @@ func formatBar(reps []*ga.Report, dimFormater func(dim []string) string) (dim []
 		}
 	}
 
-	// Aggregate value with same dimension.
 	for k, v := range dim {
 		u[k] = dimVal[v]
 	}
@@ -541,6 +520,15 @@ func mapDimension(dim string) string {
 	}
 
 	return strings.TrimSpace(d)
+}
+
+func mapDimensions(dimensions []string) []*ga.Dimension {
+	d := []*ga.Dimension{}
+	for _, v := range dimensions {
+		d = append(d, &ga.Dimension{Name: mapDimension(v)})
+	}
+
+	return d
 }
 
 func mapOrderBy(o []string) []*ga.OrderBy {

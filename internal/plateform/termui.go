@@ -6,8 +6,6 @@ import (
 	"github.com/Phantas0s/termui"
 )
 
-var debug bool = false
-
 type termUI struct {
 	body    *termui.Grid
 	widgets []termui.GridBufferer
@@ -17,8 +15,6 @@ type termUI struct {
 
 // NewTermUI returns a new Terminal Interface object with a given output mode.
 func NewTermUI(d bool) (*termUI, error) {
-	debug = d
-
 	if err := termui.Init(); err != nil {
 		return nil, err
 	}
@@ -36,20 +32,24 @@ func NewTermUI(d bool) (*termUI, error) {
 	}, nil
 }
 
+// Close termui.
 func (termUI) Close() {
 	termui.Close()
 }
 
+// AddCol to the termui grid system.
 func (t *termUI) AddCol(size int) {
 	t.col = append(t.col, termui.NewCol(size, 0, t.widgets...))
 	t.widgets = []termui.GridBufferer{}
 }
 
+// AddRow to the termui grid system.
 func (t *termUI) AddRow() {
 	t.body.AddRows(termui.NewRow(t.col...))
 	t.body.Align()
 }
 
+// TextBox widget type.
 func (t *termUI) TextBox(
 	data string,
 	textColor uint16,
@@ -57,6 +57,7 @@ func (t *termUI) TextBox(
 	title string,
 	tc uint16,
 	height int,
+	multiline bool,
 ) {
 	textBox := termui.NewPar(data)
 
@@ -65,10 +66,12 @@ func (t *termUI) TextBox(
 	textBox.BorderLabel = title
 	textBox.BorderLabelFg = termui.Attribute(tc)
 	textBox.Height = height
+	textBox.Multiline = multiline
 
 	t.widgets = append(t.widgets, textBox)
 }
 
+// Title is a special TextBox widget type.
 func (t *termUI) Title(
 	title string,
 	textColor uint16,
@@ -88,6 +91,7 @@ func (t *termUI) Title(
 	t.body.AddRows(termui.NewCol(size, 0, pro))
 }
 
+// BarChar widget type.
 func (t *termUI) BarChart(
 	data []int,
 	dimensions []string,
@@ -96,6 +100,7 @@ func (t *termUI) BarChart(
 	bd uint16,
 	fg uint16,
 	nc uint16,
+	enc uint16,
 	height int,
 	gap int,
 	barWidth int,
@@ -113,11 +118,13 @@ func (t *termUI) BarChart(
 	bc.BarColor = termui.Attribute(barColor)
 	bc.BarGap = gap
 	bc.NumColor = termui.Attribute(nc)
+	bc.EmptyNumColor = termui.Attribute(enc)
 	bc.Buffer()
 
 	t.widgets = append(t.widgets, bc)
 }
 
+// StackedBarChar widget type.
 func (t *termUI) StackedBarChart(
 	data [8][]int,
 	dimensions []string,
@@ -147,6 +154,7 @@ func (t *termUI) StackedBarChart(
 	t.widgets = append(t.widgets, bc)
 }
 
+// Table widget type.
 func (t *termUI) Table(
 	data [][]string,
 	title string,
@@ -166,16 +174,18 @@ func (t *termUI) Table(
 }
 
 // KQuit set a key to quit the application.
-func (termUI) KQuit(key string) {
+func (*termUI) KQuit(key string) {
 	termui.Handle(fmt.Sprintf("/sys/kbd/%s", key), func(termui.Event) {
 		termui.StopLoop()
 	})
 }
 
+// Loop termui to receive events.
 func (t *termUI) Loop() {
 	termui.Loop()
 }
 
+// Render termui and delete the instance of the widgets rendered.
 func (t *termUI) Render() {
 	termui.Render(t.body)
 	// delete every widget for the row rendered.
@@ -187,10 +197,17 @@ func (t *termUI) removeWidgets() {
 	t.col = []*termui.Row{}
 }
 
+// Clean and create a new empty grid.
 func (t *termUI) Clean() {
 	t.body = termui.NewGrid()
 	t.body.X = 0
 	t.body.Y = 0
 	t.body.BgColor = termui.ThemeAttr("bg")
 	t.body.Width = termui.TermWidth()
+}
+
+func (t *termUI) HotReload() {
+	termui.Close()
+	_ = termui.Init()
+	t.Clean()
 }

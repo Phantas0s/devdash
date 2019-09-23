@@ -35,6 +35,7 @@ type gaWidget struct {
 	viewID    string
 }
 
+// NewGaWidget including all information to connect to the Google Analytics API.
 func NewGaWidget(keyfile string, viewID string) (*gaWidget, error) {
 	an, err := plateform.NewAnalyticsClient(keyfile)
 	if err != nil {
@@ -47,6 +48,7 @@ func NewGaWidget(keyfile string, viewID string) (*gaWidget, error) {
 	}, nil
 }
 
+// CreateWidgets for Google Analytics.
 func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	g.tui = tui
 
@@ -100,7 +102,7 @@ func (g *gaWidget) totalMetric(widget Widget) (err error) {
 		endDate = widget.Options[optionEndDate]
 	}
 
-	sd, ed, err := ConvertDates(time.Now(), startDate, endDate)
+	sd, ed, err := plateform.ConvertDates(time.Now(), startDate, endDate)
 	if err != nil {
 		return err
 	}
@@ -118,16 +120,27 @@ func (g *gaWidget) totalMetric(widget Widget) (err error) {
 		}
 	}
 
-	users, err := g.analytics.SimpleMetric(g.viewID, metric, sd.Format(gaTimeFormat), ed.Format(gaTimeFormat), global)
+	users, err := g.analytics.SimpleMetric(
+		plateform.AnalyticValues{
+			ViewID:    g.viewID,
+			StartDate: sd.Format(gaTimeFormat),
+			EndDate:   ed.Format(gaTimeFormat),
+			Global:    global,
+			Metrics:   []string{metric},
+		},
+	)
 	if err != nil {
 		return err
 	}
 
-	g.tui.AddTextBox(
+	err = g.tui.AddTextBox(
 		users,
 		title,
 		widget.Options,
 	)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -144,11 +157,14 @@ func (g *gaWidget) realTimeUser(widget Widget) error {
 		return err
 	}
 
-	g.tui.AddTextBox(
+	err = g.tui.AddTextBox(
 		users,
 		title,
 		widget.Options,
 	)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -181,13 +197,14 @@ func (g *gaWidget) barPages(widget Widget) (err error) {
 	}
 	widget.Options[optionDimensions] = "page_path"
 	widget.Options[optionMetric] = "page_views"
-	widget.Options[optionTitle] = " Page views "
 
 	if _, ok := widget.Options[optionFilters]; !ok {
 		return errors.New("The widget ga.bar_pages require a filter (relative url of your page, i.e '/my-super-page/')")
 	}
 
-	widget.Options[optionTitle] += " - filter " + widget.Options[optionFilters] + " "
+	if _, ok := widget.Options[optionTitle]; !ok {
+		widget.Options[optionTitle] = widget.Options[optionFilters]
+	}
 
 	return g.barMetric(widget)
 }
@@ -202,7 +219,15 @@ func (g *gaWidget) barBounces(widget Widget) (err error) {
 	return g.barMetric(widget)
 }
 
-func (g *gaWidget) barMetric(widget Widget) error {
+func (g *gaWidget) barMetric(widget Widget) (err error) {
+	global := false
+	if _, ok := widget.Options[optionGlobal]; ok {
+		global, err = strconv.ParseBool(widget.Options[optionGlobal])
+		if err != nil {
+			return errors.Wrapf(err, "could not parse string %s to bool", widget.Options[optionGlobal])
+		}
+	}
+
 	sd := "7_days_ago"
 	if _, ok := widget.Options[optionStartDate]; ok {
 		sd = widget.Options[optionStartDate]
@@ -213,7 +238,7 @@ func (g *gaWidget) barMetric(widget Widget) error {
 		ed = widget.Options[optionEndDate]
 	}
 
-	startDate, endDate, err := ConvertDates(time.Now(), sd, ed)
+	startDate, endDate, err := plateform.ConvertDates(time.Now(), sd, ed)
 	if err != nil {
 		return err
 	}
@@ -248,13 +273,16 @@ func (g *gaWidget) barMetric(widget Widget) error {
 	}
 
 	dim, val, err := g.analytics.BarMetric(
-		g.viewID,
-		startDate.Format(gaTimeFormat),
-		endDate.Format(gaTimeFormat),
-		metric,
-		dimensions,
-		timePeriod,
-		filters,
+		plateform.AnalyticValues{
+			ViewID:     g.viewID,
+			StartDate:  startDate.Format(gaTimeFormat),
+			EndDate:    endDate.Format(gaTimeFormat),
+			TimePeriod: timePeriod,
+			Global:     global,
+			Metrics:    []string{metric},
+			Dimensions: dimensions,
+			Filters:    filters,
+		},
 	)
 	if err != nil {
 		return err
@@ -266,9 +294,6 @@ func (g *gaWidget) barMetric(widget Widget) error {
 }
 
 func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
-	// defaults
-	var pLen int64 = 20
-
 	global := false
 	if _, ok := widget.Options[optionGlobal]; ok {
 		global, err = strconv.ParseBool(widget.Options[optionGlobal])
@@ -308,7 +333,7 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 		ed = widget.Options[optionEndDate]
 	}
 
-	startDate, endDate, err := ConvertDates(time.Now(), sd, ed)
+	startDate, endDate, err := plateform.ConvertDates(time.Now(), sd, ed)
 	if err != nil {
 		return err
 	}
@@ -325,28 +350,6 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 		}
 	}
 
-	headers, dim, val, err := g.analytics.Table(
-		g.viewID,
-		startDate.Format(gaTimeFormat),
-		endDate.Format(gaTimeFormat),
-		global,
-		metrics,
-		dimension,
-		orders,
-		firstHeader,
-		filters,
-	)
-	if err != nil {
-		return err
-	}
-
-	mustContain := ""
-	if _, ok := widget.Options[optionMustContain]; ok {
-		if len(widget.Options[optionMustContain]) > 0 {
-			mustContain = widget.Options[optionMustContain]
-		}
-	}
-
 	var rowLimit int64 = 5
 	if _, ok := widget.Options[optionRowLimit]; ok {
 		rowLimit, err = strconv.ParseInt(widget.Options[optionRowLimit], 0, 0)
@@ -354,46 +357,69 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 			return errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
 		}
 	}
+
+	headers, dim, val, err := g.analytics.Table(
+		plateform.AnalyticValues{
+			ViewID:     g.viewID,
+			StartDate:  startDate.Format(gaTimeFormat),
+			EndDate:    endDate.Format(gaTimeFormat),
+			Global:     global,
+			Metrics:    metrics,
+			Dimensions: []string{dimension},
+			Filters:    filters,
+			Orders:     orders,
+			RowLimit:   rowLimit,
+		},
+		firstHeader,
+	)
+	if err != nil {
+		return err
+	}
+
 	if int(rowLimit) > len(dim) {
 		rowLimit = int64(len(dim))
 	}
 
-	// total of pages + one row for headers
-	table := make([][]string, rowLimit+1)
-	table[0] = headers
-
-	for i := 0; i < int(rowLimit); i++ {
-		if mustContain != "" && !strings.Contains(dim[i], mustContain) {
-			continue
-		}
-
-		p := strings.Trim(dim[i], " ")
-		if _, ok := widget.Options[optionCharLimit]; ok {
-			pLen, err = strconv.ParseInt(widget.Options[optionCharLimit], 0, 0)
-		}
+	var charLimit int64 = 20
+	if _, ok := widget.Options[optionCharLimit]; ok {
+		charLimit, err = strconv.ParseInt(widget.Options[optionCharLimit], 0, 0)
 		if err != nil {
 			return errors.Wrapf(err, "%s must be a number", widget.Options[optionCharLimit])
 		}
-		if len(p) > int(pLen) {
-			p = p[:pLen]
-		}
-
-		// first row after headers
-		table[i+1] = []string{p}
-		table[i+1] = append(table[i+1], val[i]...)
 	}
 
-	// Filter out every empty columns
-	finalTable := [][]string{}
-	for _, v := range table {
-		if v != nil {
-			finalTable = append(finalTable, v)
-		}
-	}
-
+	finalTable := formatTable(rowLimit, dim, val, charLimit, headers)
 	g.tui.AddTable(finalTable, title, widget.Options)
 
 	return nil
+}
+
+func formatTable(
+	rowLimit int64,
+	dim []string,
+	val [][]string,
+	charLimit int64,
+	headers []string,
+) [][]string {
+	table := [][]string{headers}
+
+	for k, v := range val {
+		if k == int(rowLimit) {
+			break
+		}
+
+		p := strings.Trim(dim[k], " ")
+		if len(p) > int(charLimit) {
+			p = p[:charLimit]
+		}
+
+		// Add dimension header
+		row := []string{p}
+		row = append(row, v...)
+		table = append(table, row)
+	}
+
+	return table
 }
 
 func (g *gaWidget) trafficSource(widget Widget) (err error) {
@@ -428,7 +454,7 @@ func (g *gaWidget) stackedBar(widget Widget) error {
 		ed = widget.Options[optionEndDate]
 	}
 
-	startDate, endDate, err := ConvertDates(time.Now(), sd, ed)
+	startDate, endDate, err := plateform.ConvertDates(time.Now(), sd, ed)
 	if err != nil {
 		return err
 	}
@@ -454,12 +480,14 @@ func (g *gaWidget) stackedBar(widget Widget) error {
 
 	// this should return new and ret instead of a unique slice val...
 	dim, new, ret, err := g.analytics.StackedBar(
-		g.viewID,
-		startDate.Format(gaTimeFormat),
-		endDate.Format(gaTimeFormat),
-		metric,
-		timePeriod,
-		dimensions,
+		plateform.AnalyticValues{
+			ViewID:     g.viewID,
+			StartDate:  startDate.Format(gaTimeFormat),
+			EndDate:    endDate.Format(gaTimeFormat),
+			TimePeriod: timePeriod,
+			Metrics:    []string{metric},
+			Dimensions: dimensions,
+		},
 	)
 	if err != nil {
 		return err

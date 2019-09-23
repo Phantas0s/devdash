@@ -6,7 +6,7 @@ general:
 
 projects:
   - name: web-techno.net - Metrics
-    title_options:
+    name_options:
       border_color: default
       text_color: default
       size: XXL

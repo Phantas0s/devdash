@@ -6,7 +6,7 @@ general:
 
 projects:
   - name: https://web-techno.net
-    title_options:
+    name_options:
       border_color: green
       text_color: yellow
       size: L

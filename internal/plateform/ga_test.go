@@ -63,7 +63,6 @@ func Test_Format(t *testing.T) {
 	}
 }
 
-// TODO simplify the test (less data)... but keep this two month period
 func Test_FormatNewReturning(t *testing.T) {
 	testCases := []struct {
 		name        string
@@ -77,58 +76,19 @@ func Test_FormatNewReturning(t *testing.T) {
 		{
 			name: "format new vs returning",
 			new: []int{
-				141,
-				126,
-				302,
-				364,
-				326,
-				329,
-				269,
-				176,
-				120,
-				291,
-				316,
-				364,
-				326,
-				273,
-				164,
-				105,
+				11245,
+				13966,
+				13804,
 			},
 			ret: []int{
-				58,
-				40,
-				72,
-				95,
-				96,
-				93,
-				66,
-				35,
-				45,
-				86,
-				78,
-				83,
-				86,
-				80,
-				44,
-				39,
+				1386,
+				1472,
+				1633,
 			},
 			expectedDim: []string{
-				"01-26",
-				"01-27",
-				"01-28",
-				"01-29",
-				"01-30",
-				"01-31",
-				"02-01",
-				"02-02",
-				"02-03",
-				"02-04",
-				"02-05",
-				"02-06",
-				"02-07",
-				"02-08",
-				"02-09",
-				"02-10",
+				"2019-04",
+				"2019-05",
+				"2019-06",
 			},
 			fixtureFile: "./testdata/fixtures/ga_new_returning.json",
 			formater:    func(dim []string) string { return dim[1] + "-" + dim[2] },
@@ -205,6 +165,49 @@ func Test_FormatBarReturning(t *testing.T) {
 			}
 
 			if tc.wantErr == false && !reflect.DeepEqual(val, tc.expectedVal) {
+				t.Errorf("Expected %v, actual %v", tc.expectedVal, val)
+			}
+		})
+	}
+}
+
+func Test_formatTable(t *testing.T) {
+	testCases := []struct {
+		name        string
+		expectedDim []string
+		expectedVal [][]string
+		fixtureFile string
+		formater    func([]string) string
+	}{
+		{
+			name:        "format new vs returning",
+			expectedDim: []string{"google", "(direct)", "indiehackers.com"},
+			expectedVal: [][]string{
+				{"453", "485", "453", "462"},
+				{"132", "180", "132", "155"},
+				{"15", "29", "15", "27"},
+			},
+			fixtureFile: "./testdata/fixtures/ga_table_traffic_sources.json",
+			formater:    func(dim []string) string { return dim[0] },
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ret := &ga.GetReportsResponse{}
+			fixtures := ReadFixtureFile(tc.fixtureFile, t)
+			err := json.Unmarshal(fixtures, ret)
+			if err != nil {
+				t.Error(err)
+			}
+
+			dim, val := formatTable(ret.Reports, tc.formater)
+
+			if !reflect.DeepEqual(dim, tc.expectedDim) {
+				t.Errorf("Expected %v, actual %v", tc.expectedDim, dim)
+			}
+
+			if !reflect.DeepEqual(val, tc.expectedVal) {
 				t.Errorf("Expected %v, actual %v", tc.expectedVal, val)
 			}
 		})

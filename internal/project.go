@@ -1,150 +1,119 @@
 package internal
 
 import (
-	"strings"
-
 	"github.com/pkg/errors"
-)
-
-var debug bool = false
-
-const (
-	// Widget config options
-
-	optionTitle      = "title"
-	optionTitleColor = "title_color"
-
-	// Time
-	optionStartDate  = "start_date"
-	optionEndDate    = "end_date"
-	optionTimePeriod = "time_period"
-	optionGlobal     = "global"
-
-	// Tables
-	optionRowLimit  = "row_limit"
-	optionCharLimit = "character_limit"
-
-	// Metrics
-	optionDimension  = "dimension"
-	optionDimensions = "dimensions"
-
-	optionMetrics = "metrics"
-	optionMetric  = "metric"
-
-	// Ordering
-	optionOrder = "order"
-
-	// Filtering
-	optionMustContain = "must_contain"
-	optionFilters     = "filters"
-
-	// Repository
-	optionRepository = "repository"
 )
 
 type service interface {
 	CreateWidgets(widget Widget, tui *Tui) (err error)
 }
 
-type Widget struct {
-	Name    string            `mapstructures:"name"`
-	Size    string            `mapstructures:"size"`
-	Options map[string]string `mapstructure:"options"`
-}
-
 type project struct {
 	name          string
-	titleOptions  map[string]string
+	nameOptions   map[string]string
 	widgets       [][][]Widget
 	sizes         [][]string
+	themes        map[string]map[string]string
 	gaWidget      service
 	monitorWidget service
 	gscWidget     service
 	githubWidget  service
 }
 
+// NewProject for the dashboard.
 func NewProject(
 	name string,
-	titleOptions map[string]string,
+	nameOptions map[string]string,
 	widgets [][][]Widget,
 	sizes [][]string,
+	themes map[string]map[string]string,
 ) *project {
 	return &project{
-		name:         name,
-		titleOptions: titleOptions,
-		widgets:      widgets,
-		sizes:        sizes,
+		name:        name,
+		nameOptions: nameOptions,
+		widgets:     widgets,
+		sizes:       sizes,
+		themes:      themes,
 	}
 }
 
+// WithGa add Google Analytics service to the project.
 func (p *project) WithGa(ga *gaWidget) {
 	p.gaWidget = ga
 }
 
+// WithMonitor add the Monitor service to the project.
 func (p *project) WithMonitor(mon *monitorWidget) {
 	p.monitorWidget = mon
 }
 
+// WithGoogleSearchConsole add the Google Search Console service to the project
 func (p *project) WithGoogleSearchConsole(gsc *gscWidget) {
 	p.gscWidget = gsc
 }
 
+// WithGithub add the Github service to the project
 func (p *project) WithGithub(github *githubWidget) {
 	p.githubWidget = github
 }
 
-func (p *project) Render(tui *Tui, d bool) (err error) {
-	debug = d
+func (p *project) addDefaultTheme(w Widget) Widget {
+	t := w.typeID()
 
-	err = p.addTitle(tui)
+	theme := map[string]string{}
+	if _, ok := p.themes[t]; ok {
+		theme = p.themes[t]
+	}
+
+	if w.Theme != "" {
+		if _, ok := p.themes[w.Theme]; ok {
+			theme = p.themes[w.Theme]
+		}
+	}
+
+	if len(theme) > 0 {
+		for k, v := range theme {
+			if len(w.Options) == 0 {
+				w.Options = map[string]string{}
+			}
+			if _, ok := w.Options[k]; !ok {
+				w.Options[k] = v
+			}
+		}
+	}
+
+	return w
+}
+
+// Render all the services' widgets.
+func (p *project) Render(tui *Tui, debug bool) {
+	err := p.addTitle(tui)
 	if err != nil {
-		return errors.Wrapf(err, "can't add project title %s", p.name)
+		err = errors.Wrapf(err, "can't add project title %s", p.name)
+		DisplayError(tui, err)
 	}
 
 	for r, row := range p.widgets {
 		for c, col := range row {
 			for _, w := range col {
-				serviceID := strings.Split(w.Name, ".")[0]
-				switch serviceID {
+				w = p.addDefaultTheme(w)
+
+				switch w.serviceID() {
 				case "ga":
-					if p.gaWidget == nil {
-						return errors.Errorf("can't use the widget %s without the service GoogleAnalytics - please fix your configuration file.", w.Name)
-					}
-
-					if err = p.gaWidget.CreateWidgets(w, tui); err != nil {
-						return err
-					}
+					displayWidget(p.gaWidget, "Google Analytics", w, tui)
 				case "mon":
-					if p.monitorWidget == nil {
-						return errors.Errorf("can't use the widget %s without the service Monitor - please fix your configuration file.", w.Name)
-					}
-
-					if err = p.monitorWidget.CreateWidgets(w, tui); err != nil {
-						return err
-					}
+					displayWidget(p.monitorWidget, "Monitor", w, tui)
 				case "gsc":
-					if p.gscWidget == nil {
-						return errors.Errorf("can't use the widget %s without the service Google Search Console - please fix your configuration file.", w.Name)
-					}
-
-					if err = p.gscWidget.CreateWidgets(w, tui); err != nil {
-						return err
-					}
+					displayWidget(p.gscWidget, "Google Search Console", w, tui)
 				case "github":
-					if p.githubWidget == nil {
-						return errors.Errorf("can't use the widget %s without the service Github - please fix your configuration file.", w.Name)
-					}
-
-					if err = p.githubWidget.CreateWidgets(w, tui); err != nil {
-						return err
-					}
+					displayWidget(p.githubWidget, "Github", w, tui)
 				default:
-					return errors.Errorf("could not find the service for widget %s - wrong name - please verify your configuration file", w.Name)
+					DisplayError(tui, errors.Errorf("The service %s doesn't exist (yet?)", w.Name))
 				}
 			}
 			if len(col) > 0 {
 				if err = tui.AddCol(p.sizes[r][c]); err != nil {
-					return err
+					DisplayError(tui, err)
 				}
 			}
 		}
@@ -158,5 +127,13 @@ func (p *project) Render(tui *Tui, d bool) (err error) {
 }
 
 func (p *project) addTitle(tui *Tui) error {
-	return tui.AddProjectTitle(p.name, p.titleOptions)
+	return tui.AddProjectTitle(p.name, p.nameOptions)
+}
+
+func displayWidget(s service, name string, w Widget, tui *Tui) {
+	if s == nil {
+		DisplayError(tui, errors.Errorf("Configuration error - you can't use the widget %s without the service %s.", w.Name, name))
+	} else if err := s.CreateWidgets(w, tui); err != nil {
+		DisplayError(tui, err)
+	}
 }

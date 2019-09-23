@@ -1,4 +1,4 @@
-// This package is an abstraction for any Terminal UI you want to use.
+// This package is an abstraction of the Terminal UI itself.
 package internal
 
 import (
@@ -22,11 +22,16 @@ const (
 
 	optionSize = "size"
 
-	optionBorderColor = "border_color"
-	optionTextColor   = "text_color"
-	optionNumColor    = "num_color"
+	optionColor = "color"
+
+	optionBorderColor   = "border_color"
+	optionTextColor     = "text_color"
+	optionNumColor      = "num_color"
+	optionEmptyNumColor = "empty_num_color"
 
 	optionBold = "bold"
+
+	optionMultiline = "false"
 
 	optionFirstColor  = "first_color"
 	optionSecondColor = "second_color"
@@ -95,6 +100,7 @@ type drawer interface {
 		title string,
 		titleColor uint16,
 		height int,
+		multiline bool,
 	)
 	BarChart(
 		data []int,
@@ -104,6 +110,7 @@ type drawer interface {
 		bd uint16,
 		fg uint16,
 		nc uint16,
+		enc uint16,
 		height int,
 		gap int,
 		barWidth int,
@@ -143,13 +150,77 @@ type looper interface {
 	Loop()
 }
 
+type reloader interface {
+	HotReload()
+}
+
 type manager interface {
 	keyManager
 	renderer
 	drawer
 	looper
+	reloader
 }
 
+type coloredElements struct {
+	textColor     uint16
+	borderColor   uint16
+	titleColor    uint16
+	numColor      uint16
+	emptyNumColor uint16
+	barColor      uint16
+}
+
+func createColoredElements(options map[string]string) coloredElements {
+	ce := coloredElements{
+		textColor:     defaultC,
+		borderColor:   defaultC,
+		titleColor:    defaultC,
+		numColor:      defaultC,
+		emptyNumColor: defaultC,
+		barColor:      defaultC,
+	}
+
+	if _, ok := options[optionColor]; ok {
+		color := colorLookUp[options[optionColor]]
+		ce = coloredElements{
+			textColor:     color,
+			borderColor:   color,
+			titleColor:    color,
+			numColor:      black,
+			emptyNumColor: color,
+			barColor:      color,
+		}
+	}
+
+	if _, ok := options[optionBorderColor]; ok {
+		ce.borderColor = colorLookUp[options[optionBorderColor]]
+	}
+
+	if _, ok := options[optionTextColor]; ok {
+		ce.textColor = colorLookUp[options[optionTextColor]]
+	}
+
+	if _, ok := options[optionTitleColor]; ok {
+		ce.titleColor = colorLookUp[options[optionTitleColor]]
+	}
+
+	if _, ok := options[optionNumColor]; ok {
+		ce.numColor = colorLookUp[options[optionNumColor]]
+	}
+
+	if _, ok := options[optionEmptyNumColor]; ok {
+		ce.emptyNumColor = colorLookUp[options[optionEmptyNumColor]]
+	}
+
+	if _, ok := options[optionBarColor]; ok {
+		ce.barColor = colorLookUp[options[optionBarColor]]
+	}
+
+	return ce
+}
+
+// AddCol to the TUI grid.
 func (t *Tui) AddCol(size string) error {
 	s, err := MapSize(size)
 	if err != nil {
@@ -160,14 +231,17 @@ func (t *Tui) AddCol(size string) error {
 	return nil
 }
 
+// AddRow to the TUI grid.
 func (t *Tui) AddRow() {
 	t.instance.AddRow()
 }
 
+// Render the TUI.
 func (t *Tui) Render() {
 	t.instance.Render()
 }
 
+// Close the TUI.
 func (t *Tui) Close() {
 	t.instance.Close()
 }
@@ -182,8 +256,8 @@ type Tui struct {
 	instance manager
 }
 
-// Map the size of each column if t-shirt size provided (XXS to XL).
-// Otherwise use the value provided in the config directly.
+// Map the size of each column if t-shirt size is provided (XXS to XL).
+// Otherwise use the numerical value provided in the config directly.
 func MapSize(size string) (int, error) {
 	s := strings.ToLower(size)
 	if size, ok := sizeLookup[s]; ok {
@@ -197,20 +271,11 @@ func MapSize(size string) (int, error) {
 	return int(si), err
 }
 
+// AddProjectTitle to the TUI.
 func (t *Tui) AddProjectTitle(title string, options map[string]string) (err error) {
 	size := "XXL"
 	if _, ok := options[optionSize]; ok {
 		size = options[optionSize]
-	}
-
-	textColor := defaultC
-	if _, ok := options[optionTextColor]; ok {
-		textColor = colorLookUp[options[optionTextColor]]
-	}
-
-	borderColor := defaultC
-	if _, ok := options[optionBorderColor]; ok {
-		borderColor = colorLookUp[options[optionBorderColor]]
 	}
 
 	bold := true
@@ -231,10 +296,11 @@ func (t *Tui) AddProjectTitle(title string, options map[string]string) (err erro
 		return err
 	}
 
+	ce := createColoredElements(options)
 	t.instance.Title(
 		title,
-		textColor,
-		borderColor,
+		ce.textColor,
+		ce.borderColor,
 		bold,
 		int(height),
 		s,
@@ -243,69 +309,51 @@ func (t *Tui) AddProjectTitle(title string, options map[string]string) (err erro
 	return nil
 }
 
+// AddTextBox to the TUI.
 func (t *Tui) AddTextBox(
 	data string,
 	title string,
 	options map[string]string,
-) {
-	// defaults
-	borderColor := defaultC
-	if _, ok := options[optionBorderColor]; ok {
-		borderColor = colorLookUp[options[optionBorderColor]]
-	}
-
-	textColor := defaultC
-	if _, ok := options[optionTextColor]; ok {
-		textColor = colorLookUp[options[optionTextColor]]
-	}
-
-	titleColor := defaultC
-	if _, ok := options[optionTitleColor]; ok {
-		titleColor = colorLookUp[options[optionTitleColor]]
-	}
+) (err error) {
 
 	var height int64 = 3
 	if _, ok := options[optionHeight]; ok {
 		height, _ = strconv.ParseInt(options[optionHeight], 0, 0)
 	}
 
+	multiline := false
+	if _, ok := options[optionMultiline]; ok {
+		multiline, err = strconv.ParseBool(options[optionMultiline])
+		if err != nil {
+			return errors.Wrapf(
+				err,
+				"can't convert %s to bool - please verify your configuration (correct values: 'true' or 'false')",
+				options[optionMultiline],
+			)
+		}
+	}
+
+	ce := createColoredElements(options)
 	t.instance.TextBox(
 		data,
-		textColor,
-		borderColor,
+		ce.textColor,
+		ce.borderColor,
 		title,
-		titleColor,
+		ce.titleColor,
 		int(height),
+		multiline,
 	)
 
+	return nil
 }
 
+// AddBarChart to the TUI, a representation of the evolution of a dataset overtime.
 func (t *Tui) AddBarChart(
 	data []int,
 	dimensions []string,
 	title string,
 	options map[string]string,
 ) {
-	// defaults
-	borderColor := defaultC
-	if _, ok := options[optionBorderColor]; ok {
-		borderColor = colorLookUp[options[optionBorderColor]]
-	}
-
-	textColor := defaultC
-	if _, ok := options[optionTextColor]; ok {
-		textColor = colorLookUp[options[optionTextColor]]
-	}
-
-	titleColor := defaultC
-	if _, ok := options[optionTitleColor]; ok {
-		titleColor = colorLookUp[options[optionTitleColor]]
-	}
-
-	numColor := defaultC
-	if _, ok := options[optionNumColor]; ok {
-		numColor = colorLookUp[options[optionNumColor]]
-	}
 
 	var height int64 = 10
 	if _, ok := options[optionHeight]; ok {
@@ -322,26 +370,24 @@ func (t *Tui) AddBarChart(
 		barWidth, _ = strconv.ParseInt(options[optionBarWidth], 0, 0)
 	}
 
-	var barColor = defaultC
-	if _, ok := options[optionBarColor]; ok {
-		barColor = colorLookUp[options[optionBarColor]]
-	}
-
+	ce := createColoredElements(options)
 	t.instance.BarChart(
 		data,
 		dimensions,
 		title,
-		titleColor,
-		borderColor,
-		textColor,
-		numColor,
+		ce.titleColor,
+		ce.borderColor,
+		ce.textColor,
+		ce.numColor,
+		ce.emptyNumColor,
 		int(height),
 		int(gap),
 		int(barWidth),
-		barColor,
+		ce.barColor,
 	)
 }
 
+// AddStackedBarChart to the TUI, which represent two or more dataset overtime.
 func (t *Tui) AddStackedBarChart(
 	data [8][]int,
 	dimensions []string,
@@ -349,27 +395,6 @@ func (t *Tui) AddStackedBarChart(
 	colors []uint16,
 	options map[string]string,
 ) {
-	// defaults
-	borderColor := blue
-	if _, ok := options[optionBorderColor]; ok {
-		borderColor = colorLookUp[options[optionBorderColor]]
-	}
-
-	textColor := defaultC
-	if _, ok := options[optionTextColor]; ok {
-		textColor = colorLookUp[options[optionTextColor]]
-	}
-
-	titleColor := defaultC
-	if _, ok := options[optionTitleColor]; ok {
-		titleColor = colorLookUp[options[optionTitleColor]]
-	}
-
-	numColor := black
-	if _, ok := options[optionNumColor]; ok {
-		numColor = colorLookUp[options[optionNumColor]]
-	}
-
 	var height int64 = 10
 	if _, ok := options[optionHeight]; ok {
 		height, _ = strconv.ParseInt(options[optionHeight], 0, 0)
@@ -385,56 +410,50 @@ func (t *Tui) AddStackedBarChart(
 		barWidth, _ = strconv.ParseInt(options[optionBarWidth], 0, 0)
 	}
 
+	ce := createColoredElements(options)
 	t.instance.StackedBarChart(
 		data,
 		dimensions,
 		title,
-		titleColor,
+		ce.titleColor,
 		colors,
-		borderColor,
-		textColor,
-		numColor,
+		ce.borderColor,
+		ce.textColor,
+		ce.numColor,
 		int(height),
 		int(gap),
 		int(barWidth),
 	)
 }
 
+// AddTable to the TUI, with a header and the dataset.
 func (t *Tui) AddTable(data [][]string, title string, options map[string]string) {
-	// defaults
-
-	borderColor := defaultC
-	if _, ok := options[optionBorderColor]; ok {
-		borderColor = colorLookUp[options[optionBorderColor]]
-	}
-
-	textColor := defaultC
-	if _, ok := options[optionTextColor]; ok {
-		textColor = colorLookUp[options[optionTextColor]]
-	}
-
-	titleColor := defaultC
-	if _, ok := options[optionTitleColor]; ok {
-		titleColor = colorLookUp[options[optionTitleColor]]
-	}
-
+	ce := createColoredElements(options)
 	t.instance.Table(
 		data,
 		title,
-		titleColor,
-		borderColor,
-		textColor,
+		ce.titleColor,
+		ce.borderColor,
+		ce.textColor,
 	)
 }
 
+// Add keyboard shortcut from the config to quit DevDash. Default Control C.
 func (t *Tui) AddKQuit(key string) {
 	t.instance.KQuit(key)
 }
 
+// Loop the TUI to receive events.
 func (t *Tui) Loop() {
 	t.instance.Loop()
 }
 
+// Clean and reinitialize the TUI.
 func (t *Tui) Clean() {
 	t.instance.Clean()
+}
+
+// Hot reload the whole TUI
+func (t *Tui) HotReload() {
+	t.instance.HotReload()
 }

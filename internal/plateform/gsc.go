@@ -5,20 +5,21 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"strings"
 
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/jwt"
+	"google.golang.org/api/option"
 	sc "google.golang.org/api/webmasters/v3"
 )
 
+// SearchConsole connect to the Google Search Console API.
 type SearchConsole struct {
 	config  *jwt.Config
-	client  *http.Client
 	service *sc.Service
 }
 
+// SearchConsoleResponse returned after requesting the API.
 type SearchConsoleResponse struct {
 	Dimension   string
 	Clicks      float64
@@ -27,6 +28,7 @@ type SearchConsoleResponse struct {
 	Position    float64
 }
 
+// NewSearchConsoleClient create a SearchConsole.
 func NewSearchConsoleClient(keyfile string) (*SearchConsole, error) {
 	data, err := ioutil.ReadFile(keyfile)
 	if err != nil {
@@ -41,8 +43,7 @@ func NewSearchConsoleClient(keyfile string) (*SearchConsole, error) {
 		return nil, fmt.Errorf("creating JWT config from json keyfile %q failed: %v", keyfile, err)
 	}
 
-	web.client = web.config.Client(context.Background())
-	web.service, err = sc.New(web.client)
+	web.service, err = sc.NewService(context.Background(), option.WithHTTPClient(web.config.Client(context.Background())))
 	if err != nil {
 		return nil, fmt.Errorf("can't get webmaster service: %v", err)
 	}
@@ -50,8 +51,8 @@ func NewSearchConsoleClient(keyfile string) (*SearchConsole, error) {
 	return web, nil
 }
 
+// Table of Google Search Console with a dimension and its values.
 func (w *SearchConsole) Table(
-	viewID string,
 	startDate string,
 	endDate string,
 	limit int64,

@@ -2,7 +2,7 @@
 ![logo of devdash with a gopher](./doc/img/logo.jpg) 
 [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=DevDash%20-%20Highly%20Configurable%20Terminal%20Dashboard%20For%20Developers:&url=https%3A%2F%2Fgithub.com%2Fphantas0s%2Fdevdash&hashtags=developers,dashboard,terminal,CLI,golang) [![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/T6T4W5K0)
 
-DevDash is a highly configurable terminal dashboard for developers, who want to choose the most up-to-date metrics they need, at one place.
+DevDash is a highly configurable terminal dashboard for developers, who want to choose and display the most up-to-date metrics they need, at one place.
 
 # Why using DevDash?
 
@@ -179,6 +179,14 @@ There are three category of widgets:
 
 # Configuration reference
 
+## General
+
+The general configuration of your dashboard.
+
+| Name     | Description                                           | Default value | Examples |
+|----------|-------------------------------------------------------|---------------|----------|
+| refresh  | The cycle's duration of refreshing data, in seconds   | 600           | 600      |
+
 ## Monitoring
 
 ### Service configuration
@@ -225,14 +233,16 @@ The repository is not mandatory. However, you will need to precise the repositor
 
 ### Widgets available
 
-| Name                          | Description                                                                      |
-| ----------------------------- | -------------------------------------------------------------------------------- |
-| github.box_stars              | Number of stars of a precise repository                                          |
-| github.box_watchers           | Number of watchers of a precise repository                                       |
-| github.box_open_issues        | Number of open issues of a precise repository                                    |
-| github.table_branches         | All branches of a precise repository                                             |
-| github.table_issues           | All issues (and their states) of a precise repository                            |
-| github.table_repositories     | Table of all repositories with count different information (see `metrics` option)|
+| Name                      | Description                                                                       | Comment                                                                       |
+| ------------------------  | --------------------------------------------------------------------------------  | ----------------------------------------------------------------------------- |
+| github.box_stars          | Number of stars of a precise repository                                           |                                                                               |
+| github.box_watchers       | Number of watchers of a precise repository                                        |                                                                               |
+| github.box_open_issues    | Number of open issues of a precise repository                                     |                                                                               |
+| github.table_branches     | All branches of a precise repository                                              |                                                                               |
+| github.table_issues       | All issues (and their states) of a precise repository                             |                                                                               |
+| github.table_repositories | Table of all repositories with count different information (see `metrics` option) |                                                                               |
+| github.bar_views   | Github traffic of the repository's page the last 14 days                          | Doesn't accept start_date / end_date option                                   |
+| github.bar_commits        | Give the number of commit per week (maximum last 52 weeks)                        | stard_date / end_date option must be "x_weeks_go" or "today". x must be < 52  |
 
 ### Widget Options
 
@@ -254,6 +264,30 @@ The repository is not mandatory. However, you will need to precise the repositor
 | title_color        | Title color      | `Default color`                 | `yellow`, `red` (see [colors](#colors))       |
 | border_color       | Border color     | `Default color`                 | `yellow`, `red` (see [colors](#colors))       |
 | text_color         | Text color       | `Default color`                 | `yellow`, `red` (see [colors](#colors))       |
+
+#### Bar Widgets
+
+##### Data Options
+
+| Name            | Description                                                                   | Default value     | Examples                                 | Not available for                                        |
+| --------------- | ----------------------------------------------------------------------------- | ----------------- | ---------------------------------------- | -------------------------------------------------------- |
+| start_date      | Start date of time period                                                     | `7_days_ago`      | `2018-01-01`, `2_weeks_ago`              | github.bar_views                                  |
+| end_date        | End date of time period                                                       | `today`           | `2018-01-31`, `2_weeks_ago`              | github.bar_views                                  |
+
+##### Display Options
+
+| Name              | Description                                                   | Default value                 | Examples                                    |
+| ----------------- | ------------------------------------------------------------- | ----------------------------- | ------------------------------------------- |
+| title             | Title                                                         | `Depending on the widget`     | `Users `                                    |
+| border_color      | Border color                                                  | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| height            | Height                                                        | `10`                          | `5`                                         |
+| title_color       | Title color                                                   | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| text_color        | Text color                                                    | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| num_color         | Color of numerical data                                       | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| empty_num_color   | Color of numerical data when the bar is too small to appear   | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| bar_color         | Bar color                                                     | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| bar_gap           | Gap size between the bars                                     | `0`                           | `5`, `10`                                   |
+| bar_width         | Bar width                                                     | `6`                           | `5`, `10`                                   |
 
 ## Google Analytics
 
@@ -300,17 +334,18 @@ The repository is not mandatory. However, you will need to precise the repositor
 
 ##### Display Options
 
-| Name           | Description                 | Default value               | Examples                                  |
-| -------------- | --------------------------- | --------------------------- | ----------------------------------------- |
-| title          | Title                       | `Depending on the widget`   | `Users `                                  |
-| border_color   | Border color                | `Default color`             | `yellow`, `red` (see [colors](#colors))   |
-| height         | Height                      | `10`                        | `5`                                       |
-| title_color    | Title color                 | `Default color`             | `yellow`, `red` (see [colors](#colors))   |
-| text_color     | Text color                  | `Default color`             | `yellow`, `red` (see [colors](#colors))   |
-| num_color      | Color of numerical data     | `Default color`             | `yellow`, `red` (see [colors](#colors))   |
-| bar_color      | Bar color                   | `Default color`             | `yellow`, `red` (see [colors](#colors))   |
-| bar_gap        | Gap size between the bars   | `0`                         | `5`, `10`                                 |
-| bar_width      | Bar width                   | `6`                         | `5`, `10`                                 |
+| Name              | Description                                                   | Default value                 | Examples                                    |
+| ----------------- | ------------------------------------------------------------- | ----------------------------- | ------------------------------------------- |
+| title             | Title                                                         | `Depending on the widget`     | `Users `                                    |
+| border_color      | Border color                                                  | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| height            | Height                                                        | `10`                          | `5`                                         |
+| title_color       | Title color                                                   | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| text_color        | Text color                                                    | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| num_color         | Color of numerical data                                       | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| empty_num_color   | Color of numerical data when the bar is too small to appear   | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| bar_color         | Bar color                                                     | `Default color`               | `yellow`, `red` (see [colors](#colors))     |
+| bar_gap           | Gap size between the bars                                     | `0`                           | `5`, `10`                                   |
+| bar_width         | Bar width                                                     | `6`                           | `5`, `10`                                   |
 
 #### Table widgets
 
@@ -325,7 +360,7 @@ The repository is not mandatory. However, you will need to precise the repositor
 | orders            | Order of the result. Multiple value possible separated with a comma         | `sessions desc`                                     | `sessions desc,page_views asc`. `page_views`   |                              |
 | filters           | Query filter (prefix `-` to exclude)                                        |                                                     | `value`, `-value`                              |                              |
 | row_limit         | Limit the number of rows                                                    | 5                                                   | 5, 100                                         |                              |
-| character_limit   | Limit the number of characters of the dimension column                      | 1000                                                | 100, 200                                       |                              |
+| character_limit   | Limit the number of characters of the dimension column                      | 20                                                  | 100, 200                                       |                              |
 
 ##### Display Options
 
