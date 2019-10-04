@@ -2,6 +2,7 @@ package plateform
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/Phantas0s/termui"
 )
@@ -19,17 +20,12 @@ func NewTermUI(d bool) (*termUI, error) {
 		return nil, err
 	}
 
-	// set the basic properties
-	body := termui.NewGrid()
-	body.X = 0
-	body.Y = 0
-	body.BgColor = termui.ThemeAttr("bg")
-	body.Width = termui.TermWidth()
+	termUI := &termUI{
+		row: []*termui.Row{},
+	}
+	termUI.Clean()
 
-	return &termUI{
-		body: body,
-		row:  []*termui.Row{},
-	}, nil
+	return termUI, nil
 }
 
 // Close termui.
@@ -180,6 +176,18 @@ func (*termUI) KQuit(key string) {
 	})
 }
 
+func (t *termUI) KHotReload(key string, run func()) {
+	var m sync.Mutex
+	termui.Handle(fmt.Sprintf("/sys/kbd/%s", key), func(termui.Event) {
+		go func() {
+			m.Lock()
+			t.HotReload()
+			run()
+			m.Unlock()
+		}()
+	})
+}
+
 // Loop termui to receive events.
 func (t *termUI) Loop() {
 	termui.Loop()
@@ -188,7 +196,7 @@ func (t *termUI) Loop() {
 // Render termui and delete the instance of the widgets rendered.
 func (t *termUI) Render() {
 	termui.Render(t.body)
-	// delete every widget for the row rendered.
+	// delete every widget for the rows / cols rendered.
 	t.removeWidgets()
 }
 

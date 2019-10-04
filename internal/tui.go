@@ -144,6 +144,7 @@ type drawer interface {
 
 type keyManager interface {
 	KQuit(key string)
+	KHotReload(key string, run func())
 }
 
 type looper interface {
@@ -441,6 +442,10 @@ func (t *Tui) AddTable(data [][]string, title string, options map[string]string)
 // Add keyboard shortcut from the config to quit DevDash. Default Control C.
 func (t *Tui) AddKQuit(key string) {
 	t.instance.KQuit(key)
+}
+
+func (t *Tui) AddKHotReload(key string, run func()) {
+	t.instance.KHotReload(key, run)
 }
 
 // Loop the TUI to receive events.

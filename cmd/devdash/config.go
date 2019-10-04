@@ -10,7 +10,8 @@ import (
 
 const (
 	// keys
-	kquit = "C-c"
+	kQuit      = "C-c"
+	kHotReload = "C-r"
 )
 
 type config struct {
@@ -19,9 +20,9 @@ type config struct {
 }
 
 type General struct {
-	Keys    map[string]string `mapstructure:"keys"`
-	Refresh int64             `mapstructure:"refresh"`
-	Reload  bool              `mapstructure:"reload"`
+	Keys      map[string]string `mapstructure:"keys"`
+	Refresh   int64             `mapstructure:"refresh"`
+	HotReload bool              `mapstructure:"hot_reload"`
 }
 
 // RefreshTime return the duration before refreshing the data of all widgets, in seconds.
@@ -143,5 +144,13 @@ func (c config) KQuit() string {
 		return c.General.Keys["quit"]
 	}
 
-	return kquit
+	return kQuit
+}
+
+func (c config) KHotReload() string {
+	if ok := c.General.Keys["hot_reload"]; ok != "" {
+		return c.General.Keys["hot_reload"]
+	}
+
+	return kHotReload
 }

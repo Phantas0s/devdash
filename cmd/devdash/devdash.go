@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/Phantas0s/devdash/internal"
@@ -37,7 +38,7 @@ func main() {
 	defer tui.Close()
 
 	cfg := loadFile(*file)
-	run(cfg.Projects, tui)
+	run(*file, tui)()
 
 	if _, err := os.Stat(*file); os.IsNotExist(err) {
 		internal.DisplayNoFile(tui)
@@ -50,28 +51,25 @@ func main() {
 		tui.Render()
 	} else {
 		tui.AddKQuit(cfg.KQuit())
+		tui.AddKHotReload(cfg.KHotReload(), run(*file, tui))
 		ticker := time.NewTicker(time.Duration(cfg.RefreshTime()) * time.Second)
+		var m sync.Mutex
 		go func() {
 			for range ticker.C {
-				if cfg.General.Reload {
-					cfg = hotReload(tui, file)
+				m.Lock()
+				if cfg.General.HotReload {
+					tui.HotReload()
 				} else {
 					tui.Clean()
 				}
 
-				run(cfg.Projects, tui)
+				run(*file, tui)()
+				m.Unlock()
 			}
 		}()
 	}
 
 	tui.Loop()
-}
-
-func hotReload(tui *internal.Tui, file *string) config {
-	cfg := loadFile(*file)
-	tui.HotReload()
-
-	return cfg
 }
 
 func loadFile(file string) config {
@@ -81,51 +79,54 @@ func loadFile(file string) config {
 	return cfg
 }
 
-func run(projects []Project, tui *internal.Tui) {
-	for _, p := range projects {
-		rows, sizes := p.OrderWidgets()
-		project := internal.NewProject(p.Name, p.NameOptions, rows, sizes, p.Themes)
+func run(file string, tui *internal.Tui) func() {
+	return func() {
+		cfg := loadFile(file)
+		for _, p := range cfg.Projects {
+			rows, sizes := p.OrderWidgets()
+			project := internal.NewProject(p.Name, p.NameOptions, rows, sizes, p.Themes, tui)
 
-		gaService := p.Services.GoogleAnalytics
-		if !gaService.empty() {
-			gaWidget, err := internal.NewGaWidget(gaService.Keyfile, gaService.ViewID)
-			if err != nil {
-				internal.DisplayError(tui, err)
+			gaService := p.Services.GoogleAnalytics
+			if !gaService.empty() {
+				gaWidget, err := internal.NewGaWidget(gaService.Keyfile, gaService.ViewID)
+				if err != nil {
+					internal.DisplayError(tui, err)
+				}
+				project.WithGa(gaWidget)
 			}
-			project.WithGa(gaWidget)
-		}
 
-		gscService := p.Services.GoogleSearchConsole
-		if !gscService.empty() {
-			gscWidget, err := internal.NewGscWidget(gscService.Keyfile, gscService.Address)
-			if err != nil {
-				internal.DisplayError(tui, err)
+			gscService := p.Services.GoogleSearchConsole
+			if !gscService.empty() {
+				gscWidget, err := internal.NewGscWidget(gscService.Keyfile, gscService.Address)
+				if err != nil {
+					internal.DisplayError(tui, err)
+				}
+				project.WithGoogleSearchConsole(gscWidget)
 			}
-			project.WithGoogleSearchConsole(gscWidget)
-		}
 
-		monService := p.Services.Monitor
-		if !monService.empty() {
-			monWidget, err := internal.NewMonitorWidget(monService.Address)
-			if err != nil {
-				internal.DisplayError(tui, err)
+			monService := p.Services.Monitor
+			if !monService.empty() {
+				monWidget, err := internal.NewMonitorWidget(monService.Address)
+				if err != nil {
+					internal.DisplayError(tui, err)
+				}
+				project.WithMonitor(monWidget)
 			}
-			project.WithMonitor(monWidget)
-		}
 
-		githubService := p.Services.Github
-		if !githubService.empty() {
-			githubWidget, err := internal.NewGithubWidget(
-				githubService.Token,
-				githubService.Owner,
-				githubService.Repository,
-			)
-			if err != nil {
-				internal.DisplayError(tui, err)
+			githubService := p.Services.Github
+			if !githubService.empty() {
+				githubWidget, err := internal.NewGithubWidget(
+					githubService.Token,
+					githubService.Owner,
+					githubService.Repository,
+				)
+				if err != nil {
+					internal.DisplayError(tui, err)
+				}
+				project.WithGithub(githubWidget)
 			}
-			project.WithGithub(githubWidget)
-		}
 
-		project.Render(tui, *debug)
+			project.Render(*debug)
+		}
 	}
 }

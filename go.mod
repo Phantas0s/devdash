@@ -4,6 +4,7 @@ go 1.12
 
 require (
 	github.com/Phantas0s/termui v0.0.0-20190825161953-d204f6ac0873
+	github.com/gizak/termui v2.3.0+incompatible
 	github.com/google/go-github/v27 v27.0.1
 	github.com/maruel/panicparse v1.3.0 // indirect
 	github.com/mattn/go-runewidth v0.0.4 // indirect

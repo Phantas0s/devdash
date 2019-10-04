@@ -18,6 +18,7 @@ type project struct {
 	monitorWidget service
 	gscWidget     service
 	githubWidget  service
+	tui           *Tui
 }
 
 // NewProject for the dashboard.
@@ -27,6 +28,7 @@ func NewProject(
 	widgets [][][]Widget,
 	sizes [][]string,
 	themes map[string]map[string]string,
+	tui *Tui,
 ) *project {
 	return &project{
 		name:        name,
@@ -34,6 +36,7 @@ func NewProject(
 		widgets:     widgets,
 		sizes:       sizes,
 		themes:      themes,
+		tui:         tui,
 	}
 }
 
@@ -86,11 +89,11 @@ func (p *project) addDefaultTheme(w Widget) Widget {
 }
 
 // Render all the services' widgets.
-func (p *project) Render(tui *Tui, debug bool) {
-	err := p.addTitle(tui)
+func (p *project) Render(debug bool) {
+	err := p.addTitle(p.tui)
 	if err != nil {
 		err = errors.Wrapf(err, "can't add project title %s", p.name)
-		DisplayError(tui, err)
+		DisplayError(p.tui, err)
 	}
 
 	for r, row := range p.widgets {
@@ -100,26 +103,26 @@ func (p *project) Render(tui *Tui, debug bool) {
 
 				switch w.serviceID() {
 				case "ga":
-					displayWidget(p.gaWidget, "Google Analytics", w, tui)
+					displayWidget(p.gaWidget, "Google Analytics", w, p.tui)
 				case "mon":
-					displayWidget(p.monitorWidget, "Monitor", w, tui)
+					displayWidget(p.monitorWidget, "Monitor", w, p.tui)
 				case "gsc":
-					displayWidget(p.gscWidget, "Google Search Console", w, tui)
+					displayWidget(p.gscWidget, "Google Search Console", w, p.tui)
 				case "github":
-					displayWidget(p.githubWidget, "Github", w, tui)
+					displayWidget(p.githubWidget, "Github", w, p.tui)
 				default:
-					DisplayError(tui, errors.Errorf("The service %s doesn't exist (yet?)", w.Name))
+					DisplayError(p.tui, errors.Errorf("The service %s doesn't exist (yet?)", w.Name))
 				}
 			}
 			if len(col) > 0 {
-				if err = tui.AddCol(p.sizes[r][c]); err != nil {
-					DisplayError(tui, err)
+				if err = p.tui.AddCol(p.sizes[r][c]); err != nil {
+					DisplayError(p.tui, err)
 				}
 			}
 		}
-		tui.AddRow()
+		p.tui.AddRow()
 		if !debug {
-			tui.Render()
+			p.tui.Render()
 		}
 	}
 
