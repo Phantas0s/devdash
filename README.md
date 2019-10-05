@@ -16,8 +16,7 @@ DevDash is a highly configurable terminal dashboard for developers, who want to 
   * Place your widgets where you want.
   * Choose the data you want to display, the colors you want to use, and a lot of other things for each widget.
 
-![example DevDash configuration](./example/img/mix-1.png)
-
+![google analytics example DevDash configuration](./example/img/mix-1.png)
 # Menu
 
 * [Installation](#installation)
@@ -25,6 +24,8 @@ DevDash is a highly configurable terminal dashboard for developers, who want to 
 * [Acknowledgement](#acknowledgement)
 * [Contribute](#contribute)
 * [Licence](#licence)
+* [Making of](#Making-of)
+* [Showcase](#showcase)
 
 # Installation
 
@@ -42,7 +43,7 @@ rm linux.sh
 
 ## Manual installation
 
-You need golang installed to compile DevDash.
+You need Golang installed to compile DevDash.
 
 You simply need to run `go get -u github.com/Phantas0s/devdash/cmd/devdash` in your terminal.
 
@@ -75,6 +76,17 @@ Therefore:
 
 "Every new feature or bug fix should be discussed with the maintainer(s) of the project before work commences. It’s fine to experiment privately, but do not send a change without discussing it first."
 
+# Making Of
+
+For anybody interested on how I managed to develop DevDash on side of a full time job, and how I organized my time and kept my motivation, [I wrote an article about that on my blog](/programming-side-project-example-devdash/).
+
 # Licence
 
 [Apache Licence 2.0](https://choosealicense.com/licenses/apache-2.0/)
+
+# Showcase
+
+![google analytics example DevDash configuration](./example/img/thevaluabledev-2.png)
+![google analytics example DevDash configuration](./example/img/thevaluabledev-3.png)
+![github example DevDash configuration](./example/img/devdash-1.png)
+
