@@ -4,8 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2019-10-05
 
-## [Unreleased]
+### Added
 
 * Add Github widgets
   * Display count stars overtime
@@ -14,8 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   * Display repositories in table with information
   * Display last week traffic on Github page
 
-* Add themes to simplify the configuration - possibility to use same options defined once for multiple widgets
-* Add color options to have same color for border, title and everything color related for one widget
+* Add `color` options to have same color for border, title and everything color related for one widget
+* Add themes to simplify the configuration - possibility to use same options defined once, for multiple widgets
+
+* Add possibility to hot reload any dashboard via a keystroke - no need to restart DevDash when changing a dashboard configuration
+
+* Create the [official DevDash website](https://thedevdash.com)
+
+### Updated 
+
+* Replace `title_options` by `name_options` for project's config (breaking change)
 
 ## [0.1.1] - 2018-07-21
 
