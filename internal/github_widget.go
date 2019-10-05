@@ -362,7 +362,7 @@ func (g *githubWidget) barStars(widget Widget) (err error) {
 		repo = widget.Options[optionRepository]
 	}
 
-	title := " Stars "
+	title := " Github Stars "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}
