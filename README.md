@@ -78,7 +78,7 @@ Therefore:
 
 # Making Of
 
-For anybody interested on how I managed to develop DevDash on side of a full time job, and how I organized my time and kept my motivation, [I wrote an article about that on my blog](/programming-side-project-example-devdash/).
+For anybody interested how I managed to develop DevDash on side of a full time job, and how I organized my time and kept my motivation, [I wrote an article about that on my blog](https://thevaluable.dev/programming-side-project-example-devdash/).
 
 # Licence
 
