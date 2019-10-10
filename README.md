@@ -16,7 +16,6 @@ DevDash is a highly configurable terminal dashboard for developers, who want to 
   * Place your widgets where you want.
   * Choose the data you want to display, the colors you want to use, and a lot of other things for each widget.
 
-![google analytics example DevDash configuration](./example/img/mix-1.png)
 # Menu
 
 * [Installation](#installation)
@@ -86,7 +85,11 @@ For anybody interested how I managed to develop DevDash on side of a full time j
 
 # Showcase
 
+![google analytics example DevDash configuration](./example/img/mix-1.png)
+-------
 ![google analytics example DevDash configuration](./example/img/thevaluabledev-2.png)
+-------
 ![google analytics example DevDash configuration](./example/img/thevaluabledev-3.png)
+-------
 ![github example DevDash configuration](./example/img/devdash-1.png)
 
