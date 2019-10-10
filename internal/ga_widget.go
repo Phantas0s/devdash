@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Phantas0s/devdash/internal/plateform"
+	"github.com/Phantas0s/devdash/internal/platform"
 	"github.com/pkg/errors"
 )
 
@@ -31,13 +31,13 @@ const (
 
 type gaWidget struct {
 	tui       *Tui
-	analytics *plateform.Analytics
+	analytics *platform.Analytics
 	viewID    string
 }
 
 // NewGaWidget including all information to connect to the Google Analytics API.
 func NewGaWidget(keyfile string, viewID string) (*gaWidget, error) {
-	an, err := plateform.NewAnalyticsClient(keyfile)
+	an, err := platform.NewAnalyticsClient(keyfile)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +102,7 @@ func (g *gaWidget) totalMetric(widget Widget) (err error) {
 		endDate = widget.Options[optionEndDate]
 	}
 
-	sd, ed, err := plateform.ConvertDates(time.Now(), startDate, endDate)
+	sd, ed, err := platform.ConvertDates(time.Now(), startDate, endDate)
 	if err != nil {
 		return err
 	}
@@ -121,7 +121,7 @@ func (g *gaWidget) totalMetric(widget Widget) (err error) {
 	}
 
 	users, err := g.analytics.SimpleMetric(
-		plateform.AnalyticValues{
+		platform.AnalyticValues{
 			ViewID:    g.viewID,
 			StartDate: sd.Format(gaTimeFormat),
 			EndDate:   ed.Format(gaTimeFormat),
@@ -238,7 +238,7 @@ func (g *gaWidget) barMetric(widget Widget) (err error) {
 		ed = widget.Options[optionEndDate]
 	}
 
-	startDate, endDate, err := plateform.ConvertDates(time.Now(), sd, ed)
+	startDate, endDate, err := platform.ConvertDates(time.Now(), sd, ed)
 	if err != nil {
 		return err
 	}
@@ -273,7 +273,7 @@ func (g *gaWidget) barMetric(widget Widget) (err error) {
 	}
 
 	dim, val, err := g.analytics.BarMetric(
-		plateform.AnalyticValues{
+		platform.AnalyticValues{
 			ViewID:     g.viewID,
 			StartDate:  startDate.Format(gaTimeFormat),
 			EndDate:    endDate.Format(gaTimeFormat),
@@ -333,7 +333,7 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 		ed = widget.Options[optionEndDate]
 	}
 
-	startDate, endDate, err := plateform.ConvertDates(time.Now(), sd, ed)
+	startDate, endDate, err := platform.ConvertDates(time.Now(), sd, ed)
 	if err != nil {
 		return err
 	}
@@ -359,7 +359,7 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 	}
 
 	headers, dim, val, err := g.analytics.Table(
-		plateform.AnalyticValues{
+		platform.AnalyticValues{
 			ViewID:     g.viewID,
 			StartDate:  startDate.Format(gaTimeFormat),
 			EndDate:    endDate.Format(gaTimeFormat),
@@ -454,7 +454,7 @@ func (g *gaWidget) stackedBar(widget Widget) error {
 		ed = widget.Options[optionEndDate]
 	}
 
-	startDate, endDate, err := plateform.ConvertDates(time.Now(), sd, ed)
+	startDate, endDate, err := platform.ConvertDates(time.Now(), sd, ed)
 	if err != nil {
 		return err
 	}
@@ -480,7 +480,7 @@ func (g *gaWidget) stackedBar(widget Widget) error {
 
 	// this should return new and ret instead of a unique slice val...
 	dim, new, ret, err := g.analytics.StackedBar(
-		plateform.AnalyticValues{
+		platform.AnalyticValues{
 			ViewID:     g.viewID,
 			StartDate:  startDate.Format(gaTimeFormat),
 			EndDate:    endDate.Format(gaTimeFormat),

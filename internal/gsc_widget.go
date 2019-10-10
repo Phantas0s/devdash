@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Phantas0s/devdash/internal/plateform"
+	"github.com/Phantas0s/devdash/internal/platform"
 	"github.com/pkg/errors"
 )
 
@@ -22,7 +22,7 @@ const (
 
 type gscWidget struct {
 	tui     *Tui
-	client  *plateform.SearchConsole
+	client  *platform.SearchConsole
 	address string
 }
 
@@ -33,7 +33,7 @@ var mappingGscHeader = map[string]string{
 
 // NewGscWidget including everything to connect to the Google Search Console API.
 func NewGscWidget(keyfile string, address string) (*gscWidget, error) {
-	sc, err := plateform.NewSearchConsoleClient(keyfile)
+	sc, err := platform.NewSearchConsoleClient(keyfile)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func (s *gscWidget) table(widget Widget) (err error) {
 		ed = widget.Options[optionEndDate]
 	}
 
-	startDate, endDate, err := plateform.ConvertDates(time.Now(), sd, ed)
+	startDate, endDate, err := platform.ConvertDates(time.Now(), sd, ed)
 	if err != nil {
 		return err
 	}
@@ -153,7 +153,7 @@ func (s *gscWidget) table(widget Widget) (err error) {
 	return nil
 }
 
-func formatNumerics(results []plateform.SearchConsoleResponse, dimension string, metrics []string) [][]string {
+func formatNumerics(results []platform.SearchConsoleResponse, dimension string, metrics []string) [][]string {
 	table := make([][]string, len(results)+1)
 	table[0] = []string{mappingGscHeader[dimension]}
 	table[0] = append(table[0], metrics...)

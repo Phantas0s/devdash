@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/Phantas0s/devdash/internal"
-	"github.com/Phantas0s/devdash/internal/plateform"
+	"github.com/Phantas0s/devdash/internal/platform"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
@@ -29,7 +29,7 @@ func main() {
 		return
 	}
 
-	termui, err := plateform.NewTermUI(*debug)
+	termui, err := platform.NewTermUI(*debug)
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -1,4 +1,4 @@
-package plateform
+package platform
 
 import (
 	"fmt"

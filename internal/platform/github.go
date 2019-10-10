@@ -2,7 +2,7 @@
 // j, _ := json.Marshal(is)
 // fmt.Println(string(j))
 
-package plateform
+package platform
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/go-github/v27/github"
+	"github.com/google/go-github/v28/github"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 	"golang.org/x/sync/errgroup"

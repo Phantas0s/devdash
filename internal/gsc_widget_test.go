@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Phantas0s/devdash/internal/plateform"
+	"github.com/Phantas0s/devdash/internal/platform"
 )
 
 func Test_formatText(t *testing.T) {
@@ -49,7 +49,7 @@ func Test_formatNumerics(t *testing.T) {
 	testCases := []struct {
 		name      string
 		expected  [][]string
-		results   []plateform.SearchConsoleResponse
+		results   []platform.SearchConsoleResponse
 		metrics   []string
 		dimension string
 	}{
@@ -59,7 +59,7 @@ func Test_formatNumerics(t *testing.T) {
 				{"Query", "clicks", "impressions", "ctr", "position"},
 				{"this is a query", "10.2", "10.1", "2.37%", "1.23"},
 			},
-			results: []plateform.SearchConsoleResponse{
+			results: []platform.SearchConsoleResponse{
 				{
 					Dimension:   "this is a query",
 					Clicks:      10.2,

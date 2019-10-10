@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Phantas0s/devdash/internal/plateform"
+	"github.com/Phantas0s/devdash/internal/platform"
 	"github.com/pkg/errors"
 )
 
@@ -25,12 +25,12 @@ const (
 
 type githubWidget struct {
 	tui    *Tui
-	client *plateform.Github
+	client *platform.Github
 }
 
 // NewGithubWidget with all information necessary to connect to the Github API.
 func NewGithubWidget(token string, owner string, repo string) (*githubWidget, error) {
-	g, err := plateform.NewGithubClient(token, owner, repo)
+	g, err := platform.NewGithubClient(token, owner, repo)
 	if err != nil {
 		return nil, err
 	}
@@ -305,7 +305,7 @@ func (g *githubWidget) barViews(widget Widget) (err error) {
 	return nil
 }
 
-// TODO to refactor - transforming any date statement (weeks_ago, month_ago) into days weeks_ago in plateform.date, and plugt it in.
+// TODO to refactor - transforming any date statement (weeks_ago, month_ago) into days weeks_ago in platform.date, and plugt it in.
 func (g *githubWidget) barCommits(widget Widget) (err error) {
 	var repo string
 	if _, ok := widget.Options[optionRepository]; ok {
@@ -336,12 +336,12 @@ func (g *githubWidget) barCommits(widget Widget) (err error) {
 		return errors.New("The widget github.bar_commits require you to indicate a week range, ie startDate: 5_weeks_ago, endDate: 1_weeks_ago ")
 	}
 
-	sw, err := plateform.ExtractCountPeriod(sd)
+	sw, err := platform.ExtractCountPeriod(sd)
 	if err != nil {
 		return err
 	}
 
-	ew, err := plateform.ExtractCountPeriod(ed)
+	ew, err := platform.ExtractCountPeriod(ed)
 	if err != nil {
 		return err
 	}
@@ -377,7 +377,7 @@ func (g *githubWidget) barStars(widget Widget) (err error) {
 		endDate = widget.Options[optionEndDate]
 	}
 
-	sd, ed, err := plateform.ConvertDates(time.Now(), startDate, endDate)
+	sd, ed, err := platform.ConvertDates(time.Now(), startDate, endDate)
 	if err != nil {
 		return err
 	}

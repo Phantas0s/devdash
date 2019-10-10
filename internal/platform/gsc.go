@@ -1,5 +1,5 @@
 // Google Search Console
-package plateform
+package platform
 
 import (
 	"context"
