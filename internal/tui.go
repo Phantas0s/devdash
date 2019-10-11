@@ -4,6 +4,7 @@ package internal
 import (
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/pkg/errors"
 )
@@ -144,7 +145,7 @@ type drawer interface {
 
 type keyManager interface {
 	KQuit(key string)
-	KHotReload(key string, run func())
+	KHotReload(key string, run func(), m *sync.Mutex)
 }
 
 type looper interface {
@@ -444,8 +445,8 @@ func (t *Tui) AddKQuit(key string) {
 	t.instance.KQuit(key)
 }
 
-func (t *Tui) AddKHotReload(key string, run func()) {
-	t.instance.KHotReload(key, run)
+func (t *Tui) AddKHotReload(key string, run func(), m *sync.Mutex) {
+	t.instance.KHotReload(key, run, m)
 }
 
 // Loop the TUI to receive events.

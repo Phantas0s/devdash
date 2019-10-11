@@ -50,10 +50,10 @@ func main() {
 		tui.AddRow()
 		tui.Render()
 	} else {
-		tui.AddKQuit(cfg.KQuit())
-		tui.AddKHotReload(cfg.KHotReload(), run(*file, tui))
-		ticker := time.NewTicker(time.Duration(cfg.RefreshTime()) * time.Second)
 		var m sync.Mutex
+		tui.AddKQuit(cfg.KQuit())
+		tui.AddKHotReload(cfg.KHotReload(), run(*file, tui), &m)
+		ticker := time.NewTicker(time.Duration(cfg.RefreshTime()) * time.Second)
 		go func() {
 			for range ticker.C {
 				m.Lock()

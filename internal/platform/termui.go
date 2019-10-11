@@ -176,8 +176,7 @@ func (*termUI) KQuit(key string) {
 	})
 }
 
-func (t *termUI) KHotReload(key string, run func()) {
-	var m sync.Mutex
+func (t *termUI) KHotReload(key string, run func(), m *sync.Mutex) {
 	termui.Handle(fmt.Sprintf("/sys/kbd/%s", key), func(termui.Event) {
 		go func() {
 			m.Lock()
