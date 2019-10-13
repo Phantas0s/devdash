@@ -10,6 +10,7 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.0 // indirect
 	github.com/nsf/termbox-go v0.0.0-20190817171036-93860e161317 // indirect
 	github.com/pkg/errors v0.8.1
+	github.com/shuheiktgw/go-travis v0.2.4
 	github.com/sparrc/go-ping v0.0.0-20190613174326-4e5b6552494c
 	github.com/spf13/viper v1.4.0
 	golang.org/x/crypto v0.0.0-20191002192127-34f69633bfdc

@@ -1,0 +1,228 @@
+[
+    {
+        "id": 596709995,
+        "number": "101",
+        "state": "passed",
+        "duration": 256,
+        "event_type": "push",
+        "previous_state": "passed",
+        "started_at": "2019-10-11T17:34:36Z",
+        "finished_at": "2019-10-11T17:36:48Z",
+        "updated_at": "2019-10-11T17:36:48.435Z",
+        "private": false,
+        "repository": {
+            "id": 24721613,
+            "name": "devdash",
+            "slug": "Phantas0s/devdash",
+            "description": ":bento: Highly Configurable Terminal Dashboard for Developers",
+            "github_id": 143766121,
+            "github_language": null,
+            "active": true,
+            "private": false,
+            "owner": {
+                "id": 930496,
+                "login": "Phantas0s",
+                "name": null,
+                "github_id": null,
+                "avatar_url": null,
+                "education": null,
+                "repositories": null,
+                "installation": null,
+                "@type": "user",
+                "@href": "/user/930496"
+            },
+            "default_branch": {
+                "name": "master",
+                "@type": "branch",
+                "@href": "/repo/24721613/branch/master",
+                "@representation": "minimal"
+            },
+            "starred": false,
+            "managed_by_installation": false,
+            "active_on_org": null,
+            "migration_status": null,
+            "allow_migration": null,
+            "@type": "repository",
+            "@href": "/repo/24721613",
+            "@representation": "standard",
+            "@permissions": {
+                "activate": true,
+                "admin": true,
+                "create_cron": true,
+                "create_env_var": true,
+                "create_key_pair": true,
+                "create_request": true,
+                "deactivate": true,
+                "delete_key_pair": true,
+                "migrate": false,
+                "read": true,
+                "star": true,
+                "unstar": true
+            }
+        },
+        "branch": {
+            "name": "master",
+            "@type": "branch",
+            "@href": "/repo/24721613/branch/master",
+            "@representation": "minimal"
+        },
+        "commit": {
+            "id": 180907499,
+            "sha": "588e51eb60b598dffb27c264725b481a56873097",
+            "ref": "refs/heads/master",
+            "message": "Cleaner way to avoid concurrency between the different reload (shortcut\n/ timer)",
+            "compare_url": "https://github.com/Phantas0s/devdash/compare/c795ac15897c...588e51eb60b5",
+            "committed_at": "2019-10-11T17:33:21Z",
+            "@type": "commit",
+            "@representation": "minimal"
+        },
+        "jobs": [
+            {
+                "id": 596709996,
+                "@type": "job",
+                "@href": "/job/596709996",
+                "@representation": "minimal"
+            },
+            {
+                "id": 596709997,
+                "@type": "job",
+                "@href": "/job/596709997",
+                "@representation": "minimal"
+            }
+        ],
+        "created_by": {
+            "id": 930496,
+            "login": "Phantas0s",
+            "name": null,
+            "github_id": null,
+            "avatar_url": null,
+            "education": null,
+            "repositories": null,
+            "installation": null,
+            "@type": "user",
+            "@href": "/user/930496",
+            "@representation": "minimal"
+        },
+        "@type": "build",
+        "@href": "/build/596709995",
+        "@representation": "standard",
+        "@permissions": {
+            "cancel": true,
+            "read": true,
+            "restart": true
+        }
+    },
+    {
+        "id": 596259298,
+        "number": "100",
+        "state": "passed",
+        "duration": 253,
+        "event_type": "push",
+        "previous_state": "passed",
+        "started_at": "2019-10-10T18:59:46Z",
+        "finished_at": "2019-10-10T19:02:03Z",
+        "updated_at": "2019-10-10T19:02:03.708Z",
+        "private": false,
+        "repository": {
+            "id": 24721613,
+            "name": "devdash",
+            "slug": "Phantas0s/devdash",
+            "description": ":bento: Highly Configurable Terminal Dashboard for Developers",
+            "github_id": 143766121,
+            "github_language": null,
+            "active": true,
+            "private": false,
+            "owner": {
+                "id": 930496,
+                "login": "Phantas0s",
+                "name": null,
+                "github_id": null,
+                "avatar_url": null,
+                "education": null,
+                "repositories": null,
+                "installation": null,
+                "@type": "user",
+                "@href": "/user/930496"
+            },
+            "default_branch": {
+                "name": "master",
+                "@type": "branch",
+                "@href": "/repo/24721613/branch/master",
+                "@representation": "minimal"
+            },
+            "starred": false,
+            "managed_by_installation": false,
+            "active_on_org": null,
+            "migration_status": null,
+            "allow_migration": null,
+            "@type": "repository",
+            "@href": "/repo/24721613",
+            "@representation": "standard",
+            "@permissions": {
+                "activate": true,
+                "admin": true,
+                "create_cron": true,
+                "create_env_var": true,
+                "create_key_pair": true,
+                "create_request": true,
+                "deactivate": true,
+                "delete_key_pair": true,
+                "migrate": false,
+                "read": true,
+                "star": true,
+                "unstar": true
+            }
+        },
+        "branch": {
+            "name": "master",
+            "@type": "branch",
+            "@href": "/repo/24721613/branch/master",
+            "@representation": "minimal"
+        },
+        "commit": {
+            "id": 180765304,
+            "sha": "c795ac15897c9cdb205382011ec95eb5dab82a30",
+            "ref": "refs/heads/master",
+            "message": "Minor README fix",
+            "compare_url": "https://github.com/Phantas0s/devdash/compare/163d868d8263...c795ac15897c",
+            "committed_at": "2019-10-10T18:59:05Z",
+            "@type": "commit",
+            "@representation": "minimal"
+        },
+        "jobs": [
+            {
+                "id": 596259299,
+                "@type": "job",
+                "@href": "/job/596259299",
+                "@representation": "minimal"
+            },
+            {
+                "id": 596259300,
+                "@type": "job",
+                "@href": "/job/596259300",
+                "@representation": "minimal"
+            }
+        ],
+        "created_by": {
+            "id": 930496,
+            "login": "Phantas0s",
+            "name": null,
+            "github_id": null,
+            "avatar_url": null,
+            "education": null,
+            "repositories": null,
+            "installation": null,
+            "@type": "user",
+            "@href": "/user/930496",
+            "@representation": "minimal"
+        },
+        "@type": "build",
+        "@href": "/build/596259298",
+        "@representation": "standard",
+        "@permissions": {
+            "cancel": true,
+            "read": true,
+            "restart": true
+        }
+    }
+]

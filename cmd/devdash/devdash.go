@@ -126,6 +126,14 @@ func run(file string, tui *internal.Tui) func() {
 				project.WithGithub(githubWidget)
 			}
 
+			travisService := p.Services.TravisCI
+			if !travisService.empty() {
+				travisWidget := internal.NewTravisCIWidget(
+					travisService.Token,
+				)
+				project.WithTravisCI(travisWidget)
+			}
+
 			project.Render(*debug)
 		}
 	}

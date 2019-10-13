@@ -33,6 +33,7 @@ const (
 
 	// Repository
 	optionRepository = "repository"
+	optionOwner      = "owner"
 
 	// Owner / all
 	optionScope = ownerScope

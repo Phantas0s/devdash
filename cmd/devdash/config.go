@@ -62,6 +62,7 @@ type Services struct {
 	GoogleSearchConsole SearchConsole   `mapstructure:"google_search_console"`
 	Monitor             Monitor         `mapstructure:"monitor"`
 	Github              Github          `mapstructure:"github"`
+	TravisCI            TravisCI        `mapstructure:"travis"`
 }
 
 type GoogleAnalytics struct {
@@ -82,6 +83,10 @@ type Github struct {
 	Token      string `mapstructure:"token"`
 	Owner      string `mapstructure:"owner"`
 	Repository string `mapstructure:"repository"`
+}
+
+type TravisCI struct {
+	Token string `mapstructure:"token"`
 }
 
 // OrderWidgets add the widgets to a three dimensional slice.
@@ -122,6 +127,10 @@ func (s SearchConsole) empty() bool {
 
 func (g Github) empty() bool {
 	return g == Github{}
+}
+
+func (t TravisCI) empty() bool {
+	return t == TravisCI{}
 }
 
 func mapConfig(data []byte) config {

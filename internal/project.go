@@ -9,16 +9,17 @@ type service interface {
 }
 
 type project struct {
-	name          string
-	nameOptions   map[string]string
-	widgets       [][][]Widget
-	sizes         [][]string
-	themes        map[string]map[string]string
-	gaWidget      service
-	monitorWidget service
-	gscWidget     service
-	githubWidget  service
-	tui           *Tui
+	name           string
+	nameOptions    map[string]string
+	widgets        [][][]Widget
+	sizes          [][]string
+	themes         map[string]map[string]string
+	gaWidget       service
+	monitorWidget  service
+	gscWidget      service
+	githubWidget   service
+	travisCIWidget service
+	tui            *Tui
 }
 
 // NewProject for the dashboard.
@@ -40,24 +41,21 @@ func NewProject(
 	}
 }
 
-// WithGa add Google Analytics service to the project.
+// Service builder
 func (p *project) WithGa(ga *gaWidget) {
 	p.gaWidget = ga
 }
-
-// WithMonitor add the Monitor service to the project.
 func (p *project) WithMonitor(mon *monitorWidget) {
 	p.monitorWidget = mon
 }
-
-// WithGoogleSearchConsole add the Google Search Console service to the project
 func (p *project) WithGoogleSearchConsole(gsc *gscWidget) {
 	p.gscWidget = gsc
 }
-
-// WithGithub add the Github service to the project
 func (p *project) WithGithub(github *githubWidget) {
 	p.githubWidget = github
+}
+func (p *project) WithTravisCI(travisCI *travisCIWidget) {
+	p.travisCIWidget = travisCI
 }
 
 func (p *project) addDefaultTheme(w Widget) Widget {
@@ -110,6 +108,8 @@ func (p *project) Render(debug bool) {
 					displayWidget(p.gscWidget, "Google Search Console", w, p.tui)
 				case "github":
 					displayWidget(p.githubWidget, "Github", w, p.tui)
+				case "travis":
+					displayWidget(p.travisCIWidget, "Travis", w, p.tui)
 				default:
 					DisplayError(p.tui, errors.Errorf("The service %s doesn't exist (yet?)", w.Name))
 				}
