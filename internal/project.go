@@ -19,6 +19,7 @@ type project struct {
 	gscWidget      service
 	githubWidget   service
 	travisCIWidget service
+	feedlyWidget   service
 	tui            *Tui
 }
 
@@ -56,6 +57,10 @@ func (p *project) WithGithub(github *githubWidget) {
 }
 func (p *project) WithTravisCI(travisCI *travisCIWidget) {
 	p.travisCIWidget = travisCI
+}
+
+func (p *project) WithFeedly(feedly *feedlyWidget) {
+	p.feedlyWidget = feedly
 }
 
 func (p *project) addDefaultTheme(w Widget) Widget {
@@ -110,6 +115,8 @@ func (p *project) Render(debug bool) {
 					displayWidget(p.githubWidget, "Github", w, p.tui)
 				case "travis":
 					displayWidget(p.travisCIWidget, "Travis", w, p.tui)
+				case "feedly":
+					displayWidget(p.feedlyWidget, "Feedly", w, p.tui)
 				default:
 					DisplayError(p.tui, errors.Errorf("The service %s doesn't exist (yet?)", w.Name))
 				}

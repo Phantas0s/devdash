@@ -134,6 +134,14 @@ func run(file string, tui *internal.Tui) func() {
 				project.WithTravisCI(travisWidget)
 			}
 
+			feedlyService := p.Services.Feedly
+			if !feedlyService.empty() {
+				feedlyService := internal.NewFeedlyWidget(
+					feedlyService.Address,
+				)
+				project.WithFeedly(feedlyService)
+			}
+
 			project.Render(*debug)
 		}
 	}

@@ -7,11 +7,17 @@ import (
 	"github.com/shuheiktgw/go-travis"
 )
 
+const noToken = "none"
+
 type TravisCI struct {
 	client *travis.Client
 }
 
 func NewTravisCI(token string) *TravisCI {
+	if token == noToken {
+		token = ""
+	}
+
 	return &TravisCI{
 		client: travis.NewClient(travis.ApiOrgUrl, token),
 	}

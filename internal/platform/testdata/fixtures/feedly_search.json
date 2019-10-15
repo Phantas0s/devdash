@@ -1,0 +1,48 @@
+{
+    "results": [
+        {
+            "feedId": "feed/http://web-techno.net/index.xml",
+            "score": 851.8368,
+            "lastUpdated": 1569575640000,
+            "coverage": 0.0,
+            "averageReadTime": 0.0,
+            "coverageScore": 0.0,
+            "estimatedEngagement": 27,
+            "tagCounts": {
+                "tech": 37,
+                "php": 4,
+                "programming": 3
+            },
+            "totalTagCount": 44,
+            "websiteTitle": "The Valuable Dev",
+            "scheme": "u:b:o",
+            "id": "feed/http://web-techno.net/index.xml",
+            "title": "The Valuable Dev",
+            "updated": 1569575640000,
+            "velocity": 0.5,
+            "topics": [
+                "tech",
+                "programming",
+                "php",
+                "web design"
+            ],
+            "subscribers": 100,
+            "website": "https://thevaluable.dev/",
+            "partial": false,
+            "coverUrl": "https://storage.googleapis.com/site-assets/290llJCm-5XRatYO1_RpSe6-WtBVqaDcdAY-808i8L8_cover-16c46f1b021",
+            "iconUrl": "https://storage.googleapis.com/site-assets/290llJCm-5XRatYO1_RpSe6-WtBVqaDcdAY-808i8L8_icon-16c46f1b021",
+            "visualUrl": "https://storage.googleapis.com/site-assets/290llJCm-5XRatYO1_RpSe6-WtBVqaDcdAY-808i8L8_visual-16c46f1b021",
+            "contentType": "article",
+            "language": "en",
+            "description": "Recent content on The Valuable Dev",
+            "coverColor": "C0DEED",
+            "deliciousTags": [
+                "tech",
+                "php",
+                "programming"
+            ]
+        }
+    ],
+    "queryType": "url",
+    "scheme": "u:b:o"
+}

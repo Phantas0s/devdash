@@ -63,6 +63,7 @@ type Services struct {
 	Monitor             Monitor         `mapstructure:"monitor"`
 	Github              Github          `mapstructure:"github"`
 	TravisCI            TravisCI        `mapstructure:"travis"`
+	Feedly              Feedly          `mapstructure:"feedly"`
 }
 
 type GoogleAnalytics struct {
@@ -89,6 +90,33 @@ type TravisCI struct {
 	Token string `mapstructure:"token"`
 }
 
+type Feedly struct {
+	Address string `mapstructure:"address"`
+}
+
+func (g GoogleAnalytics) empty() bool {
+	return g == GoogleAnalytics{}
+}
+
+func (m Monitor) empty() bool {
+	return m == Monitor{}
+}
+func (s SearchConsole) empty() bool {
+	return s == SearchConsole{}
+}
+
+func (g Github) empty() bool {
+	return g == Github{}
+}
+
+func (t TravisCI) empty() bool {
+	return t == TravisCI{}
+}
+
+func (t Feedly) empty() bool {
+	return t == Feedly{}
+}
+
 // OrderWidgets add the widgets to a three dimensional slice.
 // First dimension: index of the rows (ir or indexRows).
 // Second dimension: index of the columns (ic or indexColumn).
@@ -112,25 +140,6 @@ func (p Project) OrderWidgets() ([][][]internal.Widget, [][]string) {
 	}
 
 	return rows, sizes
-}
-
-func (g GoogleAnalytics) empty() bool {
-	return g == GoogleAnalytics{}
-}
-
-func (m Monitor) empty() bool {
-	return m == Monitor{}
-}
-func (s SearchConsole) empty() bool {
-	return s == SearchConsole{}
-}
-
-func (g Github) empty() bool {
-	return g == Github{}
-}
-
-func (t TravisCI) empty() bool {
-	return t == TravisCI{}
 }
 
 func mapConfig(data []byte) config {
