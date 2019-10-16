@@ -35,31 +35,23 @@ func NewFeedly(address string) *Feedly {
 
 func (f Feedly) Subscribers() (string, error) {
 	url := f.createAPIURL()
-	fmt.Println(url)
 	resp, err := f.Client.Get(url)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "error while fetching feedly API")
 	}
 
 	defer resp.Body.Close()
 	c, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "error while readling feedly API response")
 	}
 
-	fr := &FeedlyResponse{}
-	err = json.Unmarshal(c, fr)
+	subscribers, err := extractSubscribers(c)
 	if err != nil {
 		return "", err
 	}
 
-	if _, ok := fr.Results[0]["subscribers"]; !ok {
-		return "", errors.New("empty response from API")
-	}
-
-	subs := fr.Results[0]["subscribers"].(float64)
-
-	return strconv.FormatFloat(subs, 'f', 0, 64), nil
+	return subscribers, nil
 }
 
 func (f Feedly) createAPIURL() string {
@@ -72,4 +64,21 @@ func (f Feedly) createAPIURL() string {
 		url.QueryEscape(f.Address),
 		params,
 	)
+}
+
+func extractSubscribers(data []byte) (string, error) {
+	fr := &FeedlyResponse{}
+	err := json.Unmarshal(data, fr)
+	if err != nil {
+		return "", errors.Wrap(err, "error while unmarshal feedly API response")
+	}
+
+	if _, ok := fr.Results[0]["subscribers"]; !ok {
+		return "", errors.New("wrong format for Feedly API")
+	}
+
+	s := fr.Results[0]["subscribers"].(float64)
+	subs := strconv.FormatFloat(s, 'f', 0, 64)
+
+	return subs, nil
 }
