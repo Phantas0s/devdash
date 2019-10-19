@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* Add Tracis CI service
+* Add Travis CI service
     * Add Travis builds widget
 * Add Feedly service
     * Add Feedly subscribers widget

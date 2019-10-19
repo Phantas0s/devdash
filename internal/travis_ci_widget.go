@@ -38,7 +38,7 @@ func (tc travisCIWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 }
 
 func (tc travisCIWidget) tableBuilds(widget Widget) (err error) {
-	title := " Tracis CI builds "
+	title := " Travis CI builds "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}
