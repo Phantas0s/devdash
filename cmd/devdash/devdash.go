@@ -17,7 +17,6 @@ import (
 var debug *bool
 
 func main() {
-	// TODO add mor commands + better management of them (cobra?)
 	file := flag.String("config", ".devdash.yml", "The config file")
 	debug = flag.Bool("debug", false, "Debug mode")
 	term := flag.Bool("term", false, "Display terminal dimensions")
@@ -41,6 +40,7 @@ func main() {
 	run(*file, tui)()
 
 	if _, err := os.Stat(*file); os.IsNotExist(err) {
+		tui.AddKQuit("C-c")
 		internal.DisplayNoFile(tui)
 		err := tui.AddCol("5")
 		if err != nil {

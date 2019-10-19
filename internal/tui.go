@@ -102,6 +102,7 @@ type drawer interface {
 		titleColor uint16,
 		height int,
 		multiline bool,
+		bold bool,
 	)
 	BarChart(
 		data []int,
@@ -335,6 +336,14 @@ func (t *Tui) AddTextBox(
 		}
 	}
 
+	bold := true
+	if _, ok := options[optionBold]; ok {
+		bold, err = strconv.ParseBool(options[optionBold])
+		if err != nil {
+			return errors.Wrapf(err, "can't convert %s to bool - please verify your configuration (correct values: true or false)", options[optionBold])
+		}
+	}
+
 	ce := createColoredElements(options)
 	t.instance.TextBox(
 		data,
@@ -344,6 +353,7 @@ func (t *Tui) AddTextBox(
 		ce.titleColor,
 		int(height),
 		multiline,
+		bold,
 	)
 
 	return nil

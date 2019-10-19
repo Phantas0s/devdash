@@ -54,12 +54,20 @@ func (t *termUI) TextBox(
 	tc uint16,
 	height int,
 	multiline bool,
+	bold bool,
 ) {
 	textBox := termui.NewPar(data)
 
+	if title != "" {
+		textBox.BorderLabel = title
+	}
+
 	textBox.TextFgColor = termui.Attribute(textColor)
+	if bold {
+		textBox.TextFgColor = termui.Attribute(textColor) | termui.AttrBold
+	}
+
 	textBox.BorderFg = termui.Attribute(borderColor)
-	textBox.BorderLabel = title
 	textBox.BorderLabelFg = termui.Attribute(tc)
 	textBox.Height = height
 	textBox.Multiline = multiline
@@ -68,6 +76,7 @@ func (t *termUI) TextBox(
 }
 
 // Title is a special TextBox widget type.
+// TODO Should be replace with regular TextBox
 func (t *termUI) Title(
 	title string,
 	textColor uint16,

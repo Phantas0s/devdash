@@ -4,7 +4,6 @@ import "strings"
 
 const (
 	// Widget config options
-
 	optionTitle      = "title"
 	optionTitleColor = "title_color"
 
@@ -21,15 +20,17 @@ const (
 	// Metrics
 	optionDimension  = "dimension"
 	optionDimensions = "dimensions"
-
-	optionMetrics = "metrics"
-	optionMetric  = "metric"
+	optionMetrics    = "metrics"
+	optionMetric     = "metric"
 
 	// Ordering
 	optionOrder = "order"
 
 	// Filtering
 	optionFilters = "filters"
+
+	// Display
+	optionContent = "content"
 
 	// Repository
 	optionRepository = "repository"
@@ -39,7 +40,6 @@ const (
 	optionScope = ownerScope
 
 	ownerScope = "owner"
-	// allScope   = "all"
 )
 
 // A widget is a representation of a set of data in the screen.
