@@ -142,6 +142,14 @@ func run(file string, tui *internal.Tui) func() {
 				project.WithFeedly(feedlyService)
 			}
 
+			gitService := p.Services.Git
+			if !gitService.empty() {
+				gitService := internal.NewGitWidget(
+					gitService.Path,
+				)
+				project.WithGit(gitService)
+			}
+
 			project.Render(*debug)
 		}
 	}

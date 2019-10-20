@@ -64,6 +64,7 @@ type Services struct {
 	Github              Github          `mapstructure:"github"`
 	TravisCI            TravisCI        `mapstructure:"travis"`
 	Feedly              Feedly          `mapstructure:"feedly"`
+	Git                 Git             `mapstructure:"git"`
 }
 
 type GoogleAnalytics struct {
@@ -94,6 +95,10 @@ type Feedly struct {
 	Address string `mapstructure:"address"`
 }
 
+type Git struct {
+	Path string `mapstructure:"path"`
+}
+
 func (g GoogleAnalytics) empty() bool {
 	return g == GoogleAnalytics{}
 }
@@ -113,8 +118,12 @@ func (t TravisCI) empty() bool {
 	return t == TravisCI{}
 }
 
-func (t Feedly) empty() bool {
-	return t == Feedly{}
+func (f Feedly) empty() bool {
+	return f == Feedly{}
+}
+
+func (g Git) empty() bool {
+	return g == Git{}
 }
 
 // OrderWidgets add the widgets to a three dimensional slice.

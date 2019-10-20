@@ -20,6 +20,7 @@ type project struct {
 	githubWidget   service
 	travisCIWidget service
 	feedlyWidget   service
+	gitWidget      service
 	tui            *Tui
 }
 
@@ -61,6 +62,10 @@ func (p *project) WithTravisCI(travisCI *travisCIWidget) {
 
 func (p *project) WithFeedly(feedly *feedlyWidget) {
 	p.feedlyWidget = feedly
+}
+
+func (p *project) WithGit(git *gitWidget) {
+	p.gitWidget = git
 }
 
 func (p *project) addDefaultTheme(w Widget) Widget {
@@ -107,6 +112,8 @@ func (p *project) Render(debug bool) {
 
 				// Map widget prefix with serice
 				switch w.serviceID() {
+				case "display":
+					createWidgets(NewDisplayWidget(), "Display", w, p.tui)
 				case "ga":
 					createWidgets(p.gaWidget, "Google Analytics", w, p.tui)
 				case "mon":
@@ -119,8 +126,8 @@ func (p *project) Render(debug bool) {
 					createWidgets(p.travisCIWidget, "Travis", w, p.tui)
 				case "feedly":
 					createWidgets(p.feedlyWidget, "Feedly", w, p.tui)
-				case "display":
-					createWidgets(NewDisplayWidget(), "Display", w, p.tui)
+				case "git":
+					createWidgets(p.gitWidget, "Git", w, p.tui)
 				default:
 					DisplayError(p.tui, errors.Errorf("The service %s doesn't exist (yet?)", w.Name))
 				}

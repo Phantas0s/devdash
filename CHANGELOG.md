@@ -8,10 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* Add Git service
+    * Add widget table branches - display information about git branches
+* Add Display service
+    * Add widget box - display a widget box containing some text
 * Add Travis CI service
-    * Add Travis builds widget
+    * Add Travis builds widget - display your last Travis CI builds
 * Add Feedly service
-    * Add Feedly subscribers widget
+    * Add Feedly subscribers widget - display number of Feedly subscribers for your website
 
 ## [0.2.0] - 2019-10-05
 

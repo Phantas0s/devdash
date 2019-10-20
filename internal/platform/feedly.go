@@ -33,7 +33,7 @@ func NewFeedly(address string) *Feedly {
 	}
 }
 
-func (f Feedly) Subscribers() (string, error) {
+func (f *Feedly) Subscribers() (string, error) {
 	url := f.createAPIURL()
 	resp, err := f.Client.Get(url)
 	if err != nil {
@@ -54,7 +54,7 @@ func (f Feedly) Subscribers() (string, error) {
 	return subscribers, nil
 }
 
-func (f Feedly) createAPIURL() string {
+func (f *Feedly) createAPIURL() string {
 	params := "n=50&fullTerm=false&organic=true&promoted=true"
 	return fmt.Sprintf(
 		"%s/%s/%s?q=%s&%s",
