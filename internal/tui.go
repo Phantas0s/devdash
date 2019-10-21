@@ -336,7 +336,7 @@ func (t *Tui) AddTextBox(
 		}
 	}
 
-	bold := true
+	bold := false
 	if _, ok := options[optionBold]; ok {
 		bold, err = strconv.ParseBool(options[optionBold])
 		if err != nil {
