@@ -73,6 +73,10 @@ func extractSubscribers(data []byte) (string, error) {
 		return "", errors.Wrap(err, "error while unmarshal feedly API response")
 	}
 
+	if len(fr.Results) == 0 {
+		return "0", nil
+	}
+
 	if _, ok := fr.Results[0]["subscribers"]; !ok {
 		return "", errors.New("wrong format for Feedly API")
 	}
