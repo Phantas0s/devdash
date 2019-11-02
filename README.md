@@ -42,9 +42,7 @@ rm linux.sh
 
 ## Manual installation
 
-You need Golang installed to compile DevDash.
-
-You simply need to run `go get -u github.com/Phantas0s/devdash/cmd/devdash` in your terminal.
+You need to clone this repository and build the binary in `cmd/devdash`.
 
 # Documentation
 
