@@ -101,7 +101,6 @@ func NewAnalyticsClient(keyfile string) (*Analytics, error) {
 	}
 
 	// analytics reporting v4 service
-
 	an.service, err = ga.NewService(context.Background(), option.WithHTTPClient(an.config.Client(context.Background())))
 	if err != nil {
 		return nil, fmt.Errorf("creating the analytics reporting service v4 object failed: %v", err)
@@ -360,7 +359,7 @@ func (c *Analytics) StackedBar(an AnalyticValues) (dim []string, new []int, ret 
 	return formatNewReturning(resp.Reports, formater)
 }
 
-// formatBar to return one slice of dimension which elements are all linked with the elements of one slice of values.
+// formatBar to return one slice of dimension which elements are all linked with the elements of another slice with the values.
 func formatBar(reps []*ga.Report, dimFormater func(dim []string) string) (dim []string, u []int, err error) {
 	dimVal := map[string]int{}
 	for _, v := range reps {

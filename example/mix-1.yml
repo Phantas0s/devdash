@@ -88,9 +88,7 @@ projects:
                   options:
                     title: "sessions/users 3 weeks ago"
                     metric: "ga:sessionsPerUser"
-                    title_color: blue
-                    border_color: blue
-                    text_color: blue
+                    color: blue
                     num_color: default
                     start_date: 3_weeks_ago
                     end_date: 3_weeks_ago
@@ -98,9 +96,7 @@ projects:
                   options:
                     title: "sessions/users 2 weeks ago"
                     metric: "ga:sessionsPerUser"
-                    title_color: blue
-                    text_color: magenta
-                    border_color: magenta
+                    color: magenta
                     num_color: default
                     start_date: 2_weeks_ago
                     end_date: 2_weeks_ago

@@ -6,7 +6,7 @@ general:
 
 projects:
   - name: Example
-    name_options:
+    title_options:
       border_color: default
       text_color: default
       size: XXL
