@@ -49,6 +49,7 @@ var mappingDimensions = map[string]string{
 	"page_path":      "ga:pagePath",
 	"traffic_source": "ga:source",
 	"user_type":      "ga:userType",
+	"country":        "ga:country",
 }
 
 var mappingHeader = map[string]string{
@@ -151,7 +152,7 @@ func (c *Analytics) SimpleMetric(val AnalyticValues) (string, error) {
 
 // BarMetric provides a qualitive dimension linked to a quantitative value, for example a date (dimension) with an int.
 func (c *Analytics) BarMetric(val AnalyticValues) ([]string, []int, error) {
-	// Add the time dimension to the first two indexes of the slice (0, 1)
+	// Add the time dimension to the first two indexes of the slice ga.Dimensions(index 0 and 1)
 	tm := mapTimePeriod(val.TimePeriod)
 	dim := []*ga.Dimension{}
 	for _, v := range tm {
@@ -160,6 +161,7 @@ func (c *Analytics) BarMetric(val AnalyticValues) ([]string, []int, error) {
 
 	formater := formatBar
 	for _, v := range val.Dimensions {
+		// TODO - looks weird. We should maybe pass the formater in this function? Extract "user_returning" case in new function?
 		if v == "user_returning" {
 			formater = formatBarReturning
 		}
@@ -167,7 +169,8 @@ func (c *Analytics) BarMetric(val AnalyticValues) ([]string, []int, error) {
 	}
 
 	fi := []*ga.DimensionFilter{}
-	if len(val.Dimensions) == 1 {
+	// TODO - Why this condition? is filter works only with one dimension only?
+	if len(val.Dimensions) == 1 && len(val.Filters) != 0 {
 		fi = append(fi, &ga.DimensionFilter{
 			CaseSensitive: false,
 			DimensionName: mapDimension(val.Dimensions[0]),
@@ -214,11 +217,19 @@ func (c *Analytics) BarMetric(val AnalyticValues) ([]string, []int, error) {
 		)
 	}
 
+	// TODO - Complicated / not scalable. Should we specify the dimension to display before? How? With a map?
 	f := func(dim []string) string {
+		// If more than time dimension, display the third one on x-axis
+		if len(dim) == 3 {
+			return dim[2]
+		}
+
+		// If only time dimension, display dimension on x-axis
 		if len(dim) >= 2 {
 			return dim[0] + "-" + dim[1]
 		}
 
+		// By default, display the first dimension on x-axis
 		return dim[0]
 	}
 

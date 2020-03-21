@@ -35,6 +35,26 @@ func Test_Format(t *testing.T) {
 			formater:    func(dim []string) string { return dim[0] + "-" + dim[1] },
 			wantErr:     false,
 		},
+		{
+			name:        "custom bar metric country",
+			expectedVal: []int{1, 5, 1, 8, 3, 1, 1, 3, 3, 1, 1},
+			expectedDim: []string{
+				"Belgium",
+				"Ukraine",
+				"Slovakia",
+				"United States",
+				"Japan",
+				"Netherlands",
+				"Sweden",
+				"China",
+				"Germany",
+				"Brazil",
+				"France",
+			},
+			fixtureFile: "./testdata/fixtures/ga_bar_metric_country.json",
+			formater:    func(dim []string) string { return dim[2] },
+			wantErr:     false,
+		},
 	}
 
 	for _, tc := range testCases {

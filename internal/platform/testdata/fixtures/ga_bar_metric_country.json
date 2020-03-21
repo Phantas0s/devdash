@@ -1,0 +1,341 @@
+{
+    "reports": [
+        {
+            "columnHeader": {
+                "dimensions": [
+                    "ga:month",
+                    "ga:day",
+                    "ga:country"
+                ],
+                "metricHeader": {
+                    "metricHeaderEntries": [
+                        {
+                            "name": "ga:sessions",
+                            "type": "INTEGER"
+                        }
+                    ]
+                }
+            },
+            "data": {
+                "maximums": [
+                    {
+                        "values": [
+                            "3"
+                        ]
+                    }
+                ],
+                "minimums": [
+                    {
+                        "values": [
+                            "1"
+                        ]
+                    }
+                ],
+                "rowCount": 21,
+                "rows": [
+                    {
+                        "dimensions": [
+                            "03",
+                            "06",
+                            "Belgium"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "1"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "06",
+                            "Ukraine"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "1"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "07",
+                            "Ukraine"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "3"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "08",
+                            "Slovakia"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "1"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "08",
+                            "United States"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "1"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "09",
+                            "Japan"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "1"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "09",
+                            "United States"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "1"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "10",
+                            "Japan"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "2"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "11",
+                            "Netherlands"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "1"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "11",
+                            "Sweden"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "1"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "11",
+                            "United States"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "2"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "13",
+                            "China"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "3"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "13",
+                            "Germany"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "2"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "13",
+                            "United States"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "1"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "14",
+                            "United States"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "1"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "15",
+                            "Ukraine"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "1"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "17",
+                            "Brazil"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "1"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "17",
+                            "United States"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "1"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "20",
+                            "France"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "1"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "20",
+                            "United States"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "1"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "03",
+                            "21",
+                            "Germany"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "1"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "totals": [
+                    {
+                        "values": [
+                            "28"
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

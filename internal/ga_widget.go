@@ -21,6 +21,7 @@ const (
 	gaBarReturning        = "ga.bar_returning"
 	gaBarNewReturning     = "ga.bar_new_returning"
 	gaBarPages            = "ga.bar_pages"
+	gaBarCountry          = "ga.bar_country"
 	gaTablePages          = "ga.table_pages"
 	gaTableTrafficSources = "ga.table_traffic_sources"
 	gaTable               = "ga.table"
@@ -73,6 +74,8 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 		err = g.barReturning(widget)
 	case gaBarPages:
 		err = g.barPages(widget)
+	case gaBarCountry:
+		err = g.barCountry(widget)
 	case gaBarBounces:
 		err = g.barBounces(widget)
 	case gaTable:
@@ -205,6 +208,19 @@ func (g *gaWidget) barPages(widget Widget) (err error) {
 	return g.barMetric(widget)
 }
 
+func (g *gaWidget) barCountry(widget Widget) (err error) {
+	if widget.Options == nil {
+		widget.Options = map[string]string{}
+	}
+	widget.Options[optionDimensions] = "country"
+	widget.Options[optionMetric] = "sessions"
+
+	if _, ok := widget.Options[optionTitle]; !ok {
+		widget.Options[optionTitle] = widget.Options[optionFilters]
+	}
+
+	return g.barMetric(widget)
+}
 func (g *gaWidget) barBounces(widget Widget) (err error) {
 	if widget.Options == nil {
 		widget.Options = map[string]string{}
