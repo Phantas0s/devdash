@@ -1,0 +1,173 @@
+{
+    "reports": [
+        {
+            "columnHeader": {
+                "dimensions": [
+                    "ga:deviceCategory",
+                    "ga:year",
+                    "ga:month"
+                ],
+                "metricHeader": {
+                    "metricHeaderEntries": [
+                        {
+                            "name": "ga:sessions",
+                            "type": "INTEGER"
+                        }
+                    ]
+                }
+            },
+            "data": {
+                "maximums": [
+                    {
+                        "values": [
+                            "11309"
+                        ]
+                    }
+                ],
+                "minimums": [
+                    {
+                        "values": [
+                            "16"
+                        ]
+                    }
+                ],
+                "rowCount": 9,
+                "rows": [
+                    {
+                        "dimensions": [
+                            "desktop",
+                            "2020",
+                            "02"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "11309"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "desktop",
+                            "2020",
+                            "03"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "10239"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "desktop",
+                            "2020",
+                            "04"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "1454"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "mobile",
+                            "2020",
+                            "02"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "6916"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "mobile",
+                            "2020",
+                            "03"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "3050"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "mobile",
+                            "2020",
+                            "04"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "359"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "tablet",
+                            "2020",
+                            "02"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "210"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "tablet",
+                            "2020",
+                            "03"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "92"
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "dimensions": [
+                            "tablet",
+                            "2020",
+                            "04"
+                        ],
+                        "metrics": [
+                            {
+                                "values": [
+                                    "16"
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "totals": [
+                    {
+                        "values": [
+                            "33645"
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

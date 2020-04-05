@@ -50,10 +50,11 @@ var mappingTimePeriod = map[string][]string{
 }
 
 var mappingDimensions = map[string]string{
-	"page_path":      "ga:pagePath",
-	"traffic_source": "ga:source",
-	"user_type":      "ga:userType",
-	"country":        "ga:country",
+	"page_path":       "ga:pagePath",
+	"traffic_source":  "ga:source",
+	"user_type":       "ga:userType",
+	"device_category": "ga:deviceCategory",
+	"country":         "ga:country",
 }
 
 var mappingHeader = map[string]string{
@@ -166,7 +167,7 @@ func (c *Analytics) BarMetric(val AnalyticValues) ([]string, []int, error) {
 
 	formater := formatBar
 	for _, v := range val.Dimensions {
-		// TODO - looks weird. We should maybe pass the formater in this function? Extract "user_returning" case in new function?
+		// Special formater - depends on a string returned by API
 		if v == "user_returning" {
 			formater = formatBarReturning
 		}
@@ -327,7 +328,7 @@ func (c *Analytics) Table(
 }
 
 // StackedBar returns one dimension set linked with multiple values.
-func (c *Analytics) StackedBar(an AnalyticValues) (dim []string, new []int, ret []int, err error) {
+func (c *Analytics) StackedBar(an AnalyticValues) (dim []string, values map[string][]int, err error) {
 	d := mapDimensions(an.Dimensions)
 	tm := mapTimePeriod(an.TimePeriod)
 
@@ -359,7 +360,7 @@ func (c *Analytics) StackedBar(an AnalyticValues) (dim []string, new []int, ret 
 	resp, err := c.service.Reports.BatchGet(req).Do()
 
 	if err != nil {
-		return nil, nil, nil, errors.Wrapf(
+		return nil, nil, errors.Wrapf(
 			err,
 			"can't get stacked bar data from google analytics with start data %s / end_date %s",
 			an.StartDate,
@@ -367,11 +368,12 @@ func (c *Analytics) StackedBar(an AnalyticValues) (dim []string, new []int, ret 
 		)
 	}
 
+	// Always date on header x-axis
 	formater := func(dim []string) string {
 		return dim[1] + "-" + dim[2]
 	}
 
-	return formatNewReturning(resp.Reports, formater)
+	return formatStackedBar(resp.Reports, formater)
 }
 
 // formatBar to return one slice of dimension which elements are all linked with the elements of another slice with the values.
@@ -466,14 +468,16 @@ func formatTable(
 	return dim, u
 }
 
-func formatNewReturning(
+func formatStackedBar(
 	reps []*ga.Report,
 	dimFormater func(dim []string) string,
-) (dim []string, new []int, ret []int, err error) {
+) (dim []string, values map[string][]int, err error) {
+	values = make(map[string][]int)
 	for _, v := range reps {
 		for l := 0; l < len(v.Data.Rows); l++ {
-			if v.Data.Rows[l].Dimensions[0] == newVisitor {
-				dim = append(dim, dimFormater(v.Data.Rows[l].Dimensions))
+			d := dimFormater(v.Data.Rows[l].Dimensions)
+			if !inArray(dim, d) {
+				dim = append(dim, d)
 			}
 
 			for m := 0; m < len(v.Data.Rows[l].Metrics); m++ {
@@ -481,18 +485,24 @@ func formatNewReturning(
 
 				var vu int64
 				if vu, err = strconv.ParseInt(value, 0, 0); err != nil {
-					return nil, nil, nil, err
+					return nil, nil, err
 				}
-				if v.Data.Rows[l].Dimensions[0] == newVisitor {
-					new = append(new, int(vu))
-				} else {
-					ret = append(ret, int(vu))
-				}
+				header := v.Data.Rows[l].Dimensions[0]
+				values[header] = append(values[header], int(vu))
 			}
 		}
 	}
 
-	return dim, new, ret, nil
+	return dim, values, nil
+}
+
+func inArray(haystack []string, needle string) bool {
+	for _, v := range haystack {
+		if v == needle {
+			return true
+		}
+	}
+	return false
 }
 
 // The map functions map the properties of the application to the Google Analytics API params.

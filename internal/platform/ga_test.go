@@ -91,11 +91,10 @@ func Test_Format(t *testing.T) {
 	}
 }
 
-func Test_FormatNewReturning(t *testing.T) {
+func Test_FormatStackedBar(t *testing.T) {
 	testCases := []struct {
 		name        string
-		new         []int
-		ret         []int
+		values      map[string][]int
 		fixtureFile string
 		expectedDim []string
 		formater    func([]string) string
@@ -103,15 +102,17 @@ func Test_FormatNewReturning(t *testing.T) {
 	}{
 		{
 			name: "format new vs returning",
-			new: []int{
-				11245,
-				13966,
-				13804,
-			},
-			ret: []int{
-				1386,
-				1472,
-				1633,
+			values: map[string][]int{
+				newVisitor: {
+					11245,
+					13966,
+					13804,
+				},
+				returningVisitor: {
+					1386,
+					1472,
+					1633,
+				},
 			},
 			expectedDim: []string{
 				"2019-04",
@@ -119,6 +120,22 @@ func Test_FormatNewReturning(t *testing.T) {
 				"2019-06",
 			},
 			fixtureFile: "./testdata/fixtures/ga_new_returning.json",
+			formater:    func(dim []string) string { return dim[1] + "-" + dim[2] },
+			wantErr:     false,
+		},
+		{
+			name: "format bar devices",
+			values: map[string][]int{
+				"desktop": {11309, 10239, 1454},
+				"mobile":  {6916, 3050, 359},
+				"tablet":  {210, 92, 16},
+			},
+			expectedDim: []string{
+				"2020-02",
+				"2020-03",
+				"2020-04",
+			},
+			fixtureFile: "./testdata/fixtures/ga_bar_devices.json",
 			formater:    func(dim []string) string { return dim[1] + "-" + dim[2] },
 			wantErr:     false,
 		},
@@ -133,7 +150,7 @@ func Test_FormatNewReturning(t *testing.T) {
 				t.Error(err)
 			}
 
-			dim, new, ret, err := formatNewReturning(r.Reports, tc.formater)
+			dim, values, err := formatStackedBar(r.Reports, tc.formater)
 			if (err != nil) != tc.wantErr {
 				t.Errorf("Error '%v' even if wantErr is %t", err, tc.wantErr)
 				return
@@ -143,12 +160,8 @@ func Test_FormatNewReturning(t *testing.T) {
 				t.Errorf("Expected %v, actual %v", tc.expectedDim, dim)
 			}
 
-			if tc.wantErr == false && !reflect.DeepEqual(new, tc.new) {
-				t.Errorf("Expected %v, actual %v", tc.new, new)
-			}
-
-			if tc.wantErr == false && !reflect.DeepEqual(ret, tc.ret) {
-				t.Errorf("Expected %v, actual %v", tc.ret, ret)
+			if tc.wantErr == false && !reflect.DeepEqual(values, tc.values) {
+				t.Errorf("Expected %v, actual %v", tc.values, values)
 			}
 		})
 	}

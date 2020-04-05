@@ -21,7 +21,8 @@ const (
 	gaBarReturning        = "ga.bar_returning"
 	gaBarNewReturning     = "ga.bar_new_returning"
 	gaBarPages            = "ga.bar_pages"
-	gaBarCountry          = "ga.bar_country"
+	gaBarCountries        = "ga.bar_countries"
+	gaBarDevices          = "ga.bar_devices"
 	gaTablePages          = "ga.table_pages"
 	gaTableTrafficSources = "ga.table_traffic_sources"
 	gaTable               = "ga.table"
@@ -69,13 +70,15 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	case gaTableTrafficSources:
 		err = g.trafficSource(widget)
 	case gaBarNewReturning:
-		err = g.newVsReturning(widget)
+		err = g.stackedBarNewReturningUsers(widget)
+	case gaBarDevices:
+		err = g.stackedBarDevices(widget)
 	case gaBarReturning:
 		err = g.barReturning(widget)
 	case gaBarPages:
 		err = g.barPages(widget)
-	case gaBarCountry:
-		err = g.barCountry(widget)
+	case gaBarCountries:
+		err = g.barCountries(widget)
 	case gaBarBounces:
 		err = g.barBounces(widget)
 	case gaTable:
@@ -209,7 +212,7 @@ func (g *gaWidget) barPages(widget Widget) (err error) {
 	return g.barMetric(widget, platform.XHeaderTime)
 }
 
-func (g *gaWidget) barCountry(widget Widget) (err error) {
+func (g *gaWidget) barCountries(widget Widget) (err error) {
 	if widget.Options == nil {
 		widget.Options = map[string]string{}
 	}
@@ -446,12 +449,22 @@ func (g *gaWidget) trafficSource(widget Widget) (err error) {
 	return g.table(widget, "Source")
 }
 
-func (g *gaWidget) newVsReturning(widget Widget) error {
+func (g *gaWidget) stackedBarNewReturningUsers(widget Widget) error {
 	if widget.Options == nil {
 		widget.Options = map[string]string{}
 	}
 
 	widget.Options[optionDimensions] = "user_type"
+
+	return g.stackedBar(widget)
+}
+
+func (g *gaWidget) stackedBarDevices(widget Widget) error {
+	if widget.Options == nil {
+		widget.Options = map[string]string{}
+	}
+
+	widget.Options[optionDimensions] = "device_category"
 
 	return g.stackedBar(widget)
 }
@@ -493,7 +506,7 @@ func (g *gaWidget) stackedBar(widget Widget) error {
 	}
 
 	// this should return new and ret instead of a unique slice val...
-	dim, new, ret, err := g.analytics.StackedBar(
+	dim, val, err := g.analytics.StackedBar(
 		platform.AnalyticValues{
 			ViewID:     g.viewID,
 			StartDate:  startDate.Format(gaTimeFormat),
@@ -507,30 +520,37 @@ func (g *gaWidget) stackedBar(widget Widget) error {
 		return err
 	}
 
-	var data [8][]int
-	// need to fill data with []int containing 0
-	for i := 0; i < 8; i++ {
-		for j := 0; j < len(ret); j++ {
-			data[i] = append(data[i], 0)
-		}
-	}
-	data[0] = new
-	data[1] = ret
-
-	colors := []uint16{blue, green}
+	// Only support 5 different colors for now
+	colors := []uint16{blue, green, yellow, red, magenta}
 	if _, ok := widget.Options[optionFirstColor]; ok {
 		colors[0] = colorLookUp[widget.Options[optionFirstColor]]
 	}
 	if _, ok := widget.Options[optionSecondColor]; ok {
 		colors[1] = colorLookUp[widget.Options[optionSecondColor]]
 	}
+	if _, ok := widget.Options[optionThirdColor]; ok {
+		colors[2] = colorLookUp[widget.Options[optionThirdColor]]
+	}
+	if _, ok := widget.Options[optionFourthColor]; ok {
+		colors[3] = colorLookUp[widget.Options[optionFourthColor]]
+	}
+	if _, ok := widget.Options[optionFifthColor]; ok {
+		colors[4] = colorLookUp[widget.Options[optionFifthColor]]
+	}
 
-	title := fmt.Sprintf(
-		" %s: Returning (%s) vs New (%s) ",
-		strings.Trim(strings.Title(metric), "_"),
-		colorStr(colors[0]),
-		colorStr(colors[1]),
-	)
+	var data [8][]int
+	title := fmt.Sprintf(strings.Trim(strings.Title(metric), "_")) + " - "
+	count := 0
+	for k, v := range val {
+		// need to fill data with []int containing 0
+		for j := 0; j < len(val[k]); j++ {
+			data[count] = append(data[count], 0)
+		}
+		data[count] = v
+		title += fmt.Sprintf("/ %s (%s) ", k, colorStr(colors[count]))
+
+		count++
+	}
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}

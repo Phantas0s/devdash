@@ -36,6 +36,10 @@ const (
 
 	optionFirstColor  = "first_color"
 	optionSecondColor = "second_color"
+	optionThirdColor  = "third_color"
+	optionFourthColor = "fourth_color"
+	optionFifthColor  = "fifth_color"
+	optionSixthColor  = "sixth_color"
 
 	optionHeight = "height"
 
