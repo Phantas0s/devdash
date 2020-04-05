@@ -547,7 +547,11 @@ func (g *gaWidget) stackedBar(widget Widget) error {
 			data[count] = append(data[count], 0)
 		}
 		data[count] = v
-		title += fmt.Sprintf("/ %s (%s) ", k, colorStr(colors[count]))
+
+		if count != 0 {
+			title += "/ "
+		}
+		title += fmt.Sprintf("%s (%s) ", k, colorStr(colors[count]))
 
 		count++
 	}

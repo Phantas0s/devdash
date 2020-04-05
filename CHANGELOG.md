@@ -9,7 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 
 * Google Analytics widgets:
-    * ga.bar_country
+    * ga.bar_countries
+    * ga.bar_devices
 
 ## [0.3.0] - 2020-01-14
 
