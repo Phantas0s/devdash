@@ -22,6 +22,10 @@ const gaPrefix = "ga:"
 // fmt.Println(string(j))
 
 const (
+	// Decide display as x-axis header for bar metrics
+	XHeaderTime uint16 = iota
+	XHeaderOtherDim
+
 	earliestDate     = "2005-01-01" // This is the earliest date Google Analytics accepts.
 	newVisitor       = "New Visitor"
 	returningVisitor = "Returning Visitor"
@@ -85,6 +89,7 @@ type AnalyticValues struct {
 	Filters    []string
 	Orders     []string
 	RowLimit   int64
+	XHeaders   uint16
 }
 
 // NewAnalyticsClient to connect to Google Analytics APIs.
@@ -217,20 +222,19 @@ func (c *Analytics) BarMetric(val AnalyticValues) ([]string, []int, error) {
 		)
 	}
 
-	// TODO - Complicated / not scalable. Should we specify the dimension to display before? How? With a map?
-	f := func(dim []string) string {
-		// If more than time dimension, display the third one on x-axis
-		if len(dim) == 3 {
-			return dim[2]
+	// Decide of the header X-axis
+	f := func(dimValues []string) string {
+		// TODO need a mapping here instead of using an index (?) - using headers of ga response
+		if val.XHeaders == XHeaderOtherDim {
+			return dimValues[2]
 		}
 
-		// If only time dimension, display dimension on x-axis
-		if len(dim) >= 2 {
-			return dim[0] + "-" + dim[1]
+		if val.XHeaders == XHeaderTime {
+			return dimValues[0] + "-" + dimValues[1]
 		}
 
-		// By default, display the first dimension on x-axis
-		return dim[0]
+		// By default, display the first dimension for headers X-axis
+		return dimValues[0]
 	}
 
 	return formater(resp.Reports, f)

@@ -55,6 +55,14 @@ func Test_Format(t *testing.T) {
 			formater:    func(dim []string) string { return dim[2] },
 			wantErr:     false,
 		},
+		{
+			name:        "custom bar metric with pages",
+			expectedVal: []int{3, 1, 1, 1, 2, 1, 1, 1, 1},
+			expectedDim: []string{"03-20", "03-25", "03-28", "03-30", "03-31", "04-01", "04-03", "04-04", "04-05"},
+			fixtureFile: "./testdata/fixtures/ga_bar_pages.json",
+			formater:    func(dim []string) string { return dim[0] + "-" + dim[1] },
+			wantErr:     false,
+		},
 	}
 
 	for _, tc := range testCases {

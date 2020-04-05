@@ -59,11 +59,11 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	case gaBoxTotal:
 		err = g.totalMetric(widget)
 	case gaBarSessions:
-		err = g.barMetric(widget)
+		err = g.barMetric(widget, platform.XHeaderTime)
 	case gaBarUsers:
 		err = g.users(widget)
 	case gaBar:
-		err = g.barMetric(widget)
+		err = g.barMetric(widget, platform.XHeaderTime)
 	case gaTablePages:
 		err = g.table(widget, "Page")
 	case gaTableTrafficSources:
@@ -174,8 +174,9 @@ func (g *gaWidget) users(widget Widget) (err error) {
 	}
 
 	widget.Options[optionMetric] = "users"
+	xHeader := platform.XHeaderTime
 
-	return g.barMetric(widget)
+	return g.barMetric(widget, xHeader)
 }
 
 func (g *gaWidget) barReturning(widget Widget) (err error) {
@@ -187,7 +188,7 @@ func (g *gaWidget) barReturning(widget Widget) (err error) {
 	widget.Options[optionDimensions] = "user_type"
 	widget.Options[optionTitle] = " Returning users "
 
-	return g.barMetric(widget)
+	return g.barMetric(widget, platform.XHeaderTime)
 }
 
 func (g *gaWidget) barPages(widget Widget) (err error) {
@@ -205,7 +206,7 @@ func (g *gaWidget) barPages(widget Widget) (err error) {
 		widget.Options[optionTitle] = widget.Options[optionFilters]
 	}
 
-	return g.barMetric(widget)
+	return g.barMetric(widget, platform.XHeaderTime)
 }
 
 func (g *gaWidget) barCountry(widget Widget) (err error) {
@@ -219,7 +220,7 @@ func (g *gaWidget) barCountry(widget Widget) (err error) {
 		widget.Options[optionTitle] = widget.Options[optionFilters]
 	}
 
-	return g.barMetric(widget)
+	return g.barMetric(widget, platform.XHeaderOtherDim)
 }
 func (g *gaWidget) barBounces(widget Widget) (err error) {
 	if widget.Options == nil {
@@ -228,10 +229,10 @@ func (g *gaWidget) barBounces(widget Widget) (err error) {
 	widget.Options[optionMetric] = "bounces"
 	widget.Options[optionTitle] += " Bounces "
 
-	return g.barMetric(widget)
+	return g.barMetric(widget, platform.XHeaderTime)
 }
 
-func (g *gaWidget) barMetric(widget Widget) (err error) {
+func (g *gaWidget) barMetric(widget Widget, xHeader uint16) (err error) {
 	global := false
 	if _, ok := widget.Options[optionGlobal]; ok {
 		global, err = strconv.ParseBool(widget.Options[optionGlobal])
@@ -294,6 +295,7 @@ func (g *gaWidget) barMetric(widget Widget) (err error) {
 			Metrics:    []string{metric},
 			Dimensions: dimensions,
 			Filters:    filters,
+			XHeaders:   xHeader,
 		},
 	)
 	if err != nil {

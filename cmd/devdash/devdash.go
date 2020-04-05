@@ -39,6 +39,7 @@ func main() {
 	cfg := loadFile(*file)
 	run(*file, tui)()
 
+	// If no config file is provided, display a generic message
 	if _, err := os.Stat(*file); os.IsNotExist(err) {
 		tui.AddKQuit("C-c")
 		internal.DisplayNoFile(tui)
@@ -53,6 +54,7 @@ func main() {
 		var m sync.Mutex
 		tui.AddKQuit(cfg.KQuit())
 		tui.AddKHotReload(cfg.KHotReload(), run(*file, tui), &m)
+
 		ticker := time.NewTicker(time.Duration(cfg.RefreshTime()) * time.Second)
 		go func() {
 			for range ticker.C {
