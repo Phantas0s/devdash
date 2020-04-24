@@ -105,12 +105,14 @@ func (p *project) Render(debug bool) {
 		DisplayError(p.tui, err)
 	}
 
+	// TODO Separating request to API with display of widget itself
+	// TODO Better decomposition + possibility to run one goroutine by API request for performance (even if we need to have every results before displaying (?))
 	for r, row := range p.widgets {
 		for c, col := range row {
 			for _, w := range col {
 				w = p.addDefaultTheme(w)
 
-				// Map widget prefix with serice
+				// Map widget prefix with service
 				switch w.serviceID() {
 				case "display":
 					createWidgets(NewDisplayWidget(), "Display", w, p.tui)
