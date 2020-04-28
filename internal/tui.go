@@ -2,6 +2,7 @@
 package internal
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -370,7 +371,7 @@ func (t *Tui) AddBarChart(
 	title string,
 	options map[string]string,
 ) {
-
+	fmt.Println("BEGIN ADD BAR CHART")
 	var height int64 = 10
 	if _, ok := options[optionHeight]; ok {
 		height, _ = strconv.ParseInt(options[optionHeight], 0, 0)
@@ -401,6 +402,7 @@ func (t *Tui) AddBarChart(
 		int(barWidth),
 		ce.barColor,
 	)
+	fmt.Println("END ADD BAR CHART")
 }
 
 // AddStackedBarChart to the TUI, which represent two or more dataset overtime.

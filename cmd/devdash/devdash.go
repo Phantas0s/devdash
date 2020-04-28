@@ -97,60 +97,60 @@ func run(file string, tui *internal.Tui) func() {
 				project.WithGa(gaWidget)
 			}
 
-			gscService := p.Services.GoogleSearchConsole
-			if !gscService.empty() {
-				gscWidget, err := internal.NewGscWidget(gscService.Keyfile, gscService.Address)
-				if err != nil {
-					internal.DisplayError(tui, err)
-				}
-				project.WithGoogleSearchConsole(gscWidget)
-			}
+			// gscService := p.Services.GoogleSearchConsole
+			// if !gscService.empty() {
+			// 	gscWidget, err := internal.NewGscWidget(gscService.Keyfile, gscService.Address)
+			// 	if err != nil {
+			// 		internal.DisplayError(tui, err)
+			// 	}
+			// 	project.WithGoogleSearchConsole(gscWidget)
+			// }
 
-			monService := p.Services.Monitor
-			if !monService.empty() {
-				monWidget, err := internal.NewMonitorWidget(monService.Address)
-				if err != nil {
-					internal.DisplayError(tui, err)
-				}
-				project.WithMonitor(monWidget)
-			}
+			// 			monService := p.Services.Monitor
+			// 			if !monService.empty() {
+			// 				monWidget, err := internal.NewMonitorWidget(monService.Address)
+			// 				if err != nil {
+			// 					internal.DisplayError(tui, err)
+			// 				}
+			// 				project.WithMonitor(monWidget)
+			// 			}
 
-			githubService := p.Services.Github
-			if !githubService.empty() {
-				githubWidget, err := internal.NewGithubWidget(
-					githubService.Token,
-					githubService.Owner,
-					githubService.Repository,
-				)
-				if err != nil {
-					internal.DisplayError(tui, err)
-				}
-				project.WithGithub(githubWidget)
-			}
+			// 			githubService := p.Services.Github
+			// 			if !githubService.empty() {
+			// 				githubWidget, err := internal.NewGithubWidget(
+			// 					githubService.Token,
+			// 					githubService.Owner,
+			// 					githubService.Repository,
+			// 				)
+			// 				if err != nil {
+			// 					internal.DisplayError(tui, err)
+			// 				}
+			// 				project.WithGithub(githubWidget)
+			// 			}
 
-			travisService := p.Services.TravisCI
-			if !travisService.empty() {
-				travisWidget := internal.NewTravisCIWidget(
-					travisService.Token,
-				)
-				project.WithTravisCI(travisWidget)
-			}
+			// 			travisService := p.Services.TravisCI
+			// 			if !travisService.empty() {
+			// 				travisWidget := internal.NewTravisCIWidget(
+			// 					travisService.Token,
+			// 				)
+			// 				project.WithTravisCI(travisWidget)
+			// 			}
 
-			feedlyService := p.Services.Feedly
-			if !feedlyService.empty() {
-				feedlyService := internal.NewFeedlyWidget(
-					feedlyService.Address,
-				)
-				project.WithFeedly(feedlyService)
-			}
+			// 			feedlyService := p.Services.Feedly
+			// 			if !feedlyService.empty() {
+			// 				feedlyService := internal.NewFeedlyWidget(
+			// 					feedlyService.Address,
+			// 				)
+			// 				project.WithFeedly(feedlyService)
+			// 			}
 
-			gitService := p.Services.Git
-			if !gitService.empty() {
-				gitService := internal.NewGitWidget(
-					gitService.Path,
-				)
-				project.WithGit(gitService)
-			}
+			// 			gitService := p.Services.Git
+			// 			if !gitService.empty() {
+			// 				gitService := internal.NewGitWidget(
+			// 					gitService.Path,
+			// 				)
+			// 				project.WithGit(gitService)
+			// 			}
 
 			project.Render(*debug)
 		}

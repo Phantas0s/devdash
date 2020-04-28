@@ -1,11 +1,13 @@
 package internal
 
 import (
+	"fmt"
+
 	"github.com/pkg/errors"
 )
 
 type service interface {
-	CreateWidgets(widget Widget, tui *Tui) (err error)
+	CreateWidgets(widget Widget, tui *Tui) (f func(), err error)
 }
 
 type project struct {
@@ -47,26 +49,27 @@ func NewProject(
 func (p *project) WithGa(ga *gaWidget) {
 	p.gaWidget = ga
 }
-func (p *project) WithMonitor(mon *monitorWidget) {
-	p.monitorWidget = mon
-}
-func (p *project) WithGoogleSearchConsole(gsc *gscWidget) {
-	p.gscWidget = gsc
-}
-func (p *project) WithGithub(github *githubWidget) {
-	p.githubWidget = github
-}
-func (p *project) WithTravisCI(travisCI *travisCIWidget) {
-	p.travisCIWidget = travisCI
-}
 
-func (p *project) WithFeedly(feedly *feedlyWidget) {
-	p.feedlyWidget = feedly
-}
+// func (p *project) WithMonitor(mon *monitorWidget) {
+// 	p.monitorWidget = mon
+// }
+// func (p *project) WithGoogleSearchConsole(gsc *gscWidget) {
+// 	p.gscWidget = gsc
+// }
+// func (p *project) WithGithub(github *githubWidget) {
+// 	p.githubWidget = github
+// }
+// func (p *project) WithTravisCI(travisCI *travisCIWidget) {
+// 	p.travisCIWidget = travisCI
+// }
 
-func (p *project) WithGit(git *gitWidget) {
-	p.gitWidget = git
-}
+// func (p *project) WithFeedly(feedly *feedlyWidget) {
+// 	p.feedlyWidget = feedly
+// }
+
+// func (p *project) WithGit(git *gitWidget) {
+// 	p.gitWidget = git
+// }
 
 func (p *project) addDefaultTheme(w Widget) Widget {
 	t := w.typeID()
@@ -107,31 +110,35 @@ func (p *project) Render(debug bool) {
 
 	// TODO Separating request to API with display of widget itself
 	// TODO Better decomposition + possibility to run one goroutine by API request for performance (even if we need to have every results before displaying (?))
+	chs := []chan func(){}
+
 	for r, row := range p.widgets {
 		for c, col := range row {
 			for _, w := range col {
 				w = p.addDefaultTheme(w)
+				ch := make(chan func())
+				chs = append(chs, ch)
 
 				// Map widget prefix with service
 				switch w.serviceID() {
-				case "display":
-					createWidgets(NewDisplayWidget(), "Display", w, p.tui)
+				// case "display":
+				// 	createWidgets(NewDisplayWidget(), "Display", w, p.tui)
 				case "ga":
-					createWidgets(p.gaWidget, "Google Analytics", w, p.tui)
-				case "mon":
-					createWidgets(p.monitorWidget, "Monitor", w, p.tui)
-				case "gsc":
-					createWidgets(p.gscWidget, "Google Search Console", w, p.tui)
-				case "github":
-					createWidgets(p.githubWidget, "Github", w, p.tui)
-				case "travis":
-					createWidgets(p.travisCIWidget, "Travis", w, p.tui)
-				case "feedly":
-					createWidgets(p.feedlyWidget, "Feedly", w, p.tui)
-				case "git":
-					createWidgets(p.gitWidget, "Git", w, p.tui)
-				default:
-					DisplayError(p.tui, errors.Errorf("The service %s doesn't exist (yet?)", w.Name))
+					go createWidgets(p.gaWidget, "Google Analytics", w, p.tui, ch)
+					// case "mon":
+					// 	createWidgets(p.monitorWidget, "Monitor", w, p.tui)
+					// case "gsc":
+					// 	createWidgets(p.gscWidget, "Google Search Console", w, p.tui)
+					// case "github":
+					// 	createWidgets(p.githubWidget, "Github", w, p.tui)
+					// case "travis":
+					// 	createWidgets(p.travisCIWidget, "Travis", w, p.tui)
+					// case "feedly":
+					// 	createWidgets(p.feedlyWidget, "Feedly", w, p.tui)
+					// case "git":
+					// 	createWidgets(p.gitWidget, "Git", w, p.tui)
+					// default:
+					// 	DisplayError(p.tui, errors.Errorf("The service %s doesn't exist (yet?)", w.Name))
 				}
 			}
 			if len(col) > 0 {
@@ -141,9 +148,16 @@ func (p *project) Render(debug bool) {
 			}
 		}
 		p.tui.AddRow()
-		if !debug {
-			p.tui.Render()
-		}
+	}
+
+	for _, chann := range chs {
+		f := <-chann
+		close(chann)
+		f()
+	}
+	fmt.Println("too soon?")
+	if !debug {
+		p.tui.Render()
 	}
 
 	return
@@ -153,10 +167,12 @@ func (p *project) addTitle(tui *Tui) error {
 	return tui.AddProjectTitle(p.name, p.nameOptions)
 }
 
-func createWidgets(s service, name string, w Widget, tui *Tui) {
-	if s == nil {
-		DisplayError(tui, errors.Errorf("Configuration error - you can't use the widget %s without the service %s.", w.Name, name))
-	} else if err := s.CreateWidgets(w, tui); err != nil {
-		DisplayError(tui, err)
-	}
+func createWidgets(s service, name string, w Widget, tui *Tui, c chan<- func()) {
+	// if s == nil {
+	// 	DisplayError(tui, errors.Errorf("Configuration error - you can't use the widget %s without the service %s.", w.Name, name))
+	// } else {
+	f, _ := s.CreateWidgets(w, tui)
+	c <- f
+	// DisplayError(tui, err)
+	// }
 }

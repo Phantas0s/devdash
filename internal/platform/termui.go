@@ -127,6 +127,7 @@ func (t *termUI) BarChart(
 	bc.Buffer()
 
 	t.widgets = append(t.widgets, bc)
+	fmt.Println("WIDGET APPENDED")
 }
 
 // StackedBarChar widget type.
@@ -208,6 +209,7 @@ func (t *termUI) Loop() {
 // Render termui and delete the instance of the widgets rendered.
 func (t *termUI) Render() {
 	termui.Render(t.body)
+	fmt.Printf("%+v\n", t)
 	// delete every widget for the rows / cols rendered.
 	t.removeWidgets()
 }

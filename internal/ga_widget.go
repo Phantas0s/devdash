@@ -51,7 +51,7 @@ func NewGaWidget(keyfile string, viewID string) (*gaWidget, error) {
 }
 
 // CreateWidgets for Google Analytics.
-func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
+func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (f func(), err error) {
 	g.tui = tui
 
 	switch widget.Name {
@@ -60,11 +60,11 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	case gaBoxTotal:
 		err = g.totalMetric(widget)
 	case gaBarSessions:
-		err = g.barMetric(widget, platform.XHeaderTime)
+		f, err = g.barMetric(widget, platform.XHeaderTime)
 	case gaBarUsers:
-		err = g.users(widget)
+		f, err = g.users(widget)
 	case gaBar:
-		err = g.barMetric(widget, platform.XHeaderTime)
+		f, err = g.barMetric(widget, platform.XHeaderTime)
 	case gaTablePages:
 		err = g.table(widget, "Page")
 	case gaTableTrafficSources:
@@ -74,17 +74,17 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
 	case gaBarDevices:
 		err = g.stackedBarDevices(widget)
 	case gaBarReturning:
-		err = g.barReturning(widget)
+		f, err = g.barReturning(widget)
 	case gaBarPages:
-		err = g.barPages(widget)
+		f, err = g.barPages(widget)
 	case gaBarCountries:
-		err = g.barCountries(widget)
+		f, err = g.barCountries(widget)
 	case gaBarBounces:
-		err = g.barBounces(widget)
+		f, err = g.barBounces(widget)
 	case gaTable:
 		err = g.table(widget, widget.Options[optionDimension])
 	default:
-		return errors.Errorf("can't find the widget %s", widget.Name)
+		return nil, errors.Errorf("can't find the widget %s", widget.Name)
 	}
 
 	return
@@ -171,7 +171,7 @@ func (g *gaWidget) realTimeUser(widget Widget) error {
 	return nil
 }
 
-func (g *gaWidget) users(widget Widget) (err error) {
+func (g *gaWidget) users(widget Widget) (f func(), err error) {
 	if widget.Options == nil {
 		widget.Options = map[string]string{}
 	}
@@ -182,7 +182,7 @@ func (g *gaWidget) users(widget Widget) (err error) {
 	return g.barMetric(widget, xHeader)
 }
 
-func (g *gaWidget) barReturning(widget Widget) (err error) {
+func (g *gaWidget) barReturning(widget Widget) (f func(), err error) {
 	if widget.Options == nil {
 		widget.Options = map[string]string{}
 	}
@@ -194,7 +194,7 @@ func (g *gaWidget) barReturning(widget Widget) (err error) {
 	return g.barMetric(widget, platform.XHeaderTime)
 }
 
-func (g *gaWidget) barPages(widget Widget) (err error) {
+func (g *gaWidget) barPages(widget Widget) (f func(), err error) {
 	if widget.Options == nil {
 		widget.Options = map[string]string{}
 	}
@@ -202,7 +202,7 @@ func (g *gaWidget) barPages(widget Widget) (err error) {
 	widget.Options[optionMetric] = "page_views"
 
 	if _, ok := widget.Options[optionFilters]; !ok {
-		return errors.New("The widget ga.bar_pages require a filter (relative url of your page, i.e '/my-super-page/')")
+		return nil, errors.New("The widget ga.bar_pages require a filter (relative url of your page, i.e '/my-super-page/')")
 	}
 
 	if _, ok := widget.Options[optionTitle]; !ok {
@@ -212,7 +212,7 @@ func (g *gaWidget) barPages(widget Widget) (err error) {
 	return g.barMetric(widget, platform.XHeaderTime)
 }
 
-func (g *gaWidget) barCountries(widget Widget) (err error) {
+func (g *gaWidget) barCountries(widget Widget) (f func(), err error) {
 	if widget.Options == nil {
 		widget.Options = map[string]string{}
 	}
@@ -225,7 +225,7 @@ func (g *gaWidget) barCountries(widget Widget) (err error) {
 
 	return g.barMetric(widget, platform.XHeaderOtherDim)
 }
-func (g *gaWidget) barBounces(widget Widget) (err error) {
+func (g *gaWidget) barBounces(widget Widget) (f func(), err error) {
 	if widget.Options == nil {
 		widget.Options = map[string]string{}
 	}
@@ -235,12 +235,12 @@ func (g *gaWidget) barBounces(widget Widget) (err error) {
 	return g.barMetric(widget, platform.XHeaderTime)
 }
 
-func (g *gaWidget) barMetric(widget Widget, xHeader uint16) (err error) {
+func (g *gaWidget) barMetric(widget Widget, xHeader uint16) (f func(), err error) {
 	global := false
 	if _, ok := widget.Options[optionGlobal]; ok {
 		global, err = strconv.ParseBool(widget.Options[optionGlobal])
 		if err != nil {
-			return errors.Wrapf(err, "could not parse string %s to bool", widget.Options[optionGlobal])
+			return nil, errors.Wrapf(err, "could not parse string %s to bool", widget.Options[optionGlobal])
 		}
 	}
 
@@ -256,7 +256,7 @@ func (g *gaWidget) barMetric(widget Widget, xHeader uint16) (err error) {
 
 	startDate, endDate, err := platform.ConvertDates(time.Now(), sd, ed)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	metric := "sessions"
@@ -302,12 +302,14 @@ func (g *gaWidget) barMetric(widget Widget, xHeader uint16) (err error) {
 		},
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	g.tui.AddBarChart(val, dim, title, widget.Options)
+	f = func() {
+		g.tui.AddBarChart(val, dim, title, widget.Options)
+	}
 
-	return nil
+	return f, nil
 }
 
 func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
