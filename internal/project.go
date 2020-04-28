@@ -1,8 +1,6 @@
 package internal
 
 import (
-	"fmt"
-
 	"github.com/pkg/errors"
 )
 
@@ -102,18 +100,17 @@ func (p *project) addDefaultTheme(w Widget) Widget {
 // Render all the services' widgets.
 func (p *project) Render(debug bool) {
 	// TODO: use display.box instead of this shortcut
+	// TODO refactor all of that
 	err := p.addTitle(p.tui)
 	if err != nil {
 		err = errors.Wrapf(err, "can't add project title %s", p.name)
 		DisplayError(p.tui, err)
 	}
 
-	// TODO Separating request to API with display of widget itself
-	// TODO Better decomposition + possibility to run one goroutine by API request for performance (even if we need to have every results before displaying (?))
 	chs := []chan func(){}
 
-	for r, row := range p.widgets {
-		for c, col := range row {
+	for _, row := range p.widgets {
+		for _, col := range row {
 			for _, w := range col {
 				w = p.addDefaultTheme(w)
 				ch := make(chan func())
@@ -141,13 +138,7 @@ func (p *project) Render(debug bool) {
 					// 	DisplayError(p.tui, errors.Errorf("The service %s doesn't exist (yet?)", w.Name))
 				}
 			}
-			if len(col) > 0 {
-				if err = p.tui.AddCol(p.sizes[r][c]); err != nil {
-					DisplayError(p.tui, err)
-				}
-			}
 		}
-		p.tui.AddRow()
 	}
 
 	for _, chann := range chs {
@@ -155,9 +146,18 @@ func (p *project) Render(debug bool) {
 		close(chann)
 		f()
 	}
-	fmt.Println("too soon?")
-	if !debug {
-		p.tui.Render()
+	for r, row := range p.widgets {
+		for c, col := range row {
+			if len(col) > 0 {
+				if err = p.tui.AddCol(p.sizes[r][c]); err != nil {
+					DisplayError(p.tui, err)
+				}
+			}
+		}
+		p.tui.AddRow()
+		if !debug {
+			p.tui.Render()
+		}
 	}
 
 	return
