@@ -5,7 +5,7 @@ import (
 )
 
 type service interface {
-	CreateWidgets(widget Widget, tui *Tui) (f func(), err error)
+	CreateWidgets(widget Widget, tui *Tui) (f func() error, err error)
 }
 
 type project struct {
@@ -48,9 +48,10 @@ func (p *project) WithGa(ga *gaWidget) {
 	p.gaWidget = ga
 }
 
-// func (p *project) WithMonitor(mon *monitorWidget) {
-// 	p.monitorWidget = mon
-// }
+func (p *project) WithMonitor(mon *monitorWidget) {
+	p.monitorWidget = mon
+}
+
 // func (p *project) WithGoogleSearchConsole(gsc *gscWidget) {
 // 	p.gscWidget = gsc
 // }
@@ -100,21 +101,23 @@ func (p *project) addDefaultTheme(w Widget) Widget {
 // Render all the services' widgets.
 func (p *project) Render(debug bool) {
 	// TODO: use display.box instead of this shortcut
-	// TODO refactor all of that
+	// TODO Create a mapping function instead of this switch
+	// TODO Should I say I need to refactor that URGENTLY?????
 	err := p.addTitle(p.tui)
 	if err != nil {
 		err = errors.Wrapf(err, "can't add project title %s", p.name)
 		DisplayError(p.tui, err)
 	}
 
-	chs := []chan func(){}
+	chs := make([][][]chan func() error, len(p.widgets))
 
-	for _, row := range p.widgets {
-		for _, col := range row {
+	for ir, row := range p.widgets {
+		for ic, col := range row {
+			chs[ir] = append(chs[ir], []chan func() error{})
 			for _, w := range col {
 				w = p.addDefaultTheme(w)
-				ch := make(chan func())
-				chs = append(chs, ch)
+				ch := make(chan func() error)
+				chs[ir][ic] = append(chs[ir][ic], ch)
 
 				// Map widget prefix with service
 				switch w.serviceID() {
@@ -122,8 +125,8 @@ func (p *project) Render(debug bool) {
 				// 	createWidgets(NewDisplayWidget(), "Display", w, p.tui)
 				case "ga":
 					go createWidgets(p.gaWidget, "Google Analytics", w, p.tui, ch)
-					// case "mon":
-					// 	createWidgets(p.monitorWidget, "Monitor", w, p.tui)
+				case "mon":
+					go createWidgets(p.monitorWidget, "Monitor", w, p.tui, ch)
 					// case "gsc":
 					// 	createWidgets(p.gscWidget, "Google Search Console", w, p.tui)
 					// case "github":
@@ -141,13 +144,17 @@ func (p *project) Render(debug bool) {
 		}
 	}
 
-	for _, chann := range chs {
-		f := <-chann
-		close(chann)
-		f()
-	}
 	for r, row := range p.widgets {
 		for c, col := range row {
+			cs := chs[r][c]
+			for _, chann := range cs {
+				f := <-chann
+				close(chann)
+				err := f()
+				if err != nil {
+					DisplayError(p.tui, err)
+				}
+			}
 			if len(col) > 0 {
 				if err = p.tui.AddCol(p.sizes[r][c]); err != nil {
 					DisplayError(p.tui, err)
@@ -167,7 +174,7 @@ func (p *project) addTitle(tui *Tui) error {
 	return tui.AddProjectTitle(p.name, p.nameOptions)
 }
 
-func createWidgets(s service, name string, w Widget, tui *Tui, c chan<- func()) {
+func createWidgets(s service, name string, w Widget, tui *Tui, c chan<- func() error) {
 	// if s == nil {
 	// 	DisplayError(tui, errors.Errorf("Configuration error - you can't use the widget %s without the service %s.", w.Name, name))
 	// } else {

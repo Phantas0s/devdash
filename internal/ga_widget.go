@@ -51,14 +51,14 @@ func NewGaWidget(keyfile string, viewID string) (*gaWidget, error) {
 }
 
 // CreateWidgets for Google Analytics.
-func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (f func(), err error) {
+func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (f func() error, err error) {
 	g.tui = tui
 
 	switch widget.Name {
 	case gaBoxRealtime:
-		err = g.realTimeUser(widget)
+		f, err = g.realTimeUser(widget)
 	case gaBoxTotal:
-		err = g.totalMetric(widget)
+		f, err = g.totalMetric(widget)
 	case gaBarSessions:
 		f, err = g.barMetric(widget, platform.XHeaderTime)
 	case gaBarUsers:
@@ -66,13 +66,13 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (f func(), err error) 
 	case gaBar:
 		f, err = g.barMetric(widget, platform.XHeaderTime)
 	case gaTablePages:
-		err = g.table(widget, "Page")
+		f, err = g.table(widget, "Page")
 	case gaTableTrafficSources:
-		err = g.trafficSource(widget)
+		f, err = g.trafficSource(widget)
 	case gaBarNewReturning:
-		err = g.stackedBarNewReturningUsers(widget)
+		f, err = g.stackedBarNewReturningUsers(widget)
 	case gaBarDevices:
-		err = g.stackedBarDevices(widget)
+		f, err = g.stackedBarDevices(widget)
 	case gaBarReturning:
 		f, err = g.barReturning(widget)
 	case gaBarPages:
@@ -82,7 +82,7 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (f func(), err error) 
 	case gaBarBounces:
 		f, err = g.barBounces(widget)
 	case gaTable:
-		err = g.table(widget, widget.Options[optionDimension])
+		f, err = g.table(widget, widget.Options[optionDimension])
 	default:
 		return nil, errors.Errorf("can't find the widget %s", widget.Name)
 	}
@@ -90,7 +90,7 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (f func(), err error) 
 	return
 }
 
-func (g *gaWidget) totalMetric(widget Widget) (err error) {
+func (g *gaWidget) totalMetric(widget Widget) (f func() error, err error) {
 	metric := "sessions"
 	if _, ok := widget.Options[optionMetric]; ok {
 		if len(widget.Options[optionMetric]) > 0 {
@@ -110,7 +110,7 @@ func (g *gaWidget) totalMetric(widget Widget) (err error) {
 
 	sd, ed, err := platform.ConvertDates(time.Now(), startDate, endDate)
 	if err != nil {
-		return err
+		return f, err
 	}
 
 	title := fmt.Sprintf("Total %s from %s to %s", metric, sd.Format(gaTimeFormat), ed.Format(gaTimeFormat))
@@ -122,7 +122,7 @@ func (g *gaWidget) totalMetric(widget Widget) (err error) {
 	if _, ok := widget.Options[optionGlobal]; ok {
 		global, err = strconv.ParseBool(widget.Options[optionGlobal])
 		if err != nil {
-			return errors.Wrapf(err, "could not parse string %s to bool", widget.Options[optionGlobal])
+			return nil, errors.Wrapf(err, "could not parse string %s to bool", widget.Options[optionGlobal])
 		}
 	}
 
@@ -136,19 +136,18 @@ func (g *gaWidget) totalMetric(widget Widget) (err error) {
 		},
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = g.tui.AddTextBox(users, title, widget.Options)
-	if err != nil {
-		return err
+	f = func() error {
+		return g.tui.AddTextBox(users, title, widget.Options)
 	}
 
-	return nil
+	return
 }
 
 // GaRTActiveUser get the real time active users from Google Analytics
-func (g *gaWidget) realTimeUser(widget Widget) error {
+func (g *gaWidget) realTimeUser(widget Widget) (f func() error, err error) {
 	title := " Real time users "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
@@ -156,22 +155,21 @@ func (g *gaWidget) realTimeUser(widget Widget) error {
 
 	users, err := g.analytics.RealTimeUsers(g.viewID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = g.tui.AddTextBox(
-		users,
-		title,
-		widget.Options,
-	)
-	if err != nil {
-		return err
+	f = func() error {
+		return g.tui.AddTextBox(
+			users,
+			title,
+			widget.Options,
+		)
 	}
 
-	return nil
+	return
 }
 
-func (g *gaWidget) users(widget Widget) (f func(), err error) {
+func (g *gaWidget) users(widget Widget) (f func() error, err error) {
 	if widget.Options == nil {
 		widget.Options = map[string]string{}
 	}
@@ -182,7 +180,7 @@ func (g *gaWidget) users(widget Widget) (f func(), err error) {
 	return g.barMetric(widget, xHeader)
 }
 
-func (g *gaWidget) barReturning(widget Widget) (f func(), err error) {
+func (g *gaWidget) barReturning(widget Widget) (f func() error, err error) {
 	if widget.Options == nil {
 		widget.Options = map[string]string{}
 	}
@@ -194,7 +192,7 @@ func (g *gaWidget) barReturning(widget Widget) (f func(), err error) {
 	return g.barMetric(widget, platform.XHeaderTime)
 }
 
-func (g *gaWidget) barPages(widget Widget) (f func(), err error) {
+func (g *gaWidget) barPages(widget Widget) (f func() error, err error) {
 	if widget.Options == nil {
 		widget.Options = map[string]string{}
 	}
@@ -212,7 +210,7 @@ func (g *gaWidget) barPages(widget Widget) (f func(), err error) {
 	return g.barMetric(widget, platform.XHeaderTime)
 }
 
-func (g *gaWidget) barCountries(widget Widget) (f func(), err error) {
+func (g *gaWidget) barCountries(widget Widget) (f func() error, err error) {
 	if widget.Options == nil {
 		widget.Options = map[string]string{}
 	}
@@ -225,7 +223,7 @@ func (g *gaWidget) barCountries(widget Widget) (f func(), err error) {
 
 	return g.barMetric(widget, platform.XHeaderOtherDim)
 }
-func (g *gaWidget) barBounces(widget Widget) (f func(), err error) {
+func (g *gaWidget) barBounces(widget Widget) (f func() error, err error) {
 	if widget.Options == nil {
 		widget.Options = map[string]string{}
 	}
@@ -235,7 +233,7 @@ func (g *gaWidget) barBounces(widget Widget) (f func(), err error) {
 	return g.barMetric(widget, platform.XHeaderTime)
 }
 
-func (g *gaWidget) barMetric(widget Widget, xHeader uint16) (f func(), err error) {
+func (g *gaWidget) barMetric(widget Widget, xHeader uint16) (f func() error, err error) {
 	global := false
 	if _, ok := widget.Options[optionGlobal]; ok {
 		global, err = strconv.ParseBool(widget.Options[optionGlobal])
@@ -305,19 +303,19 @@ func (g *gaWidget) barMetric(widget Widget, xHeader uint16) (f func(), err error
 		return nil, err
 	}
 
-	f = func() {
-		g.tui.AddBarChart(val, dim, title, widget.Options)
+	f = func() error {
+		return g.tui.AddBarChart(val, dim, title, widget.Options)
 	}
 
 	return f, nil
 }
 
-func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
+func (g *gaWidget) table(widget Widget, firstHeader string) (f func() error, err error) {
 	global := false
 	if _, ok := widget.Options[optionGlobal]; ok {
 		global, err = strconv.ParseBool(widget.Options[optionGlobal])
 		if err != nil {
-			return errors.Wrapf(err, "could not parse string %s to bool", widget.Options[optionGlobal])
+			return nil, errors.Wrapf(err, "could not parse string %s to bool", widget.Options[optionGlobal])
 		}
 	}
 
@@ -354,7 +352,7 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 
 	startDate, endDate, err := platform.ConvertDates(time.Now(), sd, ed)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	title := fmt.Sprintf("%s from %s to %s", firstHeader, startDate.Format(gaTimeFormat), endDate.Format(gaTimeFormat))
@@ -373,7 +371,7 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 	if _, ok := widget.Options[optionRowLimit]; ok {
 		rowLimit, err = strconv.ParseInt(widget.Options[optionRowLimit], 0, 0)
 		if err != nil {
-			return errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
+			return nil, errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
 		}
 	}
 
@@ -392,7 +390,7 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 		firstHeader,
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if int(rowLimit) > len(dim) {
@@ -403,14 +401,17 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (err error) {
 	if _, ok := widget.Options[optionCharLimit]; ok {
 		charLimit, err = strconv.ParseInt(widget.Options[optionCharLimit], 0, 0)
 		if err != nil {
-			return errors.Wrapf(err, "%s must be a number", widget.Options[optionCharLimit])
+			return nil, errors.Wrapf(err, "%s must be a number", widget.Options[optionCharLimit])
 		}
 	}
 
 	finalTable := formatTable(rowLimit, dim, val, charLimit, headers)
-	g.tui.AddTable(finalTable, title, widget.Options)
 
-	return nil
+	f = func() error {
+		return g.tui.AddTable(finalTable, title, widget.Options)
+	}
+
+	return
 }
 
 func formatTable(
@@ -441,7 +442,7 @@ func formatTable(
 	return table
 }
 
-func (g *gaWidget) trafficSource(widget Widget) (err error) {
+func (g *gaWidget) trafficSource(widget Widget) (f func() error, err error) {
 	if widget.Options == nil {
 		widget.Options = map[string]string{}
 	}
@@ -451,7 +452,7 @@ func (g *gaWidget) trafficSource(widget Widget) (err error) {
 	return g.table(widget, "Source")
 }
 
-func (g *gaWidget) stackedBarNewReturningUsers(widget Widget) error {
+func (g *gaWidget) stackedBarNewReturningUsers(widget Widget) (func() error, error) {
 	if widget.Options == nil {
 		widget.Options = map[string]string{}
 	}
@@ -461,7 +462,7 @@ func (g *gaWidget) stackedBarNewReturningUsers(widget Widget) error {
 	return g.stackedBar(widget)
 }
 
-func (g *gaWidget) stackedBarDevices(widget Widget) error {
+func (g *gaWidget) stackedBarDevices(widget Widget) (f func() error, err error) {
 	if widget.Options == nil {
 		widget.Options = map[string]string{}
 	}
@@ -471,7 +472,7 @@ func (g *gaWidget) stackedBarDevices(widget Widget) error {
 	return g.stackedBar(widget)
 }
 
-func (g *gaWidget) stackedBar(widget Widget) error {
+func (g *gaWidget) stackedBar(widget Widget) (f func() error, err error) {
 	// defaults
 	sd := "7_days_ago"
 	if _, ok := widget.Options[optionStartDate]; ok {
@@ -485,7 +486,7 @@ func (g *gaWidget) stackedBar(widget Widget) error {
 
 	startDate, endDate, err := platform.ConvertDates(time.Now(), sd, ed)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	metric := "sessions"
@@ -519,7 +520,7 @@ func (g *gaWidget) stackedBar(widget Widget) error {
 		},
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Only support 5 different colors for now
@@ -561,7 +562,9 @@ func (g *gaWidget) stackedBar(widget Widget) error {
 		title = widget.Options[optionTitle]
 	}
 
-	g.tui.AddStackedBarChart(data, dim, title, colors, widget.Options)
+	f = func() error {
+		return g.tui.AddStackedBarChart(data, dim, title, colors, widget.Options)
+	}
 
-	return nil
+	return
 }

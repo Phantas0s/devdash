@@ -27,30 +27,30 @@ func NewMonitorWidget(address string) (*monitorWidget, error) {
 }
 
 // CreateWidgets for the monitor service.
-func (m *monitorWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
+func (m *monitorWidget) CreateWidgets(widget Widget, tui *Tui) (f func() error, err error) {
 	m.tui = tui
 
 	switch widget.Name {
 	case boxPing:
-		err = m.pingWidget(widget)
+		f, err = m.pingWidget(widget)
 	case boxAvailability:
-		err = m.availabilityWidget(widget)
+		f, err = m.availabilityWidget(widget)
 	default:
-		return errors.New("can't find the widget " + widget.Name)
+		return nil, errors.New("can't find the widget " + widget.Name)
 	}
 
 	return
 }
 
-func (m *monitorWidget) pingWidget(widget Widget) error {
+func (m *monitorWidget) pingWidget(widget Widget) (f func() error, err error) {
 	URL, err := url.Parse(m.address)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	pinger, err := goping.NewPinger(URL.Host)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	pinger.Count = 1
 	pinger.Run()                 // blocks until finished
@@ -61,22 +61,21 @@ func (m *monitorWidget) pingWidget(widget Widget) error {
 		title = widget.Options[optionTitle]
 	}
 
-	err = m.tui.AddTextBox(
-		fmt.Sprintf("Sent: %d / Received: %d / Time: %d", stats.PacketsSent, stats.PacketsRecv, stats.AvgRtt),
-		title,
-		widget.Options,
-	)
-	if err != nil {
-		return err
+	f = func() error {
+		return m.tui.AddTextBox(
+			fmt.Sprintf("Sent: %d / Received: %d / Time: %d", stats.PacketsSent, stats.PacketsRecv, stats.AvgRtt),
+			title,
+			widget.Options,
+		)
 	}
 
-	return nil
+	return
 }
 
-func (m *monitorWidget) availabilityWidget(widget Widget) error {
+func (m *monitorWidget) availabilityWidget(widget Widget) (f func() error, err error) {
 	req, err := http.NewRequest(http.MethodGet, m.address, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	client := &http.Client{}
@@ -100,14 +99,13 @@ func (m *monitorWidget) availabilityWidget(widget Widget) error {
 		title = widget.Options[optionTitle]
 	}
 
-	err = m.tui.AddTextBox(
-		fmt.Sprintf("%s (%d)", status, statusCode),
-		title,
-		widget.Options,
-	)
-	if err != nil {
-		return err
+	f = func() error {
+		return m.tui.AddTextBox(
+			fmt.Sprintf("%s (%d)", status, statusCode),
+			title,
+			widget.Options,
+		)
 	}
 
-	return nil
+	return
 }

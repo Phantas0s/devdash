@@ -106,14 +106,14 @@ func run(file string, tui *internal.Tui) func() {
 			// 	project.WithGoogleSearchConsole(gscWidget)
 			// }
 
-			// 			monService := p.Services.Monitor
-			// 			if !monService.empty() {
-			// 				monWidget, err := internal.NewMonitorWidget(monService.Address)
-			// 				if err != nil {
-			// 					internal.DisplayError(tui, err)
-			// 				}
-			// 				project.WithMonitor(monWidget)
-			// 			}
+			monService := p.Services.Monitor
+			if !monService.empty() {
+				monWidget, err := internal.NewMonitorWidget(monService.Address)
+				if err != nil {
+					internal.DisplayError(tui, err)
+				}
+				project.WithMonitor(monWidget)
+			}
 
 			// 			githubService := p.Services.Github
 			// 			if !githubService.empty() {

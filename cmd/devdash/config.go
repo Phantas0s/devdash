@@ -131,10 +131,8 @@ func (g Git) empty() bool {
 // Second dimension: index of the columns (ic or indexColumn).
 // Third dimension: index of the widget.
 func (p Project) OrderWidgets() ([][][]internal.Widget, [][]string) {
-	rowLen := len(p.Widgets)
-
-	rows := make([][][]internal.Widget, rowLen)
-	sizes := make([][]string, rowLen)
+	rows := make([][][]internal.Widget, len(p.Widgets))
+	sizes := make([][]string, len(p.Widgets))
 	for ir, r := range p.Widgets {
 		for ic, c := range r.Row {
 			rows[ir] = append(rows[ir], []internal.Widget{}) // add columns to rows

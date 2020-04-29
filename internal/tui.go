@@ -333,8 +333,7 @@ func (t *Tui) AddTextBox(
 		multiline, err = strconv.ParseBool(options[optionMultiline])
 		if err != nil {
 			return errors.Wrapf(
-				err,
-				"can't convert %s to bool - please verify your configuration (correct values: 'true' or 'false')",
+				err, "can't convert %s to bool - please verify your configuration (correct values: 'true' or 'false')",
 				options[optionMultiline],
 			)
 		}
@@ -369,20 +368,29 @@ func (t *Tui) AddBarChart(
 	dimensions []string,
 	title string,
 	options map[string]string,
-) {
+) (err error) {
 	var height int64 = 10
 	if _, ok := options[optionHeight]; ok {
-		height, _ = strconv.ParseInt(options[optionHeight], 0, 0)
+		height, err = strconv.ParseInt(options[optionHeight], 0, 0)
+		if err != nil {
+			return err
+		}
 	}
 
 	var gap int64 = 0
 	if _, ok := options[optionBarGap]; ok {
-		gap, _ = strconv.ParseInt(options[optionBarGap], 0, 0)
+		gap, err = strconv.ParseInt(options[optionBarGap], 0, 0)
+		if err != nil {
+			return err
+		}
 	}
 
 	var barWidth int64 = 6
 	if _, ok := options[optionBarWidth]; ok {
-		barWidth, _ = strconv.ParseInt(options[optionBarWidth], 0, 0)
+		barWidth, err = strconv.ParseInt(options[optionBarWidth], 0, 0)
+		if err != nil {
+			return err
+		}
 	}
 
 	ce := createColoredElements(options)
@@ -400,6 +408,8 @@ func (t *Tui) AddBarChart(
 		int(barWidth),
 		ce.barColor,
 	)
+
+	return nil
 }
 
 // AddStackedBarChart to the TUI, which represent two or more dataset overtime.
@@ -409,20 +419,29 @@ func (t *Tui) AddStackedBarChart(
 	title string,
 	colors []uint16,
 	options map[string]string,
-) {
+) (err error) {
 	var height int64 = 10
 	if _, ok := options[optionHeight]; ok {
-		height, _ = strconv.ParseInt(options[optionHeight], 0, 0)
+		height, err = strconv.ParseInt(options[optionHeight], 0, 0)
+		if err != nil {
+			return err
+		}
 	}
 
 	var gap int64 = 0
 	if _, ok := options[optionBarGap]; ok {
-		gap, _ = strconv.ParseInt(options[optionBarGap], 0, 0)
+		gap, err = strconv.ParseInt(options[optionBarGap], 0, 0)
+		if err != nil {
+			return err
+		}
 	}
 
 	var barWidth int64 = 6
 	if _, ok := options[optionBarWidth]; ok {
-		barWidth, _ = strconv.ParseInt(options[optionBarWidth], 0, 0)
+		barWidth, err = strconv.ParseInt(options[optionBarWidth], 0, 0)
+		if err != nil {
+			return err
+		}
 	}
 
 	ce := createColoredElements(options)
@@ -439,10 +458,12 @@ func (t *Tui) AddStackedBarChart(
 		int(gap),
 		int(barWidth),
 	)
+
+	return nil
 }
 
 // AddTable to the TUI, with a header and the dataset.
-func (t *Tui) AddTable(data [][]string, title string, options map[string]string) {
+func (t *Tui) AddTable(data [][]string, title string, options map[string]string) error {
 	ce := createColoredElements(options)
 	t.instance.Table(
 		data,
@@ -451,6 +472,8 @@ func (t *Tui) AddTable(data [][]string, title string, options map[string]string)
 		ce.borderColor,
 		ce.textColor,
 	)
+
+	return nil
 }
 
 // Add keyboard shortcut from the config to quit DevDash. Default Control C.
