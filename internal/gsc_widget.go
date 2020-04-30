@@ -45,23 +45,23 @@ func NewGscWidget(keyfile string, address string) (*gscWidget, error) {
 }
 
 // CreateWidgets for the Google Search Console API.
-func (s *gscWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
+func (s *gscWidget) CreateWidgets(widget Widget, tui *Tui) (f func() error, err error) {
 	s.tui = tui
 	switch widget.Name {
 	case gscTablePages:
-		err = s.pages(widget)
+		f, err = s.pages(widget)
 	case gscTableQueries:
-		err = s.table(widget)
+		f, err = s.table(widget)
 	case gscTable:
-		err = s.table(widget)
+		f, err = s.table(widget)
 	default:
-		return errors.Errorf("can't find the widget %s", widget.Name)
+		return nil, errors.Errorf("can't find the widget %s", widget.Name)
 	}
 
 	return
 }
 
-func (s *gscWidget) pages(widget Widget) error {
+func (s *gscWidget) pages(widget Widget) (f func() error, err error) {
 	if widget.Options == nil {
 		widget.Options = map[string]string{}
 	}
@@ -73,7 +73,7 @@ func (s *gscWidget) pages(widget Widget) error {
 
 // table of the result of a Google Search Console query.
 // If no metric provided, the default is "query" with no filters.
-func (s *gscWidget) table(widget Widget) (err error) {
+func (s *gscWidget) table(widget Widget) (f func() error, err error) {
 	sd := "7_days_ago"
 	if _, ok := widget.Options[optionStartDate]; ok {
 		sd = widget.Options[optionStartDate]
@@ -86,14 +86,14 @@ func (s *gscWidget) table(widget Widget) (err error) {
 
 	startDate, endDate, err := platform.ConvertDates(time.Now(), sd, ed)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var rowLimit int64 = 5
 	if _, ok := widget.Options[optionRowLimit]; ok {
 		rowLimit, err = strconv.ParseInt(widget.Options[optionRowLimit], 0, 0)
 		if err != nil {
-			return errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
+			return nil, errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
 		}
 	}
 
@@ -101,7 +101,7 @@ func (s *gscWidget) table(widget Widget) (err error) {
 	if _, ok := widget.Options[optionCharLimit]; ok {
 		c, err := strconv.ParseInt(widget.Options[optionCharLimit], 0, 0)
 		if err != nil {
-			return errors.Wrapf(err, "%s must be a number", widget.Options[optionCharLimit])
+			return nil, errors.Wrapf(err, "%s must be a number", widget.Options[optionCharLimit])
 		}
 		charLimit = int(c)
 	}
@@ -142,15 +142,17 @@ func (s *gscWidget) table(widget Widget) (err error) {
 		filters,
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	table := formatNumerics(results, dimension, metrics)
 	table = formatText(table, charLimit, s.address)
 
-	s.tui.AddTable(table, title, widget.Options)
+	f = func() error {
+		return s.tui.AddTable(table, title, widget.Options)
+	}
 
-	return nil
+	return
 }
 
 func formatNumerics(results []platform.SearchConsoleResponse, dimension string, metrics []string) [][]string {

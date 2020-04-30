@@ -40,38 +40,38 @@ func NewGithubWidget(token string, owner string, repo string) (*githubWidget, er
 }
 
 // CreateWidgets for the Github service.
-func (g *githubWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
+func (g *githubWidget) CreateWidgets(widget Widget, tui *Tui) (f func() error, err error) {
 	g.tui = tui
 
 	switch widget.Name {
 	case githubBoxStars:
-		err = g.boxStars(widget)
+		f, err = g.boxStars(widget)
 	case githubBoxWatchers:
-		err = g.boxWatchers(widget)
+		f, err = g.boxWatchers(widget)
 	case githubBoxOpenIssues:
-		err = g.boxOpenIssues(widget)
+		f, err = g.boxOpenIssues(widget)
 	case githubTableRepositories:
-		err = g.tableRepo(widget)
+		f, err = g.tableRepo(widget)
 	case githubTableBranches:
-		err = g.tableBranches(widget)
+		f, err = g.tableBranches(widget)
 	case githubTableIssues:
-		err = g.tableIssues(widget)
+		f, err = g.tableIssues(widget)
 	case githubTablePullRequests:
-		err = g.tablePullRequests(widget)
+		f, err = g.tablePullRequests(widget)
 	case githubBarViews:
-		err = g.barViews(widget)
+		f, err = g.barViews(widget)
 	case githubBarCommits:
-		err = g.barCommits(widget)
+		f, err = g.barCommits(widget)
 	case githubBarStars:
-		err = g.barStars(widget)
+		f, err = g.barStars(widget)
 	default:
-		return errors.Errorf("can't find the widget %s for service github", widget.Name)
+		return nil, errors.Errorf("can't find the widget %s for service github", widget.Name)
 	}
 
 	return
 }
 
-func (g *githubWidget) boxStars(widget Widget) error {
+func (g *githubWidget) boxStars(widget Widget) (f func() error, err error) {
 	var repo string
 	if _, ok := widget.Options[optionRepository]; ok {
 		repo = widget.Options[optionRepository]
@@ -84,24 +84,23 @@ func (g *githubWidget) boxStars(widget Widget) error {
 
 	stars, err := g.client.TotalStars(repo)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	s := strconv.FormatInt(int64(stars), 10)
 
-	err = g.tui.AddTextBox(
-		s,
-		title,
-		widget.Options,
-	)
-	if err != nil {
-		return err
+	f = func() error {
+		return g.tui.AddTextBox(
+			s,
+			title,
+			widget.Options,
+		)
 	}
 
-	return nil
+	return
 }
 
-func (g *githubWidget) boxWatchers(widget Widget) error {
+func (g *githubWidget) boxWatchers(widget Widget) (f func() error, err error) {
 	title := " Github Watchers "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
@@ -114,24 +113,23 @@ func (g *githubWidget) boxWatchers(widget Widget) error {
 
 	w, err := g.client.TotalWatchers(repo)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	s := strconv.FormatInt(int64(w), 10)
 
-	err = g.tui.AddTextBox(
-		s,
-		title,
-		widget.Options,
-	)
-	if err != nil {
-		return err
+	f = func() error {
+		return g.tui.AddTextBox(
+			s,
+			title,
+			widget.Options,
+		)
 	}
 
-	return nil
+	return
 }
 
-func (g *githubWidget) boxOpenIssues(widget Widget) error {
+func (g *githubWidget) boxOpenIssues(widget Widget) (f func() error, err error) {
 	title := " Github Open Issues "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
@@ -144,24 +142,23 @@ func (g *githubWidget) boxOpenIssues(widget Widget) error {
 
 	w, err := g.client.TotalOpenIssues(repo)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	s := strconv.FormatInt(int64(w), 10)
 
-	err = g.tui.AddTextBox(
-		s,
-		title,
-		widget.Options,
-	)
-	if err != nil {
-		return err
+	f = func() error {
+		return g.tui.AddTextBox(
+			s,
+			title,
+			widget.Options,
+		)
 	}
 
-	return nil
+	return
 }
 
-func (g *githubWidget) tableRepo(widget Widget) (err error) {
+func (g *githubWidget) tableRepo(widget Widget) (f func() error, err error) {
 	title := " Github Repositories "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
@@ -171,7 +168,7 @@ func (g *githubWidget) tableRepo(widget Widget) (err error) {
 	if _, ok := widget.Options[optionRowLimit]; ok {
 		limit, err = strconv.ParseInt(widget.Options[optionRowLimit], 10, 0)
 		if err != nil {
-			return errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
+			return nil, errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
 		}
 	}
 
@@ -189,15 +186,17 @@ func (g *githubWidget) tableRepo(widget Widget) (err error) {
 
 	rs, err := g.client.ListRepo(int(limit), order, metrics)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	g.tui.AddTable(rs, title, widget.Options)
+	f = func() error {
+		return g.tui.AddTable(rs, title, widget.Options)
+	}
 
-	return nil
+	return
 }
 
-func (g *githubWidget) tableBranches(widget Widget) (err error) {
+func (g *githubWidget) tableBranches(widget Widget) (f func() error, err error) {
 	var repo string
 	if _, ok := widget.Options[optionRepository]; ok {
 		repo = widget.Options[optionRepository]
@@ -212,21 +211,23 @@ func (g *githubWidget) tableBranches(widget Widget) (err error) {
 	if _, ok := widget.Options[optionRowLimit]; ok {
 		limit, err = strconv.ParseInt(widget.Options[optionRowLimit], 10, 0)
 		if err != nil {
-			return errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
+			return nil, errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
 		}
 	}
 
 	bs, err := g.client.ListBranches(repo, int(limit))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	g.tui.AddTable(bs, title, widget.Options)
+	f = func() error {
+		return g.tui.AddTable(bs, title, widget.Options)
+	}
 
-	return nil
+	return
 }
 
-func (g *githubWidget) tableIssues(widget Widget) (err error) {
+func (g *githubWidget) tableIssues(widget Widget) (f func() error, err error) {
 	var repo string
 	if _, ok := widget.Options[optionRepository]; ok {
 		repo = widget.Options[optionRepository]
@@ -241,21 +242,23 @@ func (g *githubWidget) tableIssues(widget Widget) (err error) {
 	if _, ok := widget.Options[optionRowLimit]; ok {
 		limit, err = strconv.ParseInt(widget.Options[optionRowLimit], 10, 0)
 		if err != nil {
-			return errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
+			return nil, errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
 		}
 	}
 
 	is, err := g.client.ListIssues(repo, int(limit))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	g.tui.AddTable(is, title, widget.Options)
+	f = func() error {
+		return g.tui.AddTable(is, title, widget.Options)
+	}
 
-	return nil
+	return
 }
 
-func (g *githubWidget) tablePullRequests(widget Widget) (err error) {
+func (g *githubWidget) tablePullRequests(widget Widget) (f func() error, err error) {
 	var repo string
 	if _, ok := widget.Options[optionRepository]; ok {
 		repo = widget.Options[optionRepository]
@@ -270,21 +273,23 @@ func (g *githubWidget) tablePullRequests(widget Widget) (err error) {
 	if _, ok := widget.Options[optionRowLimit]; ok {
 		limit, err = strconv.ParseInt(widget.Options[optionRowLimit], 10, 0)
 		if err != nil {
-			return errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
+			return nil, errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
 		}
 	}
 
 	is, err := g.client.ListPullRequests(repo, int(limit))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	g.tui.AddTable(is, title, widget.Options)
+	f = func() error {
+		return g.tui.AddTable(is, title, widget.Options)
+	}
 
-	return nil
+	return
 }
 
-func (g *githubWidget) barViews(widget Widget) (err error) {
+func (g *githubWidget) barViews(widget Widget) (f func() error, err error) {
 	var repo string
 	if _, ok := widget.Options[optionRepository]; ok {
 		repo = widget.Options[optionRepository]
@@ -297,16 +302,18 @@ func (g *githubWidget) barViews(widget Widget) (err error) {
 
 	dim, counts, err := g.client.Views(repo, 0)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	g.tui.AddBarChart(counts, dim, title, widget.Options)
+	f = func() error {
+		return g.tui.AddBarChart(counts, dim, title, widget.Options)
+	}
 
-	return nil
+	return
 }
 
 // TODO to refactor - transforming any date statement (weeks_ago, month_ago) into days weeks_ago in platform.date, and plugt it in.
-func (g *githubWidget) barCommits(widget Widget) (err error) {
+func (g *githubWidget) barCommits(widget Widget) (f func() error, err error) {
 	var repo string
 	if _, ok := widget.Options[optionRepository]; ok {
 		repo = widget.Options[optionRepository]
@@ -333,30 +340,32 @@ func (g *githubWidget) barCommits(widget Widget) (err error) {
 	}
 
 	if !strings.Contains(sd, "weeks_ago") || !strings.Contains(ed, "weeks_ago") {
-		return errors.New("The widget github.bar_commits require you to indicate a week range, ie startDate: 5_weeks_ago, endDate: 1_weeks_ago ")
+		return nil, errors.New("The widget github.bar_commits require you to indicate a week range, ie startDate: 5_weeks_ago, endDate: 1_weeks_ago ")
 	}
 
 	sw, err := platform.ExtractCountPeriod(sd)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	ew, err := platform.ExtractCountPeriod(ed)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	dim, counts, err := g.client.CountCommits(repo, scope, sw, ew, time.Now())
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	g.tui.AddBarChart(counts, dim, title, widget.Options)
+	f = func() error {
+		return g.tui.AddBarChart(counts, dim, title, widget.Options)
+	}
 
-	return nil
+	return
 }
 
-func (g *githubWidget) barStars(widget Widget) (err error) {
+func (g *githubWidget) barStars(widget Widget) (f func() error, err error) {
 	var repo string
 	if _, ok := widget.Options[optionRepository]; ok {
 		repo = widget.Options[optionRepository]
@@ -379,15 +388,17 @@ func (g *githubWidget) barStars(widget Widget) (err error) {
 
 	sd, ed, err := platform.ConvertDates(time.Now(), startDate, endDate)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	dim, counts, err := g.client.CountStars(repo, sd, ed)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	g.tui.AddBarChart(counts, dim, title, widget.Options)
+	f = func() error {
+		return g.tui.AddBarChart(counts, dim, title, widget.Options)
+	}
 
-	return nil
+	return
 }

@@ -21,20 +21,20 @@ func NewGitWidget(path string) *gitWidget {
 	}
 }
 
-func (g gitWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
+func (g gitWidget) CreateWidgets(widget Widget, tui *Tui) (f func() error, err error) {
 	g.tui = tui
 
 	switch widget.Name {
 	case gitBranches:
-		err = g.branches(widget)
+		f, err = g.branches(widget)
 	default:
-		return errors.Errorf("can't find the widget %s for service Git", widget.Name)
+		return nil, errors.Errorf("can't find the widget %s for service Git", widget.Name)
 	}
 
 	return
 }
 
-func (g gitWidget) branches(widget Widget) (err error) {
+func (g gitWidget) branches(widget Widget) (f func() error, err error) {
 	title := " Git Branches "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
@@ -42,10 +42,12 @@ func (g gitWidget) branches(widget Widget) (err error) {
 
 	data, err := g.client.Branches()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	g.tui.AddTable(data, title, widget.Options)
+	f = func() error {
+		return g.tui.AddTable(data, title, widget.Options)
+	}
 
-	return nil
+	return
 }

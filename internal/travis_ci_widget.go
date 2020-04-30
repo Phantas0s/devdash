@@ -24,20 +24,20 @@ func NewTravisCIWidget(token string) *travisCIWidget {
 	}
 }
 
-func (tc travisCIWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
+func (tc travisCIWidget) CreateWidgets(widget Widget, tui *Tui) (f func() error, err error) {
 	tc.tui = tui
 
 	switch widget.Name {
 	case travisCITableBuilds:
-		err = tc.tableBuilds(widget)
+		f, err = tc.tableBuilds(widget)
 	default:
-		return errors.Errorf("can't find the widget %s for service travis ci", widget.Name)
+		return nil, errors.Errorf("can't find the widget %s for service travis ci", widget.Name)
 	}
 
 	return
 }
 
-func (tc travisCIWidget) tableBuilds(widget Widget) (err error) {
+func (tc travisCIWidget) tableBuilds(widget Widget) (f func() error, err error) {
 	title := " Travis CI builds "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
@@ -57,16 +57,18 @@ func (tc travisCIWidget) tableBuilds(widget Widget) (err error) {
 	if _, ok := widget.Options[optionRowLimit]; ok {
 		limit, err = strconv.ParseInt(widget.Options[optionRowLimit], 10, 0)
 		if err != nil {
-			return errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
+			return nil, errors.Wrapf(err, "%s must be a number", widget.Options[optionRowLimit])
 		}
 	}
 
 	builds, err := tc.client.Builds(repo, owner, limit)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	tc.tui.AddTable(builds, title, widget.Options)
+	f = func() error {
+		return tc.tui.AddTable(builds, title, widget.Options)
+	}
 
-	return nil
+	return
 }

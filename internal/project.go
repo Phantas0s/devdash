@@ -52,23 +52,25 @@ func (p *project) WithMonitor(mon *monitorWidget) {
 	p.monitorWidget = mon
 }
 
-// func (p *project) WithGoogleSearchConsole(gsc *gscWidget) {
-// 	p.gscWidget = gsc
-// }
-// func (p *project) WithGithub(github *githubWidget) {
-// 	p.githubWidget = github
-// }
-// func (p *project) WithTravisCI(travisCI *travisCIWidget) {
-// 	p.travisCIWidget = travisCI
-// }
+func (p *project) WithGoogleSearchConsole(gsc *gscWidget) {
+	p.gscWidget = gsc
+}
 
-// func (p *project) WithFeedly(feedly *feedlyWidget) {
-// 	p.feedlyWidget = feedly
-// }
+func (p *project) WithGithub(github *githubWidget) {
+	p.githubWidget = github
+}
 
-// func (p *project) WithGit(git *gitWidget) {
-// 	p.gitWidget = git
-// }
+func (p *project) WithTravisCI(travisCI *travisCIWidget) {
+	p.travisCIWidget = travisCI
+}
+
+func (p *project) WithFeedly(feedly *feedlyWidget) {
+	p.feedlyWidget = feedly
+}
+
+func (p *project) WithGit(git *gitWidget) {
+	p.gitWidget = git
+}
 
 func (p *project) addDefaultTheme(w Widget) Widget {
 	t := w.typeID()
@@ -101,8 +103,8 @@ func (p *project) addDefaultTheme(w Widget) Widget {
 // Render all the services' widgets.
 func (p *project) Render(debug bool) {
 	// TODO: use display.box instead of this shortcut
-	// TODO Create a mapping function instead of this switch
-	// TODO Should I say I need to refactor that URGENTLY?????
+	// TODO Create a mapping function instead of this switch (?)
+	// TODO Separate query / display
 	err := p.addTitle(p.tui)
 	if err != nil {
 		err = errors.Wrapf(err, "can't add project title %s", p.name)
@@ -121,24 +123,24 @@ func (p *project) Render(debug bool) {
 
 				// Map widget prefix with service
 				switch w.serviceID() {
-				// case "display":
-				// 	createWidgets(NewDisplayWidget(), "Display", w, p.tui)
+				case "display":
+					go createWidgets(NewDisplayWidget(), "Display", w, p.tui, ch)
 				case "ga":
 					go createWidgets(p.gaWidget, "Google Analytics", w, p.tui, ch)
 				case "mon":
 					go createWidgets(p.monitorWidget, "Monitor", w, p.tui, ch)
-					// case "gsc":
-					// 	createWidgets(p.gscWidget, "Google Search Console", w, p.tui)
-					// case "github":
-					// 	createWidgets(p.githubWidget, "Github", w, p.tui)
-					// case "travis":
-					// 	createWidgets(p.travisCIWidget, "Travis", w, p.tui)
-					// case "feedly":
-					// 	createWidgets(p.feedlyWidget, "Feedly", w, p.tui)
-					// case "git":
-					// 	createWidgets(p.gitWidget, "Git", w, p.tui)
-					// default:
-					// 	DisplayError(p.tui, errors.Errorf("The service %s doesn't exist (yet?)", w.Name))
+				case "gsc":
+					go createWidgets(p.gscWidget, "Google Search Console", w, p.tui, ch)
+				case "github":
+					go createWidgets(p.githubWidget, "Github", w, p.tui, ch)
+				case "travis":
+					go createWidgets(p.travisCIWidget, "Travis", w, p.tui, ch)
+				case "feedly":
+					go createWidgets(p.feedlyWidget, "Feedly", w, p.tui, ch)
+				case "git":
+					go createWidgets(p.gitWidget, "Git", w, p.tui, ch)
+				default:
+					ch <- DisplayError(p.tui, errors.Errorf("The service %s doesn't exist (yet?)", w.Name))
 				}
 			}
 		}

@@ -20,20 +20,20 @@ func NewFeedlyWidget(address string) *feedlyWidget {
 	}
 }
 
-func (f feedlyWidget) CreateWidgets(widget Widget, tui *Tui) (err error) {
+func (f feedlyWidget) CreateWidgets(widget Widget, tui *Tui) (fu func() error, err error) {
 	f.tui = tui
 
 	switch widget.Name {
 	case FeedlySubscribers:
-		err = f.boxSubscribers(widget)
+		fu, err = f.boxSubscribers(widget)
 	default:
-		return errors.Errorf("can't find the widget %s for service Feedly", widget.Name)
+		return nil, errors.Errorf("can't find the widget %s for service Feedly", widget.Name)
 	}
 
 	return
 }
 
-func (f feedlyWidget) boxSubscribers(widget Widget) (err error) {
+func (f feedlyWidget) boxSubscribers(widget Widget) (fu func() error, err error) {
 	title := " Feedly subscribers "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
@@ -41,13 +41,12 @@ func (f feedlyWidget) boxSubscribers(widget Widget) (err error) {
 
 	subs, err := f.client.Subscribers()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = f.tui.AddTextBox(subs, title, widget.Options)
-	if err != nil {
-		return err
+	fu = func() error {
+		return f.tui.AddTextBox(subs, title, widget.Options)
 	}
 
-	return nil
+	return
 }
