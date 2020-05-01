@@ -140,7 +140,9 @@ func (p *project) Render(debug bool) {
 				case "git":
 					go createWidgets(p.gitWidget, "Git", w, p.tui, ch)
 				default:
-					ch <- DisplayError(p.tui, errors.Errorf("The service %s doesn't exist (yet?)", w.Name))
+					go func(c chan<- func() error, serviceID string) {
+						c <- DisplayError(p.tui, errors.Errorf("The service %s doesn't exist", serviceID))
+					}(ch, w.serviceID())
 				}
 			}
 		}
@@ -154,12 +156,12 @@ func (p *project) Render(debug bool) {
 				close(chann)
 				err := f()
 				if err != nil {
-					DisplayError(p.tui, err)
+					DisplayError(p.tui, err)()
 				}
 			}
 			if len(col) > 0 {
 				if err = p.tui.AddCol(p.sizes[r][c]); err != nil {
-					DisplayError(p.tui, err)
+					DisplayError(p.tui, err)()
 				}
 			}
 		}
@@ -177,11 +179,14 @@ func (p *project) addTitle(tui *Tui) error {
 }
 
 func createWidgets(s service, name string, w Widget, tui *Tui, c chan<- func() error) {
-	// if s == nil {
-	// 	DisplayError(tui, errors.Errorf("Configuration error - you can't use the widget %s without the service %s.", w.Name, name))
-	// } else {
-	f, _ := s.CreateWidgets(w, tui)
-	c <- f
-	// DisplayError(tui, err)
-	// }
+	if s == nil {
+		c <- DisplayError(tui, errors.Errorf("Configuration error - you can't use the widget %s without the service %s.", w.Name, name))
+	} else {
+		f, err := s.CreateWidgets(w, tui)
+		if err != nil {
+			c <- DisplayError(tui, errors.Errorf("Error for widet %s of service %s: %s", w.Name, name, err.Error()))
+		} else {
+			c <- f
+		}
+	}
 }
