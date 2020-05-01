@@ -90,30 +90,52 @@ func (g *gaWidget) CreateWidgets(widget Widget, tui *Tui) (f func() error, err e
 	return
 }
 
-func (g *gaWidget) totalMetric(widget Widget) (f func() error, err error) {
-	metric := "sessions"
-	if _, ok := widget.Options[optionMetric]; ok {
-		if len(widget.Options[optionMetric]) > 0 {
-			metric = widget.Options[optionMetric]
-		}
-	}
-
+func ExtractTimeRange(widgetOptions map[string]string) (sd time.Time, ed time.Time, err error) {
 	startDate := "7_days_ago"
-	if _, ok := widget.Options[optionStartDate]; ok {
-		startDate = widget.Options[optionStartDate]
+	if _, ok := widgetOptions[optionStartDate]; ok {
+		startDate = widgetOptions[optionStartDate]
 	}
 
 	endDate := "today"
-	if _, ok := widget.Options[optionEndDate]; ok {
-		endDate = widget.Options[optionEndDate]
+	if _, ok := widgetOptions[optionEndDate]; ok {
+		endDate = widgetOptions[optionEndDate]
 	}
 
-	sd, ed, err := platform.ConvertDates(time.Now(), startDate, endDate)
+	sd, ed, err = platform.ConvertDates(time.Now(), startDate, endDate)
 	if err != nil {
-		return f, err
+		return time.Time{}, time.Time{}, err
 	}
 
-	title := fmt.Sprintf("Total %s from %s to %s", metric, sd.Format(gaTimeFormat), ed.Format(gaTimeFormat))
+	return
+}
+
+func ExtractDimension(widgetOptions map[string]string) (dimensions []string) {
+	dimensions = []string{}
+	if _, ok := widgetOptions[optionDimensions]; ok {
+		if len(widgetOptions[optionDimensions]) > 0 {
+			dimensions = strings.Split(strings.TrimSpace(widgetOptions[optionDimensions]), ",")
+		}
+	}
+
+	return
+}
+
+func ExtractMetric(widgetOptions map[string]string) (metric string) {
+	metric = "sessions"
+	if _, ok := widgetOptions[optionMetric]; ok {
+		metric = widgetOptions[optionMetric]
+	}
+
+	return
+}
+
+func (g *gaWidget) totalMetric(widget Widget) (f func() error, err error) {
+	startDate, endDate, err := ExtractTimeRange(widget.Options)
+	if err != nil {
+		return nil, err
+	}
+
+	title := fmt.Sprintf("Total %s from %s to %s", ExtractMetric(widget.Options), startDate.Format(gaTimeFormat), endDate.Format(gaTimeFormat))
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}
@@ -129,10 +151,10 @@ func (g *gaWidget) totalMetric(widget Widget) (f func() error, err error) {
 	users, err := g.analytics.SimpleMetric(
 		platform.AnalyticValues{
 			ViewID:    g.viewID,
-			StartDate: sd.Format(gaTimeFormat),
-			EndDate:   ed.Format(gaTimeFormat),
+			StartDate: startDate.Format(gaTimeFormat),
+			EndDate:   endDate.Format(gaTimeFormat),
 			Global:    global,
-			Metrics:   []string{metric},
+			Metrics:   []string{ExtractMetric(widget.Options)},
 		},
 	)
 	if err != nil {
@@ -223,6 +245,7 @@ func (g *gaWidget) barCountries(widget Widget) (f func() error, err error) {
 
 	return g.barMetric(widget, platform.XHeaderOtherDim)
 }
+
 func (g *gaWidget) barBounces(widget Widget) (f func() error, err error) {
 	if widget.Options == nil {
 		widget.Options = map[string]string{}
@@ -242,31 +265,9 @@ func (g *gaWidget) barMetric(widget Widget, xHeader uint16) (f func() error, err
 		}
 	}
 
-	sd := "7_days_ago"
-	if _, ok := widget.Options[optionStartDate]; ok {
-		sd = widget.Options[optionStartDate]
-	}
-
-	ed := "today"
-	if _, ok := widget.Options[optionEndDate]; ok {
-		ed = widget.Options[optionEndDate]
-	}
-
-	startDate, endDate, err := platform.ConvertDates(time.Now(), sd, ed)
+	startDate, endDate, err := ExtractTimeRange(widget.Options)
 	if err != nil {
 		return nil, err
-	}
-
-	metric := "sessions"
-	if _, ok := widget.Options[optionMetric]; ok {
-		metric = widget.Options[optionMetric]
-	}
-
-	dimensions := []string{}
-	if _, ok := widget.Options[optionDimensions]; ok {
-		if len(widget.Options[optionDimensions]) > 0 {
-			dimensions = strings.Split(strings.TrimSpace(widget.Options[optionDimensions]), ",")
-		}
 	}
 
 	filters := []string{}
@@ -281,7 +282,7 @@ func (g *gaWidget) barMetric(widget Widget, xHeader uint16) (f func() error, err
 		timePeriod = strings.TrimSpace(widget.Options[optionTimePeriod])
 	}
 
-	title := fmt.Sprintf(" %s per %s ", strings.Title(metric), timePeriod)
+	title := fmt.Sprintf(" %s per %s ", strings.Title(ExtractMetric(widget.Options)), timePeriod)
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}
@@ -293,8 +294,8 @@ func (g *gaWidget) barMetric(widget Widget, xHeader uint16) (f func() error, err
 			EndDate:    endDate.Format(gaTimeFormat),
 			TimePeriod: timePeriod,
 			Global:     global,
-			Metrics:    []string{metric},
-			Dimensions: dimensions,
+			Metrics:    []string{ExtractMetric(widget.Options)},
+			Dimensions: ExtractDimension(widget.Options),
 			Filters:    filters,
 			XHeaders:   xHeader,
 		},
@@ -340,17 +341,7 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (f func() error, err
 		}
 	}
 
-	sd := "7_days_ago"
-	if _, ok := widget.Options[optionStartDate]; ok {
-		sd = widget.Options[optionStartDate]
-	}
-
-	ed := "today"
-	if _, ok := widget.Options[optionEndDate]; ok {
-		ed = widget.Options[optionEndDate]
-	}
-
-	startDate, endDate, err := platform.ConvertDates(time.Now(), sd, ed)
+	startDate, endDate, err := ExtractTimeRange(widget.Options)
 	if err != nil {
 		return nil, err
 	}
@@ -474,26 +465,9 @@ func (g *gaWidget) stackedBarDevices(widget Widget) (f func() error, err error) 
 
 func (g *gaWidget) stackedBar(widget Widget) (f func() error, err error) {
 	// defaults
-	sd := "7_days_ago"
-	if _, ok := widget.Options[optionStartDate]; ok {
-		sd = widget.Options[optionStartDate]
-	}
-
-	ed := "today"
-	if _, ok := widget.Options[optionEndDate]; ok {
-		ed = widget.Options[optionEndDate]
-	}
-
-	startDate, endDate, err := platform.ConvertDates(time.Now(), sd, ed)
+	startDate, endDate, err := ExtractTimeRange(widget.Options)
 	if err != nil {
 		return nil, err
-	}
-
-	metric := "sessions"
-	if _, ok := widget.Options[optionMetric]; ok {
-		if len(widget.Options[optionMetric]) > 0 {
-			metric = widget.Options[optionMetric]
-		}
 	}
 
 	timePeriod := "day"
@@ -501,22 +475,14 @@ func (g *gaWidget) stackedBar(widget Widget) (f func() error, err error) {
 		timePeriod = strings.TrimSpace(widget.Options[optionTimePeriod])
 	}
 
-	dimensions := []string{}
-	if _, ok := widget.Options[optionDimensions]; ok {
-		if len(widget.Options[optionDimensions]) > 0 {
-			dimensions = strings.Split(strings.TrimSpace(widget.Options[optionDimensions]), ",")
-		}
-	}
-
-	// this should return new and ret instead of a unique slice val...
 	dim, val, err := g.analytics.StackedBar(
 		platform.AnalyticValues{
 			ViewID:     g.viewID,
 			StartDate:  startDate.Format(gaTimeFormat),
 			EndDate:    endDate.Format(gaTimeFormat),
 			TimePeriod: timePeriod,
-			Metrics:    []string{metric},
-			Dimensions: dimensions,
+			Metrics:    []string{ExtractMetric(widget.Options)},
+			Dimensions: ExtractDimension(widget.Options),
 		},
 	)
 	if err != nil {
@@ -542,7 +508,7 @@ func (g *gaWidget) stackedBar(widget Widget) (f func() error, err error) {
 	}
 
 	var data [8][]int
-	title := fmt.Sprintf(strings.Trim(strings.Title(metric), "_")) + " - "
+	title := fmt.Sprintf(strings.Trim(strings.Title(ExtractMetric(widget.Options)), "_")) + " - "
 	count := 0
 	for k, v := range val {
 		// need to fill data with []int containing 0
