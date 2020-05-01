@@ -67,17 +67,22 @@ func (tc TravisCI) Builds(repository string, owner string, limit int64) ([][]str
 
 func formatBuilds(builds []*travis.Build, limit int64) [][]string {
 	table := make([][]string, limit+1)
+
 	table[0] = []string{
 		"Repository",
 		"State",
 		"Duration",
 		"Finished At",
 	}
-	for k, v := range builds {
-		table[k+1] = append(table[k+1], *v.Repository.Name)
-		table[k+1] = append(table[k+1], *v.State)
-		table[k+1] = append(table[k+1], strconv.FormatUint(uint64(*v.Duration), 10))
-		table[k+1] = append(table[k+1], *v.FinishedAt)
+	// TODO random bug occurs here, crashing all application
+	// condition might fix it - to verify
+	if len(builds) > 0 {
+		for k, v := range builds {
+			table[k+1] = append(table[k+1], *v.Repository.Name)
+			table[k+1] = append(table[k+1], *v.State)
+			table[k+1] = append(table[k+1], strconv.FormatUint(uint64(*v.Duration), 10))
+			table[k+1] = append(table[k+1], *v.FinishedAt)
+		}
 	}
 
 	return table

@@ -15,6 +15,7 @@ func Test_formatBuilds(t *testing.T) {
 		expected    [][]string
 		limit       int64
 	}{
+		// TODO test empty array!
 		{
 			name: "happy case",
 			expected: [][]string{
