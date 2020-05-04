@@ -100,11 +100,49 @@ func (p *project) addDefaultTheme(w Widget) Widget {
 	return w
 }
 
-// Render all the services' widgets.
-func (p *project) Render(debug bool) {
+func (p *project) mapServiceID(serviceID string) (service, error) {
+	services := map[string]service{
+		"display": NewDisplayWidget(),
+		"ga":      p.gaWidget,
+		"mon":     p.monitorWidget,
+		"gsc":     p.gscWidget,
+		"github":  p.githubWidget,
+		"travis":  p.travisCIWidget,
+		"feedly":  p.feedlyWidget,
+		"git":     p.gitWidget,
+	}
+
+	if _, ok := services[serviceID]; ok {
+		return services[serviceID], nil
+	}
+
+	return nil, errors.Errorf("Impossible to find the service with ID %s", serviceID)
+}
+
+func mapServiceName(serviceID string) (string, error) {
+	services := map[string]string{
+		"display": "Display",
+		"ga":      "Google Analytics",
+		"mon":     "Monitor",
+		"gsc":     "Google Search Console",
+		"github":  "Github",
+		"travis":  "Travis",
+		"feedly":  "Feedly",
+		"git":     "Git",
+	}
+
+	if _, ok := services[serviceID]; ok {
+		return services[serviceID], nil
+	}
+
+	return "", errors.Errorf("Impossible to find the service with ID %s", serviceID)
+}
+
+// Create all the widgets and populate them with data.
+// Return channels with render functions
+func (p *project) CreateWidgets() [][][]chan func() error {
 	// TODO: use display.box instead of this shortcut
 	// TODO Create a mapping function instead of this switch (?)
-	// TODO Separate query / display
 	err := p.addTitle(p.tui)
 	if err != nil {
 		err = errors.Wrapf(err, "can't add project title %s", p.name)
@@ -121,33 +159,31 @@ func (p *project) Render(debug bool) {
 				ch := make(chan func() error)
 				chs[ir][ic] = append(chs[ir][ic], ch)
 
-				// Map widget prefix with service
-				switch w.serviceID() {
-				case "display":
-					go createWidgets(NewDisplayWidget(), "Display", w, p.tui, ch)
-				case "ga":
-					go createWidgets(p.gaWidget, "Google Analytics", w, p.tui, ch)
-				case "mon":
-					go createWidgets(p.monitorWidget, "Monitor", w, p.tui, ch)
-				case "gsc":
-					go createWidgets(p.gscWidget, "Google Search Console", w, p.tui, ch)
-				case "github":
-					go createWidgets(p.githubWidget, "Github", w, p.tui, ch)
-				case "travis":
-					go createWidgets(p.travisCIWidget, "Travis", w, p.tui, ch)
-				case "feedly":
-					go createWidgets(p.feedlyWidget, "Feedly", w, p.tui, ch)
-				case "git":
-					go createWidgets(p.gitWidget, "Git", w, p.tui, ch)
-				default:
-					go func(c chan<- func() error, serviceID string) {
-						c <- DisplayError(p.tui, errors.Errorf("The service %s doesn't exist", serviceID))
-					}(ch, w.serviceID())
+				service, err := p.mapServiceID(w.serviceID())
+				if err != nil {
+					go func(c chan<- func() error) {
+						c <- DisplayError(p.tui, err)
+					}(ch)
+					continue
 				}
+
+				serviceName, err := mapServiceName(w.serviceID())
+				if err != nil {
+					go func(c chan<- func() error) {
+						c <- DisplayError(p.tui, err)
+					}(ch)
+					continue
+				}
+
+				go createWidgets(service, serviceName, w, p.tui, ch)
 			}
 		}
 	}
 
+	return chs
+}
+
+func (p *project) Render(chs [][][]chan func() error) {
 	for r, row := range p.widgets {
 		for c, col := range row {
 			cs := chs[r][c]
@@ -160,18 +196,14 @@ func (p *project) Render(debug bool) {
 				}
 			}
 			if len(col) > 0 {
-				if err = p.tui.AddCol(p.sizes[r][c]); err != nil {
+				if err := p.tui.AddCol(p.sizes[r][c]); err != nil {
 					DisplayError(p.tui, err)()
 				}
 			}
 		}
 		p.tui.AddRow()
-		if !debug {
-			p.tui.Render()
-		}
+		p.tui.Render()
 	}
-
-	return
 }
 
 func (p *project) addTitle(tui *Tui) error {

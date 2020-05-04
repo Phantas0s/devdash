@@ -152,7 +152,10 @@ func run(file string, tui *internal.Tui) func() {
 				project.WithGit(gitService)
 			}
 
-			project.Render(*debug)
+			renderFuncs := project.CreateWidgets()
+			if !*debug {
+				project.Render(renderFuncs)
+			}
 		}
 	}
 }
