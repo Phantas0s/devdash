@@ -22,7 +22,7 @@ const gaPrefix = "ga:"
 // fmt.Println(string(j))
 
 const (
-	// Decide display as x-axis header for bar metrics
+	// Determine if the time will be display as x-axis headers, or something else
 	XHeaderTime uint16 = iota
 	XHeaderOtherDim
 
@@ -368,7 +368,7 @@ func (c *Analytics) StackedBar(an AnalyticValues) (dim []string, values map[stri
 		)
 	}
 
-	// Always date on header x-axis
+	// Always dates on x-axis
 	formater := func(dim []string) string {
 		return dim[1] + "-" + dim[2]
 	}

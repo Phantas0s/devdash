@@ -511,10 +511,6 @@ func (g *gaWidget) stackedBar(widget Widget) (f func() error, err error) {
 	title := fmt.Sprintf(strings.Trim(strings.Title(ExtractMetric(widget.Options)), "_")) + " - "
 	count := 0
 	for k, v := range val {
-		// need to fill data with []int containing 0
-		for j := 0; j < len(val[k]); j++ {
-			data[count] = append(data[count], 0)
-		}
 		data[count] = v
 
 		if count != 0 {

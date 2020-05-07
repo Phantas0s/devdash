@@ -183,6 +183,19 @@ func (p *project) CreateWidgets() [][][]chan func() error {
 	return chs
 }
 
+func createWidgets(s service, name string, w Widget, tui *Tui, c chan<- func() error) {
+	if s == nil {
+		c <- DisplayError(tui, errors.Errorf("Configuration error - you can't use the widget %s without the service %s.", w.Name, name))
+	} else {
+		f, err := s.CreateWidgets(w, tui)
+		if err != nil {
+			c <- DisplayError(tui, errors.Errorf("Error for widet %s of service %s: %s", w.Name, name, err.Error()))
+		} else {
+			c <- f
+		}
+	}
+}
+
 func (p *project) Render(chs [][][]chan func() error) {
 	for r, row := range p.widgets {
 		for c, col := range row {
@@ -208,17 +221,4 @@ func (p *project) Render(chs [][][]chan func() error) {
 
 func (p *project) addTitle(tui *Tui) error {
 	return tui.AddProjectTitle(p.name, p.nameOptions)
-}
-
-func createWidgets(s service, name string, w Widget, tui *Tui, c chan<- func() error) {
-	if s == nil {
-		c <- DisplayError(tui, errors.Errorf("Configuration error - you can't use the widget %s without the service %s.", w.Name, name))
-	} else {
-		f, err := s.CreateWidgets(w, tui)
-		if err != nil {
-			c <- DisplayError(tui, errors.Errorf("Error for widet %s of service %s: %s", w.Name, name, err.Error()))
-		} else {
-			c <- f
-		}
-	}
 }
