@@ -6,7 +6,7 @@ import (
 
 type monitorServerWidget struct {
 	tui    *Tui
-	client platform.SSH
+	client *platform.SSH
 }
 
 func NewMonitorServerWidget(username, addr string) (*monitorServerWidget, error) {
@@ -23,3 +23,13 @@ func NewMonitorServerWidget(username, addr string) (*monitorServerWidget, error)
 func (ms *monitorServerWidget) CreateWidgets(widget Widget, tui *Tui) (f func() error, err error) {
 	return nil, nil
 }
+
+func (ms *monitorServerWidget) GetMemory(widget Widget, tui *Tui) (f func() error, err error) {
+	// headers MemTotal, MemFree, Buffers, Cached, SwapTotal, SwapFree
+	return func() error {
+		return nil
+	}, nil
+}
+
+// func (ms *monitorServerWidget) table(widget Widget, firstHeader string) (f func() error, err error) {
+// }
