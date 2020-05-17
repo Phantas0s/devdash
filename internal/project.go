@@ -202,10 +202,12 @@ func (p *project) Render(chs [][][]chan func() error) {
 		for c, col := range row {
 			cs := chs[r][c]
 			for _, chann := range cs {
-				f := <-chann
-				err := f()
-				if err != nil {
-					DisplayError(p.tui, err)()
+				f, ok := <-chann
+				if ok {
+					err := f()
+					if err != nil {
+						DisplayError(p.tui, err)()
+					}
 				}
 			}
 			if len(col) > 0 {
