@@ -9,7 +9,7 @@ type monitorServerWidget struct {
 	client platform.SSH
 }
 
-func NewMonitorWidget(username, addr string) (*monitorServerWidget, error) {
+func NewMonitorServerWidget(username, addr string) (*monitorServerWidget, error) {
 	sshClient, err := platform.NewSSHClient(username, addr)
 	if err != nil {
 		return nil, err
