@@ -3,10 +3,10 @@ package platform
 
 import (
 	"context"
-	"fmt"
 	"io/ioutil"
 	"strings"
 
+	"github.com/pkg/errors"
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/jwt"
 	"google.golang.org/api/option"
@@ -32,7 +32,7 @@ type SearchConsoleResponse struct {
 func NewSearchConsoleClient(keyfile string) (*SearchConsole, error) {
 	data, err := ioutil.ReadFile(keyfile)
 	if err != nil {
-		return nil, fmt.Errorf("reading keyfile %q failed: %v", keyfile, err)
+		return nil, errors.Errorf("reading keyfile %q failed: %v", keyfile, err)
 	}
 
 	// webmaster tools
@@ -40,12 +40,15 @@ func NewSearchConsoleClient(keyfile string) (*SearchConsole, error) {
 
 	web.config, err = google.JWTConfigFromJSON(data, sc.WebmastersReadonlyScope)
 	if err != nil {
-		return nil, fmt.Errorf("creating JWT config from json keyfile %q failed: %v", keyfile, err)
+		return nil, errors.Errorf("creating JWT config from json keyfile %q failed: %v", keyfile, err)
 	}
 
-	web.service, err = sc.NewService(context.Background(), option.WithHTTPClient(web.config.Client(context.Background())))
+	web.service, err = sc.NewService(
+		context.Background(),
+		option.WithHTTPClient(web.config.Client(context.Background())),
+	)
 	if err != nil {
-		return nil, fmt.Errorf("can't get webmaster service: %v", err)
+		return nil, errors.Errorf("can't get webmaster service: %v", err)
 	}
 
 	return web, nil

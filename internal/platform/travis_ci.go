@@ -74,13 +74,18 @@ func formatBuilds(builds []*travis.Build, limit int64) [][]string {
 		"Duration",
 		"Finished At",
 	}
-	// TODO random bug occurs here, crashing all application
-	// condition might fix it - to verify
+
 	if len(builds) > 0 {
 		for k, v := range builds {
 			table[k+1] = append(table[k+1], *v.Repository.Name)
 			table[k+1] = append(table[k+1], *v.State)
-			table[k+1] = append(table[k+1], strconv.FormatUint(uint64(*v.Duration), 10))
+
+			// TODO not sure why duration is sometimes nil...
+			if v.Duration != nil {
+				table[k+1] = append(table[k+1], strconv.FormatUint(uint64(*v.Duration), 10))
+			} else {
+				table[k+1] = append(table[k+1], "???")
+			}
 			table[k+1] = append(table[k+1], *v.FinishedAt)
 		}
 	}

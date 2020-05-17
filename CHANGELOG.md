@@ -12,6 +12,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     * ga.bar_countries
     * ga.bar_devices
 
+### Updated 
+
+* Increase performances
+
 ## [0.3.0] - 2020-01-14
 
 ### Added
