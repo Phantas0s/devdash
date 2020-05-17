@@ -322,6 +322,7 @@ func (g *gaWidget) table(widget Widget, firstHeader string) (f func() error, err
 
 	dimension := "page_path"
 	if _, ok := widget.Options[optionDimension]; ok {
+		// TODO is the condition useful?
 		if len(widget.Options[optionDimension]) > 0 {
 			dimension = widget.Options[optionDimension]
 		}

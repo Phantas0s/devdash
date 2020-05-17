@@ -194,6 +194,7 @@ func createWidgets(s service, name string, w Widget, tui *Tui, c chan<- func() e
 			c <- f
 		}
 	}
+	close(c)
 }
 
 func (p *project) Render(chs [][][]chan func() error) {
@@ -202,7 +203,6 @@ func (p *project) Render(chs [][][]chan func() error) {
 			cs := chs[r][c]
 			for _, chann := range cs {
 				f := <-chann
-				close(chann)
 				err := f()
 				if err != nil {
 					DisplayError(p.tui, err)()
