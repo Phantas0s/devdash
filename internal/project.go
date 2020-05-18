@@ -9,19 +9,21 @@ type service interface {
 }
 
 type project struct {
-	name           string
-	nameOptions    map[string]string
-	widgets        [][][]Widget
-	sizes          [][]string
-	themes         map[string]map[string]string
-	gaWidget       service
-	monitorWidget  service
-	gscWidget      service
-	githubWidget   service
-	travisCIWidget service
-	feedlyWidget   service
-	gitWidget      service
-	tui            *Tui
+	name        string
+	nameOptions map[string]string
+	widgets     [][][]Widget
+	sizes       [][]string
+	themes      map[string]map[string]string
+	tui         *Tui
+
+	gaWidget         service
+	monitorWidget    service
+	gscWidget        service
+	githubWidget     service
+	travisCIWidget   service
+	feedlyWidget     service
+	gitWidget        service
+	remoteHostWidget service
 }
 
 // NewProject for the dashboard.
@@ -72,6 +74,10 @@ func (p *project) WithGit(git *gitWidget) {
 	p.gitWidget = git
 }
 
+func (p *project) WithRemoteHost(remoteHost *remoteHostWidget) {
+	p.remoteHostWidget = remoteHost
+}
+
 func (p *project) addDefaultTheme(w Widget) Widget {
 	t := w.typeID()
 
@@ -110,6 +116,7 @@ func (p *project) mapServiceID(serviceID string) (service, error) {
 		"travis":  p.travisCIWidget,
 		"feedly":  p.feedlyWidget,
 		"git":     p.gitWidget,
+		"rh":      p.remoteHostWidget,
 	}
 
 	if _, ok := services[serviceID]; ok {
@@ -129,6 +136,7 @@ func mapServiceName(serviceID string) (string, error) {
 		"travis":  "Travis",
 		"feedly":  "Feedly",
 		"git":     "Git",
+		"rh":      "Remote Host",
 	}
 
 	if _, ok := services[serviceID]; ok {
@@ -142,7 +150,6 @@ func mapServiceName(serviceID string) (string, error) {
 // Return channels with render functions
 func (p *project) CreateWidgets() [][][]chan func() error {
 	// TODO: use display.box instead of this shortcut
-	// TODO Create a mapping function instead of this switch (?)
 	err := p.addTitle(p.tui)
 	if err != nil {
 		err = errors.Wrapf(err, "can't add project title %s", p.name)
@@ -183,13 +190,16 @@ func (p *project) CreateWidgets() [][][]chan func() error {
 	return chs
 }
 
+// createWidgets and fetch information via different ways depending on Widget (API / SSH / ...)
+// A function to display the widget will be send to a channel.
+// One channel per widget to keep the widget order in a slice.
 func createWidgets(s service, name string, w Widget, tui *Tui, c chan<- func() error) {
 	if s == nil {
 		c <- DisplayError(tui, errors.Errorf("Configuration error - you can't use the widget %s without the service %s.", w.Name, name))
 	} else {
 		f, err := s.CreateWidgets(w, tui)
 		if err != nil {
-			c <- DisplayError(tui, errors.Errorf("Error for widet %s of service %s: %s", w.Name, name, err.Error()))
+			c <- DisplayError(tui, errors.Errorf("Error for widget %s of service %s: %s", w.Name, name, err.Error()))
 		} else {
 			c <- f
 		}

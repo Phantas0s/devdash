@@ -1,5 +1,5 @@
-// totime is a simple package which return the start date and end date of a precise period of time.
-// The period of time can be this week, this month, previous week, previous month, the month in two months...
+// totime is a simple package which return the start date and end date of an period of time.
+// The period of time can be this week, this month, previous week, previous month. You can as well look in the future: in 2 months, in 4 weeks...
 //
 // Examples:
 // Base time is someday in January 2019, ThisMonth will return startDate = 2019-01-01, endDate = 2019-01-31
