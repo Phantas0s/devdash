@@ -65,6 +65,7 @@ type Services struct {
 	TravisCI            TravisCI        `mapstructure:"travis"`
 	Feedly              Feedly          `mapstructure:"feedly"`
 	Git                 Git             `mapstructure:"git"`
+	RemoteHost          RemoteHost      `mapstructure:"remote_host"`
 }
 
 type GoogleAnalytics struct {
@@ -93,6 +94,11 @@ type TravisCI struct {
 
 type Feedly struct {
 	Address string `mapstructure:"address"`
+}
+
+type RemoteHost struct {
+	Username string `mapstructure:"username"`
+	Address  string `mapstructure:"address"`
 }
 
 type Git struct {
@@ -124,6 +130,10 @@ func (f Feedly) empty() bool {
 
 func (g Git) empty() bool {
 	return g == Git{}
+}
+
+func (g RemoteHost) empty() bool {
+	return g == RemoteHost{}
 }
 
 // OrderWidgets add the widgets to a three dimensional slice.
@@ -164,6 +174,7 @@ func mapConfig(data []byte) config {
 	return cfg
 }
 
+// Keyboard events
 func (c config) KQuit() string {
 	if ok := c.General.Keys["quit"]; ok != "" {
 		return c.General.Keys["quit"]

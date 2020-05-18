@@ -130,26 +130,33 @@ func run(file string, tui *internal.Tui) func() {
 
 			travisService := p.Services.TravisCI
 			if !travisService.empty() {
-				travisWidget := internal.NewTravisCIWidget(
-					travisService.Token,
-				)
+				travisWidget := internal.NewTravisCIWidget(travisService.Token)
 				project.WithTravisCI(travisWidget)
 			}
 
 			feedlyService := p.Services.Feedly
 			if !feedlyService.empty() {
-				feedlyService := internal.NewFeedlyWidget(
-					feedlyService.Address,
-				)
+				feedlyService := internal.NewFeedlyWidget(feedlyService.Address)
 				project.WithFeedly(feedlyService)
 			}
 
 			gitService := p.Services.Git
 			if !gitService.empty() {
-				gitService := internal.NewGitWidget(
-					gitService.Path,
-				)
+				gitService := internal.NewGitWidget(gitService.Path)
 				project.WithGit(gitService)
+			}
+
+			remoteHostService := p.Services.RemoteHost
+			if !remoteHostService.empty() {
+				remoteHostService, err := internal.NewRemoteHostWidget(
+					remoteHostService.Username,
+					remoteHostService.Address,
+				)
+				if err != nil {
+					fmt.Println(err)
+					internal.DisplayError(tui, err)
+				}
+				project.WithRemoteHost(remoteHostService)
 			}
 
 			renderFuncs := project.CreateWidgets()
