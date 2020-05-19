@@ -60,6 +60,13 @@ func Test_ConvertUnit(t *testing.T) {
 			base:     "kb",
 			to:       "gb",
 		},
+		{
+			name:     "kb->kb",
+			expected: []int{1, 10},
+			input:    []int{1, 10},
+			base:     "kb",
+			to:       "kb",
+		},
 	}
 
 	for _, tc := range testCases {

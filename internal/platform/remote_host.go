@@ -130,19 +130,20 @@ func ConvertBinUnit(val []int, base, to string) (tv []int) {
 
 	r := convert[base] - convert[to]
 
-	if r > 0 {
+	if r >= 0 {
 		for _, v := range val {
 			tv = append(tv, int(math.Floor(float64(v)/(math.Pow(float64(1024), float64(r))))))
 		}
 	}
 
+	// TODO to test
 	if r < 0 {
 		for _, v := range val {
 			tv = append(tv, int(math.Floor(float64(v)*(math.Pow(float64(1024), float64(r))))))
 		}
 	}
 
-	return tv
+	return
 }
 
 func formatToBar(data string) (val []int) {

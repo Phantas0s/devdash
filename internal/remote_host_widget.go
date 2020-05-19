@@ -104,11 +104,10 @@ func (ms *remoteHostWidget) barGetMemory(widget Widget) (f func() error, err err
 
 	unit := "kb"
 	if _, ok := widget.Options[optionUnit]; ok {
-		if len(widget.Options[optionUnit]) > 0 {
-			unit = widget.Options[optionUnit]
-		}
+		unit = widget.Options[optionUnit]
 	}
 
+	fmt.Println(widget.Options)
 	mem, err := ms.service.Memory(metrics, unit)
 	if err != nil {
 		return nil, err
