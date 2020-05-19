@@ -22,6 +22,7 @@ const (
 	optionDimensions = "dimensions"
 	optionMetrics    = "metrics"
 	optionMetric     = "metric"
+	optionUnit       = "unit"
 
 	// Ordering
 	optionOrder = "order"
