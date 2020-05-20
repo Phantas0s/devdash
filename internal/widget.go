@@ -24,6 +24,8 @@ const (
 	optionMetric     = "metric"
 	optionUnit       = "unit"
 
+	optionHeaders = "headers"
+
 	// Ordering
 	optionOrder = "order"
 

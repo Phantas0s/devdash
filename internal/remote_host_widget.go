@@ -10,8 +10,10 @@ import (
 )
 
 const (
-	rhUptime = "rh.box_uptime"
-	rhMemory = "rh.bar_memory"
+	rhUptime    = "rh.box_uptime"
+	rhLoad      = "rh.box_load"
+	rhProcesses = "rh.box_processes"
+	rhMemory    = "rh.bar_memory"
 )
 
 type remoteHostWidget struct {
@@ -36,8 +38,12 @@ func (ms *remoteHostWidget) CreateWidgets(widget Widget, tui *Tui) (f func() err
 	switch widget.Name {
 	case rhUptime:
 		f, err = ms.boxUptime(widget)
+	case rhLoad:
+		f, err = ms.boxLoad(widget)
+	case rhProcesses:
+		f, err = ms.boxProcesses(widget)
 	case rhMemory:
-		f, err = ms.barGetMemory(widget)
+		f, err = ms.barMemory(widget)
 	default:
 		return nil, errors.Errorf("can't find the widget %s", widget.Name)
 	}
@@ -45,8 +51,44 @@ func (ms *remoteHostWidget) CreateWidgets(widget Widget, tui *Tui) (f func() err
 	return
 }
 
+func (ms *remoteHostWidget) boxLoad(widget Widget) (f func() error, err error) {
+	title := " Load "
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	load, err := ms.service.Load()
+	if err != nil {
+		return nil, err
+	}
+
+	f = func() error {
+		return ms.tui.AddTextBox(load, title, widget.Options)
+	}
+
+	return
+}
+
+func (ms *remoteHostWidget) boxProcesses(widget Widget) (f func() error, err error) {
+	title := " Processes "
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	procs, err := ms.service.Processes()
+	if err != nil {
+		return nil, err
+	}
+
+	f = func() error {
+		return ms.tui.AddTextBox(procs, title, widget.Options)
+	}
+
+	return
+}
+
 func (ms *remoteHostWidget) boxUptime(widget Widget) (f func() error, err error) {
-	title := "Uptime"
+	title := " Uptime "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}
@@ -89,12 +131,7 @@ func formatSeconds(dur time.Duration) string {
 	return s2
 }
 
-func (ms *remoteHostWidget) barGetMemory(widget Widget) (f func() error, err error) {
-	title := "Memory"
-	if _, ok := widget.Options[optionTitle]; ok {
-		title = widget.Options[optionTitle]
-	}
-
+func (ms *remoteHostWidget) barMemory(widget Widget) (f func() error, err error) {
 	metrics := []string{"MemTotal", "MemFree", "MemAvailable"}
 	if _, ok := widget.Options[optionMetrics]; ok {
 		if len(widget.Options[optionMetrics]) > 0 {
@@ -102,9 +139,21 @@ func (ms *remoteHostWidget) barGetMemory(widget Widget) (f func() error, err err
 		}
 	}
 
+	headers := metrics
+	if _, ok := widget.Options[optionHeaders]; ok {
+		if len(widget.Options[optionHeaders]) > 0 {
+			headers = strings.Split(strings.TrimSpace(widget.Options[optionHeaders]), ",")
+		}
+	}
+
 	unit := "kb"
 	if _, ok := widget.Options[optionUnit]; ok {
 		unit = widget.Options[optionUnit]
+	}
+
+	title := fmt.Sprintf(" Memory (%s) ", unit)
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
 	}
 
 	fmt.Println(widget.Options)
@@ -114,7 +163,7 @@ func (ms *remoteHostWidget) barGetMemory(widget Widget) (f func() error, err err
 	}
 
 	f = func() error {
-		return ms.tui.AddBarChart(mem, metrics, title, widget.Options)
+		return ms.tui.AddBarChart(mem, headers, title, widget.Options)
 	}
 
 	return

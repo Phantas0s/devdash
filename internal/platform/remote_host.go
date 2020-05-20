@@ -3,6 +3,7 @@ package platform
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -68,6 +69,48 @@ func (s *RemoteHost) Uptime() (int64, error) {
 	}
 
 	return int64(time.Duration(secs * 1e9)), nil
+}
+
+func (s *RemoteHost) Load() (string, error) {
+	command := "/bin/cat /proc/loadavg"
+	lines, err := s.run(command)
+	if err != nil {
+		return "", err
+	}
+	res := strings.Fields(lines)
+	if len(res) < 3 {
+		return "", errors.Errorf(
+			"command %s return unexpected %v, needs to have 3 parts separated with whitespaces",
+			command,
+			res,
+		)
+	}
+
+	return fmt.Sprintf("%s %s %s", res[0], res[1], res[2]), nil
+}
+
+func (s *RemoteHost) Processes() (string, error) {
+	command := "/bin/cat /proc/loadavg"
+	lines, err := s.run(command)
+	if err != nil {
+		return "", err
+	}
+
+	res := strings.Fields(lines)
+	if len(res) < 5 {
+		return "", errors.Errorf("command %s return unexpected %v, needs to have 5 parts separated with whitespaces", command, res)
+	}
+
+	runProc := "unknown"
+	totalProc := "unknown"
+	if i := strings.Index(res[3], "/"); i != -1 {
+		runProc = res[3][0:i]
+		if i+1 < len(res[3]) {
+			totalProc = res[3][i+1:]
+		}
+	}
+
+	return fmt.Sprintf("%s/%s", runProc, totalProc), nil
 }
 
 // TODO no need to specify headers
