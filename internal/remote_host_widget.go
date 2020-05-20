@@ -156,7 +156,6 @@ func (ms *remoteHostWidget) barMemory(widget Widget) (f func() error, err error)
 		title = widget.Options[optionTitle]
 	}
 
-	fmt.Println(widget.Options)
 	mem, err := ms.service.Memory(metrics, unit)
 	if err != nil {
 		return nil, err
