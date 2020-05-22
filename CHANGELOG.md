@@ -12,9 +12,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     * ga.bar_countries
     * ga.bar_devices
 
+* Remote host service (grab data from command line via SSH on remote host)
+    * rh.box_uptime
+    * rh.box_load
+    * rh.box_processes
+    * rh.bar_memory
+
+* Possibility to load dashboard configurations from `$XDG_CONFIG_HOME` only using filename.
+Example: `devdash -c dashboard` if there is a file `$XDG_CONFIG_HOME/devdash/dashboard`
+
 ### Updated 
 
 * Increase performances
+
+### Breaking Changes
+
+* `devdash -config dashboad-config.yml` is not valid anymore. Replaced by `devdash -c dashboard-config.yml` or `devdash --config dashboard-config.yml`
 
 ## [0.3.0] - 2020-01-14
 
