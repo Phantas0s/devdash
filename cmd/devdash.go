@@ -1,34 +1,16 @@
-package main
+package cmd
 
 import (
-	"flag"
 	"fmt"
-	"io/ioutil"
-	"os"
 	"sync"
 	"time"
 
 	"github.com/Phantas0s/devdash/internal"
 	"github.com/Phantas0s/devdash/internal/platform"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
-// debug mode
-var debug *bool
-
-func main() {
-	file := flag.String("config", ".devdash.yml", "The config file")
-	debug = flag.Bool("debug", false, "Debug mode")
-	term := flag.Bool("term", false, "Display terminal dimensions")
-	flag.Parse()
-
-	if *term {
-		width, height, _ := terminal.GetSize(0)
-		fmt.Printf("Width: %d, Height: %d", width, height)
-		return
-	}
-
-	termui, err := platform.NewTermUI(*debug)
+func begin(file string, debug bool) {
+	termui, err := platform.NewTermUI(debug)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -36,54 +18,36 @@ func main() {
 	tui := internal.NewTUI(termui)
 	defer tui.Close()
 
-	cfg := loadFile(*file)
-	run(*file, tui)()
+	cfg := mapConfig(file)
+	display(file, tui)()
 
-	// If no config file is provided, display a generic message
-	if _, err := os.Stat(*file); os.IsNotExist(err) {
-		tui.AddKQuit("C-c")
-		internal.DisplayNoFile(tui)
-		err := tui.AddCol("5")
-		if err != nil {
-			fmt.Println(err)
-		}
+	tui.AddKQuit(cfg.KQuit())
+	// TODO sharing mutex breaks its invariant - to refactor
+	var m sync.Mutex
+	tui.AddKHotReload(cfg.KHotReload(), display(file, tui), &m)
 
-		tui.AddRow()
-		tui.Render()
-	} else {
-		var m sync.Mutex
-		tui.AddKQuit(cfg.KQuit())
-		tui.AddKHotReload(cfg.KHotReload(), run(*file, tui), &m)
-
-		ticker := time.NewTicker(time.Duration(cfg.RefreshTime()) * time.Second)
-		go func() {
-			for range ticker.C {
-				m.Lock()
-				if cfg.General.HotReload {
-					tui.HotReload()
-				} else {
-					tui.Clean()
-				}
-
-				run(*file, tui)()
-				m.Unlock()
+	ticker := time.NewTicker(time.Duration(cfg.RefreshTime()) * time.Second)
+	go func() {
+		for range ticker.C {
+			m.Lock()
+			if cfg.General.HotReload {
+				tui.HotReload()
+			} else {
+				tui.Clean()
 			}
-		}()
-	}
+
+			display(file, tui)()
+			m.Unlock()
+		}
+	}()
 
 	tui.Loop()
 }
 
-func loadFile(file string) config {
-	data, _ := ioutil.ReadFile(file)
-	cfg := mapConfig(data)
-
-	return cfg
-}
-
-func run(file string, tui *internal.Tui) func() {
+// TODO separate render from parsing projects
+func display(file string, tui *internal.Tui) func() {
 	return func() {
-		cfg := loadFile(file)
+		cfg := mapConfig(file)
 		for _, p := range cfg.Projects {
 			rows, sizes := p.OrderWidgets()
 			project := internal.NewProject(p.Name, p.NameOptions, rows, sizes, p.Themes, tui)
@@ -160,7 +124,7 @@ func run(file string, tui *internal.Tui) func() {
 			}
 
 			renderFuncs := project.CreateWidgets()
-			if !*debug {
+			if !debug {
 				project.Render(renderFuncs)
 			}
 		}

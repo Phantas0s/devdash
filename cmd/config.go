@@ -1,10 +1,16 @@
-package main
+package cmd
 
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+
+	"strings"
 
 	"github.com/Phantas0s/devdash/internal"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
 
@@ -159,19 +165,78 @@ func (p Project) OrderWidgets() ([][][]internal.Widget, [][]string) {
 	return rows, sizes
 }
 
-func mapConfig(data []byte) config {
-	viper.SetConfigType("yaml")
-	err := viper.ReadConfig(bytes.NewBuffer(data))
+func mapConfig(cfgFile string) config {
+	home, err := homedir.Dir()
 	if err != nil {
-		panic(fmt.Errorf("could not read config data %s: %s", string(data), err))
+		fmt.Println(err)
 	}
 
+	if cfgFile == "" {
+		defaultPath := home + "/.config/devdash/"
+		cfgFile = defaultConfig(defaultPath, "default.yml")
+	}
+
+	// viper.AddConfigPath(home)
+	viper.AddConfigPath(".")
+	viper.AddConfigPath("$XDG_CONFIG_HOME/devdash/")
+	viper.AddConfigPath(home + "/.config/devdash/")
+
+	viper.SetConfigName(removeExt(cfgFile))
+	err = viper.ReadInConfig()
+	if err != nil {
+		tryReadFile(cfgFile)
+	}
+
+	// viper.WatchConfig()
 	var cfg config
 	if err := viper.Unmarshal(&cfg); err != nil {
 		panic(err)
 	}
 
 	return cfg
+}
+
+func removeExt(filepath string) string {
+	ext := []string{".json", ".yml", ".yaml"}
+	for _, v := range ext {
+		filepath = strings.ReplaceAll(filepath, v, "")
+	}
+
+	return filepath
+}
+
+func defaultConfig(path string, filename string) string {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		os.MkdirAll(path, 0755)
+	}
+
+	f := path + filename
+	if _, err := os.Stat(f); os.IsNotExist(err) {
+		file, _ := os.Create(f)
+		if file != nil {
+			defer file.Close()
+			viper.WriteConfigAs(f)
+		}
+	}
+
+	return f
+}
+
+func tryReadFile(cfgFile string) {
+	if _, err := os.Stat(cfgFile); os.IsNotExist(err) {
+		panic(fmt.Errorf("config %s doesnt exists", cfgFile))
+	}
+
+	f, err := ioutil.ReadFile(cfgFile)
+	if err != nil {
+		panic(fmt.Errorf("could not read file %s data", cfgFile))
+	}
+
+	viper.SetConfigType(strings.Trim(filepath.Ext(cfgFile), "."))
+	err = viper.ReadConfig(bytes.NewBuffer(f))
+	if err != nil {
+		panic(fmt.Errorf("could not read config %s data", string(f)))
+	}
 }
 
 // Keyboard events
