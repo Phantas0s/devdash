@@ -80,13 +80,17 @@ func formatBuilds(builds []*travis.Build, limit int64) [][]string {
 			table[k+1] = append(table[k+1], *v.Repository.Name)
 			table[k+1] = append(table[k+1], *v.State)
 
-			// TODO not sure why duration is sometimes nil...
+			// Can be nil if
 			if v.Duration != nil {
 				table[k+1] = append(table[k+1], strconv.FormatUint(uint64(*v.Duration), 10))
 			} else {
-				table[k+1] = append(table[k+1], "???")
+				table[k+1] = append(table[k+1], "Running")
 			}
-			table[k+1] = append(table[k+1], *v.FinishedAt)
+			if v.FinishedAt != nil {
+				table[k+1] = append(table[k+1], *v.FinishedAt)
+			} else {
+				table[k+1] = append(table[k+1], "Running")
+			}
 		}
 	}
 
