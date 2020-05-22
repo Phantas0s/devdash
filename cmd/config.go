@@ -213,9 +213,33 @@ func defaultConfig(path string, filename string) string {
 	f := path + filename
 	if _, err := os.Stat(f); os.IsNotExist(err) {
 		file, _ := os.Create(f)
+		defer file.Close()
+
+		// TODO kind of ugly, but not sure if I can use a template here: it will be runtimeee
 		if file != nil {
-			defer file.Close()
-			viper.WriteConfigAs(f)
+			_, err := file.Write([]byte(
+				`---
+general:
+  refresh: 600
+  keys:
+    quit: "C-c"
+
+projects:
+  - name: Default Configuration - You can modify at at $XDG_CONFIG_HOME/devdash/devdash.yml
+    services:
+      monitor:
+        address: "https://thevaluable.dev"
+    widgets:
+      - row:
+          - col:
+              size: "M"
+              elements:
+                - name: mon.box_availability
+                  options:
+                    border_color: green`))
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 
