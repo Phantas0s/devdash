@@ -5,10 +5,10 @@ general:
     quit: "C-c"
 
 projects:
-  - name: Quickstart
+  - name: Default Configuration - You can modify at at $XDG_CONFIG_HOME/devdash/devdash.yml
     services:
       monitor:
-        address: "https://www.web-techno.net"
+        address: "https://thevaluable.dev"
     widgets:
       - row:
           - col:
