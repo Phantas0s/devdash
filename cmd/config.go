@@ -199,7 +199,7 @@ func mapConfig(cfgFile string) config {
 func removeExt(filepath string) string {
 	ext := []string{".json", ".yml", ".yaml"}
 	for _, v := range ext {
-		filepath = strings.ReplaceAll(filepath, v, "")
+		filepath = strings.Replace(filepath, v, "", -1)
 	}
 
 	return filepath
