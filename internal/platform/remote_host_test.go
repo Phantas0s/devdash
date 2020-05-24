@@ -3,6 +3,8 @@ package platform
 import (
 	"reflect"
 	"testing"
+
+	"github.com/Phantas0s/devdash/humanmath"
 )
 
 func Test_formatToTable(t *testing.T) {
@@ -71,7 +73,7 @@ func Test_ConvertUnit(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			actual := ConvertBinUnit(tc.input, tc.base, tc.to)
+			actual := humanmath.ConvertBinUnit(tc.input, tc.base, tc.to)
 
 			if !reflect.DeepEqual(tc.expected, actual) {
 				t.Errorf("Expected %v, actual %v", tc.expected, actual)

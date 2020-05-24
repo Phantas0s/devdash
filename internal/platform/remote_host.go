@@ -4,11 +4,11 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"math"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/Phantas0s/devdash/humanmath"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/ssh"
 )
@@ -158,35 +158,59 @@ func (s *RemoteHost) Memory(metrics []string, unit string) (val []int, err error
 		}
 	}
 
-	return ConvertBinUnit(formatToBar(data), "kb", unit), nil
+	return humanmath.ConvertBinUnit(formatToBar(data), "kb", unit), nil
 }
 
-// TODO these conversions are pretty ugly
-// TODO floating point number (precision 2)
-func ConvertBinUnit(val []int, base, to string) (tv []int) {
-	convert := map[string]int{
-		"b":  3,
-		"kb": 2,
-		"mb": 1,
-		"gb": 0,
+// See https://www.idnt.net/en-US/kb/941772
+func (s *RemoteHost) CPURate() (int, error) {
+	raw, err := s.run("/bin/cat /proc/stat")
+	if err != nil {
+		return 0, err
 	}
 
-	r := convert[base] - convert[to]
+	lines := strings.Split(string(raw), "\n")
 
-	if r >= 0 {
-		for _, v := range val {
-			tv = append(tv, int(math.Floor(float64(v)/(math.Pow(float64(1024), float64(r))))))
-		}
+	// aggregate of all other cpus
+	cpu := strings.Fields(lines[0])
+
+	if len(cpu) < 5 {
+		return 0, errors.Errorf("needs 5 fields for cpu: header, user, nice, system, idle. Instead, having %s", cpu)
 	}
 
-	// TODO to test
-	if r < 0 {
-		for _, v := range val {
-			tv = append(tv, int(math.Floor(float64(v)*(math.Pow(float64(1024), float64(r))))))
-		}
+	user, _ := strconv.ParseUint(cpu[1], 10, strconv.IntSize)
+	nice, _ := strconv.ParseUint(cpu[2], 10, strconv.IntSize)
+	system, _ := strconv.ParseUint(cpu[3], 10, strconv.IntSize)
+	idle, _ := strconv.ParseUint(cpu[4], 10, strconv.IntSize)
+
+	var IOWait uint64 = 0
+	var IRQ uint64 = 0
+	var softIRQs uint64 = 0
+	var steal uint64 = 0
+	var guest uint64 = 0
+	var guestNice uint64 = 0
+	if len(cpu) > 5 {
+		IOWait, _ = strconv.ParseUint(cpu[5], 10, strconv.IntSize)
+	}
+	if len(cpu) > 6 {
+		IRQ, _ = strconv.ParseUint(cpu[6], 10, strconv.IntSize)
+	}
+	if len(cpu) > 7 {
+		softIRQs, _ = strconv.ParseUint(cpu[7], 10, strconv.IntSize)
+	}
+	if len(cpu) > 8 {
+		steal, _ = strconv.ParseUint(cpu[8], 10, strconv.IntSize)
+	}
+	if len(cpu) > 9 {
+		guest, _ = strconv.ParseUint(cpu[9], 10, strconv.IntSize)
+	}
+	if len(cpu) > 10 {
+		guestNice, _ = strconv.ParseUint(cpu[10], 10, strconv.IntSize)
 	}
 
-	return
+	total := user + nice + system + idle + IOWait + IRQ + softIRQs + steal + guest + guestNice
+
+	// Percentage of not idle (busy)
+	return int(100 - humanmath.Round(float64(idle)*100/float64(total), 2)), nil
 }
 
 func formatToBar(data string) (val []int) {

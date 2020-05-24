@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -14,6 +15,7 @@ const (
 	rhLoad      = "rh.box_load"
 	rhProcesses = "rh.box_processes"
 	rhMemory    = "rh.bar_memory"
+	rhBoxCPU    = "rh.box_cpu"
 )
 
 type remoteHostWidget struct {
@@ -44,6 +46,8 @@ func (ms *remoteHostWidget) CreateWidgets(widget Widget, tui *Tui) (f func() err
 		f, err = ms.boxProcesses(widget)
 	case rhMemory:
 		f, err = ms.barMemory(widget)
+	case rhBoxCPU:
+		f, err = ms.boxCPU(widget)
 	default:
 		return nil, errors.Errorf("can't find the widget %s", widget.Name)
 	}
@@ -100,6 +104,24 @@ func (ms *remoteHostWidget) boxUptime(widget Widget) (f func() error, err error)
 
 	f = func() error {
 		return ms.tui.AddTextBox(formatSeconds(time.Duration(uptime)), title, widget.Options)
+	}
+
+	return
+}
+
+func (ms *remoteHostWidget) boxCPU(widget Widget) (f func() error, err error) {
+	title := " CPU Rate "
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	CPU, err := ms.service.CPURate()
+	if err != nil {
+		return nil, err
+	}
+
+	f = func() error {
+		return ms.tui.AddTextBox(strconv.Itoa(CPU)+" %", title, widget.Options)
 	}
 
 	return
