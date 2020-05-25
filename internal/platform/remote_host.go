@@ -33,6 +33,8 @@ func NewRemoteHost(username, addr string) (*RemoteHost, error) {
 }
 
 // Run a command on remote server via SSH
+// TODO should be possible to put run as a property of remote host object
+// Could swap between localhost and remotehost that way when call NewRemoteHost with a flag
 func (s *RemoteHost) run(command string) (string, error) {
 	session, err := s.sshClient.NewSession()
 	if err != nil {
@@ -159,6 +161,42 @@ func (s *RemoteHost) Memory(metrics []string, unit string) (val []int, err error
 	}
 
 	return humanmath.ConvertBinUnit(formatToBar(data), "kb", unit), nil
+}
+
+func (s *RemoteHost) MemRate() (int, error) {
+	lines, err := s.run("/bin/cat /proc/meminfo")
+	if err != nil {
+		return 0, err
+	}
+
+	scanner := bufio.NewScanner(strings.NewReader(lines))
+	memTotal := 0
+	memFree := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+		parts := strings.Fields(line)
+
+		if len(parts) < 3 {
+			continue
+		}
+
+		val, err := strconv.ParseUint(parts[1], 10, 64)
+		if err != nil {
+			return 0, err
+		}
+
+		k := strings.Trim(parts[0], ":")
+		switch k {
+		case "MemTotal":
+			memTotal = humanmath.ConvertBinUnit([]int{int(val)}, "kb", "mb")[0]
+		case "MemFree":
+			memFree = humanmath.ConvertBinUnit([]int{int(val)}, "kb", "mb")[0]
+		}
+
+	}
+
+	memUsed := memTotal - memFree
+	return int(humanmath.Round(float64(memUsed)*100/float64(memTotal), 2)), nil
 }
 
 // See https://www.idnt.net/en-US/kb/941772
