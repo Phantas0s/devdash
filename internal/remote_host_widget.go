@@ -11,12 +11,13 @@ import (
 )
 
 const (
-	rhUptime     = "rh.box_uptime"
-	rhLoad       = "rh.box_load"
-	rhProcesses  = "rh.box_processes"
-	rhMemory     = "rh.bar_memory"
-	rhBoxCPURate = "rh.box_cpu_rate"
-	rhBoxMemRate = "rh.box_memory_rate"
+	rhUptime      = "rh.box_uptime"
+	rhLoad        = "rh.box_load"
+	rhProcesses   = "rh.box_processes"
+	rhMemory      = "rh.bar_memory"
+	rhBoxCPURate  = "rh.box_cpu_rate"
+	rhBoxMemRate  = "rh.box_memory_rate"
+	rhBoxSwapRate = "rh.box_swap_rate"
 )
 
 type remoteHostWidget struct {
@@ -51,10 +52,11 @@ func (ms *remoteHostWidget) CreateWidgets(widget Widget, tui *Tui) (f func() err
 		f, err = ms.boxCPURate(widget)
 	case rhBoxMemRate:
 		f, err = ms.boxMemRate(widget)
+	case rhBoxSwapRate:
+		f, err = ms.boxSwapRate(widget)
 	default:
 		return nil, errors.Errorf("can't find the widget %s", widget.Name)
 	}
-
 	return
 }
 
@@ -143,6 +145,24 @@ func (ms *remoteHostWidget) boxMemRate(widget Widget) (f func() error, err error
 
 	f = func() error {
 		return ms.tui.AddTextBox(strconv.Itoa(memRate)+" %", title, widget.Options)
+	}
+
+	return
+}
+
+func (ms *remoteHostWidget) boxSwapRate(widget Widget) (f func() error, err error) {
+	title := " Swap Rate "
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	swapRate, err := ms.service.SwapRate()
+	if err != nil {
+		return nil, err
+	}
+
+	f = func() error {
+		return ms.tui.AddTextBox(strconv.Itoa(swapRate)+" %", title, widget.Options)
 	}
 
 	return

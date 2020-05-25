@@ -199,6 +199,43 @@ func (s *RemoteHost) MemRate() (int, error) {
 	return int(humanmath.Round(float64(memUsed)*100/float64(memTotal), 2)), nil
 }
 
+// TODO to refactor - DRY
+func (s *RemoteHost) SwapRate() (int, error) {
+	lines, err := s.run("/bin/cat /proc/meminfo")
+	if err != nil {
+		return 0, err
+	}
+
+	scanner := bufio.NewScanner(strings.NewReader(lines))
+	swapTotal := 0
+	swapFree := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+		parts := strings.Fields(line)
+
+		if len(parts) < 3 {
+			continue
+		}
+
+		val, err := strconv.ParseUint(parts[1], 10, 64)
+		if err != nil {
+			return 0, err
+		}
+
+		k := strings.Trim(parts[0], ":")
+		switch k {
+		case "SwapTotal":
+			swapTotal = humanmath.ConvertBinUnit([]int{int(val)}, "kb", "mb")[0]
+		case "SwapFree":
+			swapFree = humanmath.ConvertBinUnit([]int{int(val)}, "kb", "mb")[0]
+		}
+
+	}
+
+	swapUsed := swapTotal - swapFree
+	return int(humanmath.Round(float64(swapUsed)*100/float64(swapTotal), 2)), nil
+}
+
 // See https://www.idnt.net/en-US/kb/941772
 func (s *RemoteHost) CPURate() (int, error) {
 	raw, err := s.run("/bin/cat /proc/stat")
