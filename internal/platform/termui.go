@@ -2,7 +2,7 @@ package platform
 
 import (
 	"fmt"
-	"sync"
+	"time"
 
 	"github.com/Phantas0s/termui"
 )
@@ -189,14 +189,9 @@ func (*termUI) KQuit(key string) {
 	})
 }
 
-func (t *termUI) KHotReload(key string, run func(), m *sync.Mutex) {
+func (t *termUI) KHotReload(key string, c chan<- time.Time) {
 	termui.Handle(fmt.Sprintf("/sys/kbd/%s", key), func(termui.Event) {
-		go func() {
-			m.Lock()
-			t.HotReload()
-			run()
-			m.Unlock()
-		}()
+		c <- time.Now()
 	})
 }
 
