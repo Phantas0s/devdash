@@ -199,7 +199,7 @@ func createWidgets(s service, name string, w Widget, tui *Tui, c chan<- func() e
 	} else {
 		f, err := s.CreateWidgets(w, tui)
 		if err != nil {
-			c <- DisplayError(tui, errors.Errorf("Error for widget %s of service %s: %s", w.Name, name, err.Error()))
+			c <- DisplayError(tui, errors.Errorf("%s / %s: %s", name, w.Name, err.Error()))
 		} else {
 			c <- f
 		}

@@ -18,6 +18,7 @@ const (
 	rhBoxCPURate  = "rh.box_cpu_rate"
 	rhBoxMemRate  = "rh.box_memory_rate"
 	rhBoxSwapRate = "rh.box_swap_rate"
+	rhBoxNetIO    = "rh.box_net_io"
 )
 
 type remoteHostWidget struct {
@@ -54,6 +55,8 @@ func (ms *remoteHostWidget) CreateWidgets(widget Widget, tui *Tui) (f func() err
 		f, err = ms.boxMemRate(widget)
 	case rhBoxSwapRate:
 		f, err = ms.boxSwapRate(widget)
+	case rhBoxNetIO:
+		f, err = ms.boxNetIO(widget)
 	default:
 		return nil, errors.Errorf("can't find the widget %s", widget.Name)
 	}
@@ -126,7 +129,7 @@ func (ms *remoteHostWidget) boxCPURate(widget Widget) (f func() error, err error
 	}
 
 	f = func() error {
-		return ms.tui.AddTextBox(strconv.Itoa(CPURate)+" %", title, widget.Options)
+		return ms.tui.AddTextBox(strconv.FormatFloat(CPURate, 'f', 2, 64)+" %", title, widget.Options)
 	}
 
 	return
@@ -144,7 +147,7 @@ func (ms *remoteHostWidget) boxMemRate(widget Widget) (f func() error, err error
 	}
 
 	f = func() error {
-		return ms.tui.AddTextBox(strconv.Itoa(memRate)+" %", title, widget.Options)
+		return ms.tui.AddTextBox(strconv.FormatFloat(memRate, 'f', 2, 64)+" %", title, widget.Options)
 	}
 
 	return
@@ -162,7 +165,7 @@ func (ms *remoteHostWidget) boxSwapRate(widget Widget) (f func() error, err erro
 	}
 
 	f = func() error {
-		return ms.tui.AddTextBox(strconv.Itoa(swapRate)+" %", title, widget.Options)
+		return ms.tui.AddTextBox(strconv.FormatFloat(swapRate, 'f', 2, 64)+" %", title, widget.Options)
 	}
 
 	return
@@ -192,6 +195,29 @@ func formatSeconds(dur time.Duration) string {
 		}
 	}
 	return s2
+}
+
+func (ms *remoteHostWidget) boxNetIO(widget Widget) (f func() error, err error) {
+	unit := "kb"
+	if _, ok := widget.Options[optionUnit]; ok {
+		unit = widget.Options[optionUnit]
+	}
+
+	title := fmt.Sprintf(" Net I/O (%s) ", unit)
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	netIO, err := ms.service.NetIO(unit)
+	if err != nil {
+		return nil, err
+	}
+
+	f = func() error {
+		return ms.tui.AddTextBox(netIO, title, widget.Options)
+	}
+
+	return
 }
 
 func (ms *remoteHostWidget) barMemory(widget Widget) (f func() error, err error) {

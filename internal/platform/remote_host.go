@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Phantas0s/devdash/humanmath"
+	"github.com/Phantas0s/devdash/gokit"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/ssh"
 )
@@ -155,23 +155,29 @@ func (s *RemoteHost) Memory(metrics []string, unit string) (val []int, err error
 
 		for _, v := range metrics {
 			if strings.Trim(parts[0], ":") == v {
-				data += strconv.FormatInt(int64(val), 10) + ","
+				data += strconv.FormatUint(val, 10) + ","
 			}
 		}
 	}
 
-	return humanmath.ConvertBinUnit(formatToBar(data), "kb", unit), nil
+	values := formatToBar(data)
+	result := []int{}
+	for _, v := range values {
+		result = append(result, int(gokit.ConvertBinUnit(float64(v), "kb", unit)))
+	}
+
+	return result, nil
 }
 
-func (s *RemoteHost) MemRate() (int, error) {
+func (s *RemoteHost) MemRate() (float64, error) {
 	lines, err := s.run("/bin/cat /proc/meminfo")
 	if err != nil {
 		return 0, err
 	}
 
 	scanner := bufio.NewScanner(strings.NewReader(lines))
-	memTotal := 0
-	memFree := 0
+	var memTotal float64 = 0
+	var memFree float64 = 0
 	for scanner.Scan() {
 		line := scanner.Text()
 		parts := strings.Fields(line)
@@ -180,7 +186,7 @@ func (s *RemoteHost) MemRate() (int, error) {
 			continue
 		}
 
-		val, err := strconv.ParseUint(parts[1], 10, 64)
+		val, err := strconv.ParseFloat(parts[1], 64)
 		if err != nil {
 			return 0, err
 		}
@@ -188,27 +194,27 @@ func (s *RemoteHost) MemRate() (int, error) {
 		k := strings.Trim(parts[0], ":")
 		switch k {
 		case "MemTotal":
-			memTotal = humanmath.ConvertBinUnit([]int{int(val)}, "kb", "mb")[0]
+			memTotal = gokit.ConvertBinUnit(val, "kb", "mb")
 		case "MemFree":
-			memFree = humanmath.ConvertBinUnit([]int{int(val)}, "kb", "mb")[0]
+			memFree = gokit.ConvertBinUnit(val, "kb", "mb")
 		}
 
 	}
 
 	memUsed := memTotal - memFree
-	return int(humanmath.Round(float64(memUsed)*100/float64(memTotal), 2)), nil
+	return gokit.Round(float64(memUsed)*100/float64(memTotal), 2), nil
 }
 
 // TODO to refactor - DRY
-func (s *RemoteHost) SwapRate() (int, error) {
+func (s *RemoteHost) SwapRate() (float64, error) {
 	lines, err := s.run("/bin/cat /proc/meminfo")
 	if err != nil {
 		return 0, err
 	}
 
 	scanner := bufio.NewScanner(strings.NewReader(lines))
-	swapTotal := 0
-	swapFree := 0
+	var swapTotal float64 = 0
+	var swapFree float64 = 0
 	for scanner.Scan() {
 		line := scanner.Text()
 		parts := strings.Fields(line)
@@ -217,7 +223,7 @@ func (s *RemoteHost) SwapRate() (int, error) {
 			continue
 		}
 
-		val, err := strconv.ParseUint(parts[1], 10, 64)
+		val, err := strconv.ParseFloat(parts[1], 64)
 		if err != nil {
 			return 0, err
 		}
@@ -225,19 +231,19 @@ func (s *RemoteHost) SwapRate() (int, error) {
 		k := strings.Trim(parts[0], ":")
 		switch k {
 		case "SwapTotal":
-			swapTotal = humanmath.ConvertBinUnit([]int{int(val)}, "kb", "mb")[0]
+			swapTotal = gokit.ConvertBinUnit(val, "kb", "mb")
 		case "SwapFree":
-			swapFree = humanmath.ConvertBinUnit([]int{int(val)}, "kb", "mb")[0]
+			swapFree = gokit.ConvertBinUnit(val, "kb", "mb")
 		}
 
 	}
 
 	swapUsed := swapTotal - swapFree
-	return int(humanmath.Round(float64(swapUsed)*100/float64(swapTotal), 2)), nil
+	return gokit.Round(float64(swapUsed)*100/float64(swapTotal), 2), nil
 }
 
 // See https://www.idnt.net/en-US/kb/941772
-func (s *RemoteHost) CPURate() (int, error) {
+func (s *RemoteHost) CPURate() (float64, error) {
 	raw, err := s.run("/bin/cat /proc/stat")
 	if err != nil {
 		return 0, err
@@ -285,15 +291,50 @@ func (s *RemoteHost) CPURate() (int, error) {
 	total := user + nice + system + idle + IOWait + IRQ + softIRQs + steal + guest + guestNice
 
 	// Percentage of not idle (busy)
-	return int(100 - humanmath.Round(float64(idle)*100/float64(total), 2)), nil
+	return 100 - gokit.Round(float64(idle)*100/float64(total), 2), nil
 }
 
-func formatToBar(data string) (val []int) {
+// GetNetStat returns net stat
+func (s *RemoteHost) NetIO(unit string) (string, error) {
+	lines, err := s.run("/bin/cat /proc/net/dev")
+	if err != nil {
+		return "", err
+	}
+
+	scanner := bufio.NewScanner(strings.NewReader(lines))
+	var receiveBytes uint64 = 0
+	var transmitBytes uint64 = 0
+	for scanner.Scan() {
+		line := scanner.Text()
+		parts := strings.Fields(line)
+
+		if len(parts) < 10 {
+			continue
+		}
+
+		device := strings.TrimSpace(strings.Trim(parts[0], ":"))
+
+		if device != "lo" {
+			rb, _ := strconv.ParseUint(parts[2], 10, 64)
+			tb, _ := strconv.ParseUint(parts[10], 10, 64)
+
+			receiveBytes += rb
+			transmitBytes += tb
+		}
+	}
+
+	rx := strconv.FormatFloat(gokit.ConvertBinUnit(float64(receiveBytes), "b", unit), 'f', 2, 64)
+	tx := strconv.FormatFloat(gokit.ConvertBinUnit(float64(transmitBytes), "b", unit), 'f', 2, 64)
+
+	return rx + " / " + tx, nil
+}
+
+func formatToBar(data string) (val []uint64) {
 	data = strings.Trim(data, ",")
 	s := strings.Split(data, ",")
-	val = []int{}
+	val = []uint64{}
 	for _, v := range s {
-		k, _ := strconv.Atoi(v)
+		k, _ := strconv.ParseUint(v, 10, strconv.IntSize)
 		val = append(val, k)
 	}
 
@@ -321,8 +362,4 @@ func min(a, b int) int {
 		return a
 	}
 	return b
-}
-
-func incSizeMetric(val uint64) uint64 {
-	return val / 1024
 }
