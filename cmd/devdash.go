@@ -27,12 +27,11 @@ func begin(file string, debug bool) {
 
 	ticker := time.NewTicker(time.Duration(cfg.RefreshTime()) * time.Second)
 
-	go func(c <-chan time.Time) {
+	go func() {
 		for {
-			val := <-c
-			hotReload <- val
+			hotReload <- <-ticker.C
 		}
-	}(ticker.C)
+	}()
 
 	go func() {
 		for {

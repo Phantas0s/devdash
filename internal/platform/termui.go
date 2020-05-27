@@ -191,7 +191,9 @@ func (*termUI) KQuit(key string) {
 
 func (t *termUI) KHotReload(key string, c chan<- time.Time) {
 	termui.Handle(fmt.Sprintf("/sys/kbd/%s", key), func(termui.Event) {
-		c <- time.Now()
+		go func() {
+			c <- time.Now()
+		}()
 	})
 }
 
