@@ -19,6 +19,7 @@ const (
 	rhBoxMemRate  = "rh.box_memory_rate"
 	rhBoxSwapRate = "rh.box_swap_rate"
 	rhBoxNetIO    = "rh.box_net_io"
+	rhBoxDiskIO   = "rh.box_disk_io"
 )
 
 type remoteHostWidget struct {
@@ -57,6 +58,8 @@ func (ms *remoteHostWidget) CreateWidgets(widget Widget, tui *Tui) (f func() err
 		f, err = ms.boxSwapRate(widget)
 	case rhBoxNetIO:
 		f, err = ms.boxNetIO(widget)
+	case rhBoxDiskIO:
+		f, err = ms.boxDiskIO(widget)
 	default:
 		return nil, errors.Errorf("can't find the widget %s", widget.Name)
 	}
@@ -215,6 +218,29 @@ func (ms *remoteHostWidget) boxNetIO(widget Widget) (f func() error, err error) 
 
 	f = func() error {
 		return ms.tui.AddTextBox(netIO, title, widget.Options)
+	}
+
+	return
+}
+
+func (ms *remoteHostWidget) boxDiskIO(widget Widget) (f func() error, err error) {
+	unit := "kb"
+	if _, ok := widget.Options[optionUnit]; ok {
+		unit = widget.Options[optionUnit]
+	}
+
+	title := fmt.Sprintf(" Disk I/O (%s) ", unit)
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	diskIO, err := ms.service.DiskIO(unit)
+	if err != nil {
+		return nil, err
+	}
+
+	f = func() error {
+		return ms.tui.AddTextBox(diskIO, title, widget.Options)
 	}
 
 	return

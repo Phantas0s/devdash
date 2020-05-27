@@ -65,7 +65,7 @@ func (s *RemoteHost) Uptime() (int64, error) {
 	}
 
 	var secs float64
-	secs, err = strconv.ParseFloat(d[0], 64)
+	secs, err = strconv.ParseFloat(d[0], strconv.IntSize)
 	if err != nil {
 		return 0, err
 	}
@@ -148,7 +148,7 @@ func (s *RemoteHost) Memory(metrics []string, unit string) (val []int, err error
 			continue
 		}
 
-		val, err := strconv.ParseUint(parts[1], 10, 64)
+		val, err := strconv.ParseUint(parts[1], 10, strconv.IntSize)
 		if err != nil {
 			return nil, err
 		}
@@ -186,7 +186,7 @@ func (s *RemoteHost) MemRate() (float64, error) {
 			continue
 		}
 
-		val, err := strconv.ParseFloat(parts[1], 64)
+		val, err := strconv.ParseFloat(parts[1], strconv.IntSize)
 		if err != nil {
 			return 0, err
 		}
@@ -223,7 +223,7 @@ func (s *RemoteHost) SwapRate() (float64, error) {
 			continue
 		}
 
-		val, err := strconv.ParseFloat(parts[1], 64)
+		val, err := strconv.ParseFloat(parts[1], strconv.IntSize)
 		if err != nil {
 			return 0, err
 		}
@@ -315,18 +315,54 @@ func (s *RemoteHost) NetIO(unit string) (string, error) {
 		device := strings.TrimSpace(strings.Trim(parts[0], ":"))
 
 		if device != "lo" {
-			rb, _ := strconv.ParseUint(parts[2], 10, 64)
-			tb, _ := strconv.ParseUint(parts[10], 10, 64)
+			rb, _ := strconv.ParseUint(parts[2], 10, strconv.IntSize)
+			tb, _ := strconv.ParseUint(parts[10], 10, strconv.IntSize)
 
 			receiveBytes += rb
 			transmitBytes += tb
 		}
 	}
 
-	rx := strconv.FormatFloat(gokit.ConvertBinUnit(float64(receiveBytes), "b", unit), 'f', 2, 64)
-	tx := strconv.FormatFloat(gokit.ConvertBinUnit(float64(transmitBytes), "b", unit), 'f', 2, 64)
+	rx := strconv.FormatFloat(gokit.ConvertBinUnit(float64(receiveBytes), "b", unit), 'f', 2, strconv.IntSize)
+	tx := strconv.FormatFloat(gokit.ConvertBinUnit(float64(transmitBytes), "b", unit), 'f', 2, strconv.IntSize)
 
 	return rx + " / " + tx, nil
+}
+
+func (s *RemoteHost) DiskIO(unit string) (string, error) {
+	// GetIOStat returns io stat
+	lines, err := s.run("/bin/cat /proc/diskstats")
+	if err != nil {
+		return "", nil
+	}
+
+	scanner := bufio.NewScanner(strings.NewReader(lines))
+	var read uint64 = 0
+	var write uint64 = 0
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		parts := strings.Fields(line)
+
+		if len(parts) < 9 {
+			continue
+		}
+
+		if parts[3] == "0" {
+			continue
+		}
+
+		r, _ := strconv.ParseUint(parts[5], 10, strconv.IntSize)
+		w, _ := strconv.ParseUint(parts[9], 10, strconv.IntSize)
+
+		read += r * 512
+		write += w * 512
+	}
+
+	fr := gokit.ConvertBinUnit(float64(read), "kb", unit)
+	fw := gokit.ConvertBinUnit(float64(write), "kb", unit)
+
+	return strconv.FormatFloat(fr, 'f', 2, strconv.IntSize) + " / " + strconv.FormatFloat(fw, 'f', 2, strconv.IntSize), nil
 }
 
 func formatToBar(data string) (val []uint64) {
