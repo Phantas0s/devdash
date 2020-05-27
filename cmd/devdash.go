@@ -18,13 +18,12 @@ func begin(file string, debug bool) {
 	defer tui.Close()
 
 	cfg := mapConfig(file)
-
-	// first display
-	display(file, tui)
-
-	tui.AddKQuit(cfg.KQuit())
 	hotReload := make(chan time.Time)
 	tui.AddKHotReload(cfg.KHotReload(), hotReload)
+	tui.AddKQuit(cfg.KQuit())
+
+	// first display
+	build(file, tui)
 
 	ticker := time.NewTicker(time.Duration(cfg.RefreshTime()) * time.Second)
 
@@ -36,14 +35,15 @@ func begin(file string, debug bool) {
 	}(ticker.C)
 
 	go func() {
-		for range hotReload {
-			if cfg.General.HotReload {
+		for {
+			select {
+			case hr := <-hotReload:
 				tui.HotReload()
-			} else {
-				tui.Clean()
+				build(file, tui)
+				if debug {
+					fmt.Println("Last reload: " + hr.Format("2006-01-02 03:04:05"))
+				}
 			}
-
-			display(file, tui)
 		}
 	}()
 
@@ -51,7 +51,7 @@ func begin(file string, debug bool) {
 }
 
 // TODO separate render from parsing projects
-func display(file string, tui *internal.Tui) {
+func build(file string, tui *internal.Tui) {
 	cfg := mapConfig(file)
 	for _, p := range cfg.Projects {
 		rows, sizes := p.OrderWidgets()

@@ -26,9 +26,8 @@ type config struct {
 }
 
 type General struct {
-	Keys      map[string]string `mapstructure:"keys"`
-	Refresh   int64             `mapstructure:"refresh"`
-	HotReload bool              `mapstructure:"hot_reload"`
+	Keys    map[string]string `mapstructure:"keys"`
+	Refresh int64             `mapstructure:"refresh"`
 }
 
 // RefreshTime return the duration before refreshing the data of all widgets, in seconds.
