@@ -2,9 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
-	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -40,21 +38,4 @@ func Execute() {
 
 func run() {
 	begin(cfg, debug)
-}
-
-// TODO - Init logger somewhere. Logger file tmp by default?
-func InitLoggerFile(logpath string) *log.Logger {
-	if logpath == "" {
-		return log.New(os.Stderr, "", 0)
-	}
-
-	file, err := os.OpenFile(logpath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	l := log.New(file, "", 0)
-	l.SetPrefix(time.Now().Format("2006-01-02 15:04:05") + " - ")
-
-	return l
 }

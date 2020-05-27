@@ -153,7 +153,7 @@ func (p *project) CreateWidgets() [][][]chan func() error {
 	err := p.addTitle(p.tui)
 	if err != nil {
 		err = errors.Wrapf(err, "can't add project title %s", p.name)
-		DisplayError(p.tui, err)
+		DisplayError(p.tui, err)()
 	}
 
 	chs := make([][][]chan func() error, len(p.widgets))

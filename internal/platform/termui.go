@@ -190,7 +190,7 @@ func (*termUI) KQuit(key string) {
 }
 
 func (t *termUI) KHotReload(key string, c chan<- time.Time) {
-	termui.Handle(fmt.Sprintf("/sys/kbd/%s", key), func(termui.Event) {
+	termui.Handle(fmt.Sprintf("/sys/kbd/%s", key), func(e termui.Event) {
 		go func() {
 			c <- time.Now()
 		}()
@@ -224,7 +224,10 @@ func (t *termUI) Clean() {
 }
 
 func (t *termUI) HotReload() {
-	termui.Close()
-	_ = termui.Init()
+	// termui.Close()
+	// Re-initializes event poll... which double them each time
+	// TODO no visual clue that the reload happened
+	// _ = termui.Init()
 	t.Clean()
+	termui.Clear()
 }

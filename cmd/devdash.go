@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"time"
 
 	"github.com/Phantas0s/devdash/internal"
@@ -34,14 +36,11 @@ func begin(file string, debug bool) {
 	}()
 
 	go func() {
-		for {
-			select {
-			case hr := <-hotReload:
-				tui.HotReload()
-				build(file, tui)
-				if debug {
-					fmt.Println("Last reload: " + hr.Format("2006-01-02 03:04:05"))
-				}
+		for hr := range hotReload {
+			tui.HotReload()
+			build(file, tui)
+			if debug {
+				fmt.Println("Last reload: " + hr.Format("2006-01-02 15:04:05"))
 			}
 		}
 	}()
@@ -60,7 +59,7 @@ func build(file string, tui *internal.Tui) {
 		if !gaService.empty() {
 			gaWidget, err := internal.NewGaWidget(gaService.Keyfile, gaService.ViewID)
 			if err != nil {
-				internal.DisplayError(tui, err)
+				internal.DisplayError(tui, err)()
 			}
 			project.WithGa(gaWidget)
 		}
@@ -69,7 +68,7 @@ func build(file string, tui *internal.Tui) {
 		if !gscService.empty() {
 			gscWidget, err := internal.NewGscWidget(gscService.Keyfile, gscService.Address)
 			if err != nil {
-				internal.DisplayError(tui, err)
+				internal.DisplayError(tui, err)()
 			}
 			project.WithGoogleSearchConsole(gscWidget)
 		}
@@ -78,7 +77,7 @@ func build(file string, tui *internal.Tui) {
 		if !monService.empty() {
 			monWidget, err := internal.NewMonitorWidget(monService.Address)
 			if err != nil {
-				internal.DisplayError(tui, err)
+				internal.DisplayError(tui, err)()
 			}
 			project.WithMonitor(monWidget)
 		}
@@ -91,7 +90,7 @@ func build(file string, tui *internal.Tui) {
 				githubService.Repository,
 			)
 			if err != nil {
-				internal.DisplayError(tui, err)
+				internal.DisplayError(tui, err)()
 			}
 			project.WithGithub(githubWidget)
 		}
@@ -122,7 +121,7 @@ func build(file string, tui *internal.Tui) {
 			)
 			if err != nil {
 				fmt.Println(err)
-				internal.DisplayError(tui, err)
+				internal.DisplayError(tui, err)()
 			}
 			project.WithRemoteHost(remoteHostService)
 		}
@@ -132,4 +131,20 @@ func build(file string, tui *internal.Tui) {
 			project.Render(renderFuncs)
 		}
 	}
+}
+
+// TODO - Wrap logger. If logger nil, drop the message
+func InitLoggerFile(logpath string) *log.Logger {
+	if logpath == "" {
+		return nil
+	}
+
+	file, err := os.OpenFile(logpath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	l := log.New(file, "", 0)
+
+	return l
 }
