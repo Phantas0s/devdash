@@ -15,15 +15,20 @@ func Test_formatToTable(t *testing.T) {
 		{
 			name: "happy case",
 			expected: [][]string{
-				{
-					"data1", "data2", "data3", "data4",
-				},
-				{
-					"data5", "data6", "data7", "data8",
-				},
+				{"data1", "data2", "data3", "data4"},
+				{"data5", "data6", "data7", "data8"},
 			},
 			headers: []string{"dataHeader1", "dataHeader2", "dataHeader3", "dataHeader4"},
 			data:    "data1,data2,data3,data4,data5,data6,data7,data8",
+		},
+		{
+			name: "data dropped when last row too small",
+			expected: [][]string{
+				{"data1", "data2", "data3", "data4"},
+				{"data5", "data6", "data7", "data8"},
+			},
+			headers: []string{"dataHeader1", "dataHeader2", "dataHeader3", "dataHeader4"},
+			data:    "data1,data2,data3,data4,data5,data6,data7,data8,data9,data10",
 		},
 	}
 

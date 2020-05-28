@@ -116,6 +116,7 @@ func (s *RemoteHost) Processes() (string, error) {
 }
 
 // TODO no need to specify headers
+// TODO not used for now - create a table from the return of correctly formatted any command
 func (s *RemoteHost) Table(command string, headers []string, metrics []string) (cells [][]string, err error) {
 	lines, err := s.run(command)
 	if err != nil {
@@ -169,7 +170,7 @@ func (s *RemoteHost) Memory(metrics []string, unit string) (val []int, err error
 	return result, nil
 }
 
-func (s *RemoteHost) MemRate() (float64, error) {
+func (s *RemoteHost) MemoryRate() (float64, error) {
 	lines, err := s.run("/bin/cat /proc/meminfo")
 	if err != nil {
 		return 0, err
@@ -329,6 +330,51 @@ func (s *RemoteHost) NetIO(unit string) (string, error) {
 	return rx + " / " + tx, nil
 }
 
+func (s *RemoteHost) Disk(headers []string, unit string) ([][]string, error) {
+	// GetIOStat returns io stat
+	lines, err := s.run("/bin/df -x devtmpfs -x tmpfs -x debugfs")
+	if err != nil {
+		return nil, nil
+	}
+
+	scanner := bufio.NewScanner(strings.NewReader(lines))
+	data := ""
+	count := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+		parts := strings.Fields(line)
+
+		if len(parts) < 6 || count == 0 {
+			count++
+			continue
+		}
+
+		filesystem := parts[0]
+		size, _ := strconv.ParseFloat(parts[1], strconv.IntSize)
+		used, _ := strconv.ParseFloat(parts[2], strconv.IntSize)
+		available, _ := strconv.ParseFloat(parts[3], strconv.IntSize)
+		useRate := parts[4]
+		mount := parts[5]
+
+		d := []string{
+			filesystem,
+			strconv.FormatFloat(gokit.ConvertBinUnit(size, "kb", unit), 'f', 2, strconv.IntSize) + unit,
+			strconv.FormatFloat(gokit.ConvertBinUnit(used, "kb", unit), 'f', 2, strconv.IntSize) + unit,
+			strconv.FormatFloat(gokit.ConvertBinUnit(available, "kb", unit), 'f', 2, strconv.IntSize) + unit,
+			useRate,
+			mount,
+		}
+
+		data += strings.Join(d, ",") + ","
+		count++
+	}
+
+	c := [][]string{headers}
+	c = append(c, formatToTable(headers, data)...)
+
+	return c, nil
+}
+
 func (s *RemoteHost) DiskIO(unit string) (string, error) {
 	// GetIOStat returns io stat
 	lines, err := s.run("/bin/cat /proc/diskstats")
@@ -387,7 +433,10 @@ func formatToTable(headers []string, data string) (cells [][]string) {
 	c := strings.Split(data, ",")
 	lenCells := len(c)
 	for i := 0; i < lenCells; i += col {
-		cells = append(cells, c[i:min(i+col, lenCells)])
+		next := c[i:min(i+col, lenCells)]
+		if len(next) == col {
+			cells = append(cells, next)
+		}
 	}
 
 	return cells

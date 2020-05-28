@@ -14,12 +14,14 @@ const (
 	rhUptime      = "rh.box_uptime"
 	rhLoad        = "rh.box_load"
 	rhProcesses   = "rh.box_processes"
-	rhMemory      = "rh.bar_memory"
 	rhBoxCPURate  = "rh.box_cpu_rate"
 	rhBoxMemRate  = "rh.box_memory_rate"
 	rhBoxSwapRate = "rh.box_swap_rate"
 	rhBoxNetIO    = "rh.box_net_io"
 	rhBoxDiskIO   = "rh.box_disk_io"
+	rhBarMemory   = "rh.bar_memory"
+	rhBarRates    = "rh.bar_rates"
+	rhTableDisk   = "rh.table_disk"
 )
 
 type remoteHostWidget struct {
@@ -48,7 +50,7 @@ func (ms *remoteHostWidget) CreateWidgets(widget Widget, tui *Tui) (f func() err
 		f, err = ms.boxLoad(widget)
 	case rhProcesses:
 		f, err = ms.boxProcesses(widget)
-	case rhMemory:
+	case rhBarMemory:
 		f, err = ms.barMemory(widget)
 	case rhBoxCPURate:
 		f, err = ms.boxCPURate(widget)
@@ -60,6 +62,10 @@ func (ms *remoteHostWidget) CreateWidgets(widget Widget, tui *Tui) (f func() err
 		f, err = ms.boxNetIO(widget)
 	case rhBoxDiskIO:
 		f, err = ms.boxDiskIO(widget)
+	case rhBarRates:
+		f, err = ms.barRates(widget)
+	case rhTableDisk:
+		f, err = ms.tableDisk(widget)
 	default:
 		return nil, errors.Errorf("can't find the widget %s", widget.Name)
 	}
@@ -144,7 +150,7 @@ func (ms *remoteHostWidget) boxMemRate(widget Widget) (f func() error, err error
 		title = widget.Options[optionTitle]
 	}
 
-	memRate, err := ms.service.MemRate()
+	memRate, err := ms.service.MemoryRate()
 	if err != nil {
 		return nil, err
 	}
@@ -169,6 +175,39 @@ func (ms *remoteHostWidget) boxSwapRate(widget Widget) (f func() error, err erro
 
 	f = func() error {
 		return ms.tui.AddTextBox(strconv.FormatFloat(swapRate, 'f', 2, 64)+" %", title, widget.Options)
+	}
+
+	return
+}
+
+func (ms *remoteHostWidget) barRates(widget Widget) (f func() error, err error) {
+	title := " Swap Rate "
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	swapRate, err := ms.service.SwapRate()
+	if err != nil {
+		return nil, err
+	}
+
+	cpuRate, err := ms.service.CPURate()
+	if err != nil {
+		return nil, err
+	}
+
+	memoryRate, err := ms.service.MemoryRate()
+	if err != nil {
+		return nil, err
+	}
+
+	f = func() error {
+		return ms.tui.AddBarChart(
+			[]int{int(cpuRate), int(memoryRate), int(swapRate)},
+			[]string{"CPU", "Memory", "Swap"},
+			title,
+			widget.Options,
+		)
 	}
 
 	return
@@ -278,6 +317,30 @@ func (ms *remoteHostWidget) barMemory(widget Widget) (f func() error, err error)
 
 	f = func() error {
 		return ms.tui.AddBarChart(mem, headers, title, widget.Options)
+	}
+
+	return
+}
+
+func (ms *remoteHostWidget) tableDisk(widget Widget) (f func() error, err error) {
+	unit := "gb"
+	if _, ok := widget.Options[optionUnit]; ok {
+		unit = widget.Options[optionUnit]
+	}
+
+	title := fmt.Sprintf(" Disks ")
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	headers := []string{"Filesystem", "Size", "Used", "Available", "Use%", "Mount"}
+	data, err := ms.service.Disk(headers, unit)
+	if err != nil {
+		return nil, err
+	}
+
+	f = func() error {
+		return ms.tui.AddTable(data, title, widget.Options)
 	}
 
 	return
