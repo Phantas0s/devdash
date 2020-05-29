@@ -43,7 +43,9 @@ func NewRemoteHostWidget(username, addr string) (*remoteHostWidget, error) {
 func (ms *remoteHostWidget) CreateWidgets(widget Widget, tui *Tui) (f func() error, err error) {
 	ms.tui = tui
 
-	switch widget.Name {
+	// Compatibility with localhost
+	name := strings.Replace(widget.Name, "lh", "rh", 1)
+	switch name {
 	case rhUptime:
 		f, err = ms.boxUptime(widget)
 	case rhLoad:

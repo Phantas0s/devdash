@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -19,16 +21,25 @@ const (
 
 type RemoteHost struct {
 	sshClient *ssh.Client
+	localhost bool
 }
 
 // TODO accept more method of connection than only via ssh-agent
 func NewRemoteHost(username, addr string) (*RemoteHost, error) {
+	if username == "localhost" && addr == "localhost" {
+		return &RemoteHost{
+			sshClient: nil,
+			localhost: true,
+		}, nil
+	}
+
 	sshClient, err := sshAgentAuth(username, addr)
 	if err != nil {
 		return nil, err
 	}
 	return &RemoteHost{
 		sshClient: sshClient,
+		localhost: false,
 	}, nil
 }
 
@@ -36,6 +47,10 @@ func NewRemoteHost(username, addr string) (*RemoteHost, error) {
 // TODO should be possible to put run as a property of remote host object
 // Could swap between localhost and remotehost that way when call NewRemoteHost with a flag
 func (s *RemoteHost) run(command string) (string, error) {
+	if s.localhost {
+		return runLocalhost(command)
+	}
+
 	session, err := s.sshClient.NewSession()
 	if err != nil {
 		return "", errors.Wrapf(err, "can't create session with SSH client for command %s", command)
@@ -50,6 +65,23 @@ func (s *RemoteHost) run(command string) (string, error) {
 	}
 
 	return string(buf.Bytes()), nil
+}
+
+func runLocalhost(command string) (string, error) {
+	c := strings.Split(command, " ")
+	cmd := exec.Command(c[0], c[1:]...)
+
+	var out bytes.Buffer
+	cmd.Stdout = &out
+
+	err := cmd.Run()
+	if err != nil {
+		return "", err
+	}
+
+	result := out.String()
+
+	return result, nil
 }
 
 func (s *RemoteHost) Uptime() (int64, error) {
@@ -340,6 +372,13 @@ func (s *RemoteHost) Disk(headers []string, unit string) ([][]string, error) {
 	scanner := bufio.NewScanner(strings.NewReader(lines))
 	data := ""
 	count := 0
+
+	regex, err := regexp.Compile("\n\n")
+	if err != nil {
+		return nil, nil
+	}
+	lines = regex.ReplaceAllString(lines, "\n")
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		parts := strings.Fields(line)

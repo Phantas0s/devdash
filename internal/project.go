@@ -24,6 +24,7 @@ type project struct {
 	feedlyWidget     service
 	gitWidget        service
 	remoteHostWidget service
+	localhostWidget  service
 }
 
 // NewProject for the dashboard.
@@ -78,6 +79,10 @@ func (p *project) WithRemoteHost(remoteHost *remoteHostWidget) {
 	p.remoteHostWidget = remoteHost
 }
 
+func (p *project) WithLocalhost(localhost *remoteHostWidget) {
+	p.localhostWidget = localhost
+}
+
 func (p *project) addDefaultTheme(w Widget) Widget {
 	t := w.typeID()
 
@@ -117,6 +122,7 @@ func (p *project) mapServiceID(serviceID string) (service, error) {
 		"feedly":  p.feedlyWidget,
 		"git":     p.gitWidget,
 		"rh":      p.remoteHostWidget,
+		"lh":      p.localhostWidget,
 	}
 
 	if _, ok := services[serviceID]; ok {
@@ -137,6 +143,7 @@ func mapServiceName(serviceID string) (string, error) {
 		"feedly":  "Feedly",
 		"git":     "Git",
 		"rh":      "Remote Host",
+		"lh":      "Localhost",
 	}
 
 	if _, ok := services[serviceID]; ok {
@@ -195,7 +202,7 @@ func (p *project) CreateWidgets() [][][]chan func() error {
 // One channel per widget to keep the widget order in a slice.
 func createWidgets(s service, name string, w Widget, tui *Tui, c chan<- func() error) {
 	if s == nil {
-		c <- DisplayError(tui, errors.Errorf("Configuration error - you can't use the widget %s without the service %s.", w.Name, name))
+		c <- DisplayError(tui, errors.Errorf("can't use widget %s without service %s.", w.Name, name))
 	} else {
 		f, err := s.CreateWidgets(w, tui)
 		if err != nil {

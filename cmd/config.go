@@ -71,6 +71,7 @@ type Services struct {
 	Feedly              Feedly          `mapstructure:"feedly"`
 	Git                 Git             `mapstructure:"git"`
 	RemoteHost          RemoteHost      `mapstructure:"remote_host"`
+	Localhost           RemoteHost      `mapstructure:"local_host"`
 }
 
 type GoogleAnalytics struct {

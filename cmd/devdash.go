@@ -103,19 +103,19 @@ func build(file string, tui *internal.Tui) {
 
 		feedlyService := p.Services.Feedly
 		if !feedlyService.empty() {
-			feedlyService := internal.NewFeedlyWidget(feedlyService.Address)
-			project.WithFeedly(feedlyService)
+			feedlyWidget := internal.NewFeedlyWidget(feedlyService.Address)
+			project.WithFeedly(feedlyWidget)
 		}
 
 		gitService := p.Services.Git
 		if !gitService.empty() {
-			gitService := internal.NewGitWidget(gitService.Path)
-			project.WithGit(gitService)
+			gitWidget := internal.NewGitWidget(gitService.Path)
+			project.WithGit(gitWidget)
 		}
 
 		remoteHostService := p.Services.RemoteHost
 		if !remoteHostService.empty() {
-			remoteHostService, err := internal.NewRemoteHostWidget(
+			remoteHostWidget, err := internal.NewRemoteHostWidget(
 				remoteHostService.Username,
 				remoteHostService.Address,
 			)
@@ -123,8 +123,15 @@ func build(file string, tui *internal.Tui) {
 				fmt.Println(err)
 				internal.DisplayError(tui, err)()
 			}
-			project.WithRemoteHost(remoteHostService)
+			project.WithRemoteHost(remoteHostWidget)
 		}
+
+		localhost, err := internal.NewRemoteHostWidget("localhost", "localhost")
+		if err != nil {
+			fmt.Println(err)
+			internal.DisplayError(tui, err)()
+		}
+		project.WithLocalhost(localhost)
 
 		renderFuncs := project.CreateWidgets()
 		if !debug {
