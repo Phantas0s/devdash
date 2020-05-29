@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
@@ -68,20 +67,16 @@ func (s *RemoteHost) run(command string) (string, error) {
 }
 
 func runLocalhost(command string) (string, error) {
-	c := strings.Split(command, " ")
-	cmd := exec.Command(c[0], c[1:]...)
-
-	var out bytes.Buffer
-	cmd.Stdout = &out
-
-	err := cmd.Run()
+	out, errs, err := gokit.Pipeline(command)
 	if err != nil {
 		return "", err
 	}
 
-	result := out.String()
+	if string(errs) != "" {
+		return "", errors.New(string(errs))
+	}
 
-	return result, nil
+	return string(out), nil
 }
 
 func (s *RemoteHost) Uptime() (int64, error) {
@@ -145,24 +140,6 @@ func (s *RemoteHost) Processes() (string, error) {
 	}
 
 	return fmt.Sprintf("%s/%s", runProc, totalProc), nil
-}
-
-// TODO no need to specify headers
-// TODO not used for now - create a table from the return of correctly formatted any command
-func (s *RemoteHost) Table(command string, headers []string, metrics []string) (cells [][]string, err error) {
-	lines, err := s.run(command)
-	if err != nil {
-		return nil, err
-	}
-
-	scanner := bufio.NewScanner(strings.NewReader(lines))
-	data := ""
-	for scanner.Scan() {
-		line := scanner.Text()
-		data += line
-	}
-
-	return formatToTable(headers, data), nil
 }
 
 func (s *RemoteHost) Memory(metrics []string, unit string) (val []int, err error) {
@@ -362,6 +339,27 @@ func (s *RemoteHost) NetIO(unit string) (string, error) {
 	return rx + " / " + tx, nil
 }
 
+// TODO no need to specify headers
+// TODO not used for now - create a table from the return of correctly formatted any command
+func (s *RemoteHost) Table(command string, headers []string) (cells [][]string, err error) {
+	lines, err := s.run(command)
+	if err != nil {
+		return nil, err
+	}
+
+	scanner := bufio.NewScanner(strings.NewReader(lines))
+	data := ""
+	for scanner.Scan() {
+		line := scanner.Text()
+		parts := strings.Fields(line)
+
+		data += strings.Join(parts, ",") + ","
+	}
+	data = strings.Trim(data, ",")
+
+	return formatToTable(headers, data), nil
+}
+
 func (s *RemoteHost) Disk(headers []string, unit string) ([][]string, error) {
 	// GetIOStat returns io stat
 	lines, err := s.run("/bin/df -x devtmpfs -x tmpfs -x debugfs")
@@ -407,6 +405,8 @@ func (s *RemoteHost) Disk(headers []string, unit string) ([][]string, error) {
 		data += strings.Join(d, ",") + ","
 		count++
 	}
+
+	data = strings.Trim(data, ",")
 
 	c := [][]string{headers}
 	c = append(c, formatToTable(headers, data)...)

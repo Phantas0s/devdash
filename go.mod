@@ -8,6 +8,7 @@ require (
 	cloud.google.com/go/storage v1.1.2 // indirect
 	github.com/OneOfOne/xxhash v1.2.5 // indirect
 	github.com/Phantas0s/termui v0.0.0-20190825161953-d204f6ac0873
+	github.com/Phantas0s/testomatic v0.2.2
 	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
 	github.com/coreos/bbolt v1.3.3 // indirect
 	github.com/coreos/etcd v3.3.17+incompatible // indirect

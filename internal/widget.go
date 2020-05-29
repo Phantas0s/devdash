@@ -3,6 +3,9 @@ package internal
 import "strings"
 
 const (
+	// Data
+	optionCommand = "command"
+
 	// Widget config options
 	optionTitle      = "title"
 	optionTitleColor = "title_color"
@@ -41,8 +44,7 @@ const (
 
 	// Owner / all
 	optionScope = ownerScope
-
-	ownerScope = "owner"
+	ownerScope  = "owner"
 )
 
 // A widget is a representation of a set of data in the screen.
