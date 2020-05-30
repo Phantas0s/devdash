@@ -217,26 +217,7 @@ func defaultConfig(path string, filename string) string {
 
 		// TODO kind of ugly, but not sure if I can use a template here: it will be runtimeee
 		if file != nil {
-			_, err := file.Write([]byte(
-				`---
-general:
-  refresh: 600
-  keys:
-    quit: "C-c"
-
-projects:
-  - name: Default Configuration - You can modify at at $XDG_CONFIG_HOME/devdash/devdash.yml
-    services:
-      monitor:
-        address: "https://thevaluable.dev"
-    widgets:
-      - row:
-          - col:
-              size: "M"
-              elements:
-                - name: mon.box_availability
-                  options:
-                    border_color: green`))
+			_, err := file.Write([]byte(internal.DefaultTemplate()))
 			if err != nil {
 				panic(err)
 			}

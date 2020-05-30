@@ -34,7 +34,7 @@ func Test_formatToTable(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			actual := formatToTable(tc.headers, tc.data)
+			actual := formatToTable(len(tc.headers), tc.data)
 
 			if !reflect.DeepEqual(actual, tc.expected) {
 				t.Errorf("Expected %v, actual %v", tc.expected, actual)

@@ -6,7 +6,9 @@ import (
 	"strings"
 )
 
-func Pipeline(command string) (out, errs []byte, pipeLineError error) {
+// execCmd from a string. Support pipes. Single quote deleted.
+// Example: "/bin/df -x devtmpfs -x tmpfs -x debugfs | sed -n '1!p'"
+func ExecCmd(command string) (out, errs []byte, pipeLineError error) {
 	cmds := []*exec.Cmd{}
 	piped := strings.Split(command, "|")
 	for _, v := range piped {

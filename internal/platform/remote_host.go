@@ -1,5 +1,9 @@
 package platform
 
+// RemoteHost execute a command on a remote host or on the local host.
+// The output is parsed and displayed in the dashboard.
+// A personalized command (or shell script) can be added to the config to render whatever output you want.
+
 import (
 	"bufio"
 	"bytes"
@@ -23,7 +27,6 @@ type RemoteHost struct {
 	localhost bool
 }
 
-// TODO accept more method of connection than only via ssh-agent
 func NewRemoteHost(username, addr string) (*RemoteHost, error) {
 	if username == "localhost" && addr == "localhost" {
 		return &RemoteHost{
@@ -67,7 +70,7 @@ func (s *RemoteHost) run(command string) (string, error) {
 }
 
 func runLocalhost(command string) (string, error) {
-	out, errs, err := gokit.Pipeline(command)
+	out, errs, err := gokit.ExecCmd(command)
 	if err != nil {
 		return "", err
 	}
@@ -349,15 +352,27 @@ func (s *RemoteHost) Table(command string, headers []string) (cells [][]string, 
 
 	scanner := bufio.NewScanner(strings.NewReader(lines))
 	data := ""
+
+	lineNumber := 0
 	for scanner.Scan() {
 		line := scanner.Text()
 		parts := strings.Fields(line)
 
+		if len(headers) == 0 {
+			headers = parts
+			lineNumber++
+			continue
+		}
+
 		data += strings.Join(parts, ",") + ","
+		lineNumber++
 	}
 	data = strings.Trim(data, ",")
 
-	return formatToTable(headers, data), nil
+	cells = [][]string{headers}
+	cells = append(cells, formatToTable(len(headers), data)...)
+
+	return
 }
 
 func (s *RemoteHost) Disk(headers []string, unit string) ([][]string, error) {
@@ -409,7 +424,7 @@ func (s *RemoteHost) Disk(headers []string, unit string) ([][]string, error) {
 	data = strings.Trim(data, ",")
 
 	c := [][]string{headers}
-	c = append(c, formatToTable(headers, data)...)
+	c = append(c, formatToTable(len(headers), data)...)
 
 	return c, nil
 }
@@ -467,8 +482,7 @@ func formatToBar(data string) (val []uint64) {
 // Info needs to be splitted with comma
 // Depending on number of columns (headers)
 // TODO improve this comment :D
-func formatToTable(headers []string, data string) (cells [][]string) {
-	col := len(headers)
+func formatToTable(col int, data string) (cells [][]string) {
 	c := strings.Split(data, ",")
 	lenCells := len(c)
 	for i := 0; i < lenCells; i += col {
