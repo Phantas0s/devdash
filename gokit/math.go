@@ -45,3 +45,10 @@ func ConvertBinUnit(val float64, base, to string) (tv float64) {
 
 	return
 }
+
+func Min(a, b int) int {
+	if a <= b {
+		return a
+	}
+	return b
+}

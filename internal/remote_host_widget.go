@@ -25,23 +25,23 @@ const (
 	rhTable       = "rh.table"
 )
 
-type remoteHostWidget struct {
+type HostWidget struct {
 	tui     *Tui
-	service *platform.RemoteHost
+	service *platform.Host
 }
 
-func NewRemoteHostWidget(username, addr string) (*remoteHostWidget, error) {
-	service, err := platform.NewRemoteHost(username, addr)
+func NewHostWidget(username, addr string) (*HostWidget, error) {
+	service, err := platform.NewHost(username, addr)
 	if err != nil {
 		return nil, err
 	}
 
-	return &remoteHostWidget{
+	return &HostWidget{
 		service: service,
 	}, nil
 }
 
-func (ms *remoteHostWidget) CreateWidgets(widget Widget, tui *Tui) (f func() error, err error) {
+func (ms *HostWidget) CreateWidgets(widget Widget, tui *Tui) (f func() error, err error) {
 	ms.tui = tui
 
 	// Compatibility with localhost
@@ -77,7 +77,7 @@ func (ms *remoteHostWidget) CreateWidgets(widget Widget, tui *Tui) (f func() err
 	return
 }
 
-func (ms *remoteHostWidget) boxLoad(widget Widget) (f func() error, err error) {
+func (ms *HostWidget) boxLoad(widget Widget) (f func() error, err error) {
 	title := " Load "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
@@ -95,7 +95,7 @@ func (ms *remoteHostWidget) boxLoad(widget Widget) (f func() error, err error) {
 	return
 }
 
-func (ms *remoteHostWidget) boxProcesses(widget Widget) (f func() error, err error) {
+func (ms *HostWidget) boxProcesses(widget Widget) (f func() error, err error) {
 	title := " Running processes "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
@@ -113,7 +113,7 @@ func (ms *remoteHostWidget) boxProcesses(widget Widget) (f func() error, err err
 	return
 }
 
-func (ms *remoteHostWidget) boxUptime(widget Widget) (f func() error, err error) {
+func (ms *HostWidget) boxUptime(widget Widget) (f func() error, err error) {
 	title := " Uptime "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
@@ -131,7 +131,7 @@ func (ms *remoteHostWidget) boxUptime(widget Widget) (f func() error, err error)
 	return
 }
 
-func (ms *remoteHostWidget) boxCPURate(widget Widget) (f func() error, err error) {
+func (ms *HostWidget) boxCPURate(widget Widget) (f func() error, err error) {
 	title := " CPU usage "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
@@ -149,7 +149,7 @@ func (ms *remoteHostWidget) boxCPURate(widget Widget) (f func() error, err error
 	return
 }
 
-func (ms *remoteHostWidget) boxMemRate(widget Widget) (f func() error, err error) {
+func (ms *HostWidget) boxMemRate(widget Widget) (f func() error, err error) {
 	title := " Memory usage "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
@@ -167,7 +167,7 @@ func (ms *remoteHostWidget) boxMemRate(widget Widget) (f func() error, err error
 	return
 }
 
-func (ms *remoteHostWidget) boxSwapRate(widget Widget) (f func() error, err error) {
+func (ms *HostWidget) boxSwapRate(widget Widget) (f func() error, err error) {
 	title := " Swap usage "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
@@ -185,7 +185,7 @@ func (ms *remoteHostWidget) boxSwapRate(widget Widget) (f func() error, err erro
 	return
 }
 
-func (ms *remoteHostWidget) barRates(widget Widget) (f func() error, err error) {
+func (ms *HostWidget) barRates(widget Widget) (f func() error, err error) {
 	title := " Resources usage (%) "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
@@ -244,7 +244,7 @@ func formatSeconds(dur time.Duration) string {
 	return s2
 }
 
-func (ms *remoteHostWidget) boxNetIO(widget Widget) (f func() error, err error) {
+func (ms *HostWidget) boxNetIO(widget Widget) (f func() error, err error) {
 	unit := "kb"
 	if _, ok := widget.Options[optionUnit]; ok {
 		unit = widget.Options[optionUnit]
@@ -267,7 +267,7 @@ func (ms *remoteHostWidget) boxNetIO(widget Widget) (f func() error, err error) 
 	return
 }
 
-func (ms *remoteHostWidget) boxDiskIO(widget Widget) (f func() error, err error) {
+func (ms *HostWidget) boxDiskIO(widget Widget) (f func() error, err error) {
 	unit := "kb"
 	if _, ok := widget.Options[optionUnit]; ok {
 		unit = widget.Options[optionUnit]
@@ -290,7 +290,7 @@ func (ms *remoteHostWidget) boxDiskIO(widget Widget) (f func() error, err error)
 	return
 }
 
-func (ms *remoteHostWidget) barMemory(widget Widget) (f func() error, err error) {
+func (ms *HostWidget) barMemory(widget Widget) (f func() error, err error) {
 	metrics := []string{"MemTotal", "MemFree", "MemAvailable"}
 	if _, ok := widget.Options[optionMetrics]; ok {
 		if len(widget.Options[optionMetrics]) > 0 {
@@ -327,7 +327,7 @@ func (ms *remoteHostWidget) barMemory(widget Widget) (f func() error, err error)
 	return
 }
 
-func (ms *remoteHostWidget) tableDisk(widget Widget) (f func() error, err error) {
+func (ms *HostWidget) tableDisk(widget Widget) (f func() error, err error) {
 	unit := "gb"
 	if _, ok := widget.Options[optionUnit]; ok {
 		unit = widget.Options[optionUnit]
@@ -351,7 +351,7 @@ func (ms *remoteHostWidget) tableDisk(widget Widget) (f func() error, err error)
 	return
 }
 
-func (ms *remoteHostWidget) table(widget Widget) (f func() error, err error) {
+func (ms *HostWidget) table(widget Widget) (f func() error, err error) {
 	title := fmt.Sprintf(" Table ")
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]

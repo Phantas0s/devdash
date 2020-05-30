@@ -42,3 +42,29 @@ func Test_formatToTable(t *testing.T) {
 		})
 	}
 }
+
+func Test_formatToBar(t *testing.T) {
+	testCases := []struct {
+		name     string
+		expected []uint64
+		data     string
+	}{
+		{
+			name: "happy case",
+			expected: []uint64{
+				10, 20, 30, 40,
+			},
+			data: "10,20,30,40",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual := formatToBar(tc.data)
+
+			if !reflect.DeepEqual(actual, tc.expected) {
+				t.Errorf("Expected %v, actual %v", tc.expected, actual)
+			}
+		})
+	}
+}

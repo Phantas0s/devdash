@@ -1,6 +1,6 @@
 package platform
 
-// RemoteHost execute a command on a remote host or on the local host.
+// host execute a command on a remote host or on the local host.
 // The output is parsed and displayed in the dashboard.
 // A personalized command (or shell script) can be added to the config to render whatever output you want.
 
@@ -22,14 +22,14 @@ const (
 	sshAgentEnv = "SSH_AUTH_SOCK"
 )
 
-type RemoteHost struct {
+type Host struct {
 	sshClient *ssh.Client
 	localhost bool
 }
 
-func NewRemoteHost(username, addr string) (*RemoteHost, error) {
+func NewHost(username, addr string) (*Host, error) {
 	if username == "localhost" && addr == "localhost" {
-		return &RemoteHost{
+		return &Host{
 			sshClient: nil,
 			localhost: true,
 		}, nil
@@ -39,16 +39,14 @@ func NewRemoteHost(username, addr string) (*RemoteHost, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &RemoteHost{
+	return &Host{
 		sshClient: sshClient,
 		localhost: false,
 	}, nil
 }
 
-// Run a command on remote server via SSH
-// TODO should be possible to put run as a property of remote host object
-// Could swap between localhost and remotehost that way when call NewRemoteHost with a flag
-func (s *RemoteHost) run(command string) (string, error) {
+// Run a command on remote server via SSH or on localhost
+func (s *Host) run(command string) (string, error) {
 	if s.localhost {
 		return runLocalhost(command)
 	}
@@ -82,7 +80,7 @@ func runLocalhost(command string) (string, error) {
 	return string(out), nil
 }
 
-func (s *RemoteHost) Uptime() (int64, error) {
+func (s *Host) Uptime() (int64, error) {
 	command := "/bin/cat /proc/uptime"
 	uptime, err := s.run(command)
 	if err != nil {
@@ -103,7 +101,7 @@ func (s *RemoteHost) Uptime() (int64, error) {
 	return int64(time.Duration(secs * 1e9)), nil
 }
 
-func (s *RemoteHost) Load() (string, error) {
+func (s *Host) Load() (string, error) {
 	command := "/bin/cat /proc/loadavg"
 	lines, err := s.run(command)
 	if err != nil {
@@ -121,7 +119,7 @@ func (s *RemoteHost) Load() (string, error) {
 	return fmt.Sprintf("%s %s %s", res[0], res[1], res[2]), nil
 }
 
-func (s *RemoteHost) Processes() (string, error) {
+func (s *Host) Processes() (string, error) {
 	command := "/bin/cat /proc/loadavg"
 	lines, err := s.run(command)
 	if err != nil {
@@ -145,7 +143,7 @@ func (s *RemoteHost) Processes() (string, error) {
 	return fmt.Sprintf("%s/%s", runProc, totalProc), nil
 }
 
-func (s *RemoteHost) Memory(metrics []string, unit string) (val []int, err error) {
+func (s *Host) Memory(metrics []string, unit string) (val []int, err error) {
 	lines, err := s.run("/bin/cat /proc/meminfo")
 	if err != nil {
 		return nil, err
@@ -182,7 +180,7 @@ func (s *RemoteHost) Memory(metrics []string, unit string) (val []int, err error
 	return result, nil
 }
 
-func (s *RemoteHost) MemoryRate() (float64, error) {
+func (s *Host) MemoryRate() (float64, error) {
 	lines, err := s.run("/bin/cat /proc/meminfo")
 	if err != nil {
 		return 0, err
@@ -219,7 +217,7 @@ func (s *RemoteHost) MemoryRate() (float64, error) {
 }
 
 // TODO to refactor - DRY
-func (s *RemoteHost) SwapRate() (float64, error) {
+func (s *Host) SwapRate() (float64, error) {
 	lines, err := s.run("/bin/cat /proc/meminfo")
 	if err != nil {
 		return 0, err
@@ -256,7 +254,7 @@ func (s *RemoteHost) SwapRate() (float64, error) {
 }
 
 // See https://www.idnt.net/en-US/kb/941772
-func (s *RemoteHost) CPURate() (float64, error) {
+func (s *Host) CPURate() (float64, error) {
 	raw, err := s.run("/bin/cat /proc/stat")
 	if err != nil {
 		return 0, err
@@ -308,7 +306,7 @@ func (s *RemoteHost) CPURate() (float64, error) {
 }
 
 // GetNetStat returns net stat
-func (s *RemoteHost) NetIO(unit string) (string, error) {
+func (s *Host) NetIO(unit string) (string, error) {
 	lines, err := s.run("/bin/cat /proc/net/dev")
 	if err != nil {
 		return "", err
@@ -342,9 +340,7 @@ func (s *RemoteHost) NetIO(unit string) (string, error) {
 	return rx + " / " + tx, nil
 }
 
-// TODO no need to specify headers
-// TODO not used for now - create a table from the return of correctly formatted any command
-func (s *RemoteHost) Table(command string, headers []string) (cells [][]string, err error) {
+func (s *Host) Table(command string, headers []string) (cells [][]string, err error) {
 	lines, err := s.run(command)
 	if err != nil {
 		return nil, err
@@ -375,7 +371,7 @@ func (s *RemoteHost) Table(command string, headers []string) (cells [][]string, 
 	return
 }
 
-func (s *RemoteHost) Disk(headers []string, unit string) ([][]string, error) {
+func (s *Host) Disk(headers []string, unit string) ([][]string, error) {
 	// GetIOStat returns io stat
 	lines, err := s.run("/bin/df -x devtmpfs -x tmpfs -x debugfs")
 	if err != nil {
@@ -429,7 +425,7 @@ func (s *RemoteHost) Disk(headers []string, unit string) ([][]string, error) {
 	return c, nil
 }
 
-func (s *RemoteHost) DiskIO(unit string) (string, error) {
+func (s *Host) DiskIO(unit string) (string, error) {
 	// GetIOStat returns io stat
 	lines, err := s.run("/bin/cat /proc/diskstats")
 	if err != nil {
@@ -486,18 +482,11 @@ func formatToTable(col int, data string) (cells [][]string) {
 	c := strings.Split(data, ",")
 	lenCells := len(c)
 	for i := 0; i < lenCells; i += col {
-		next := c[i:min(i+col, lenCells)]
+		next := c[i:gokit.Min(i+col, lenCells)]
 		if len(next) == col {
 			cells = append(cells, next)
 		}
 	}
 
 	return cells
-}
-
-func min(a, b int) int {
-	if a <= b {
-		return a
-	}
-	return b
 }

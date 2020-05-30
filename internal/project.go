@@ -75,11 +75,11 @@ func (p *project) WithGit(git *gitWidget) {
 	p.gitWidget = git
 }
 
-func (p *project) WithRemoteHost(remoteHost *remoteHostWidget) {
+func (p *project) WithRemoteHost(remoteHost *HostWidget) {
 	p.remoteHostWidget = remoteHost
 }
 
-func (p *project) WithLocalhost(localhost *remoteHostWidget) {
+func (p *project) WithLocalhost(localhost *HostWidget) {
 	p.localhostWidget = localhost
 }
 

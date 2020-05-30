@@ -115,7 +115,7 @@ func build(file string, tui *internal.Tui) {
 
 		remoteHostService := p.Services.RemoteHost
 		if !remoteHostService.empty() {
-			remoteHostWidget, err := internal.NewRemoteHostWidget(
+			remoteHostWidget, err := internal.NewHostWidget(
 				remoteHostService.Username,
 				remoteHostService.Address,
 			)
@@ -126,7 +126,7 @@ func build(file string, tui *internal.Tui) {
 			project.WithRemoteHost(remoteHostWidget)
 		}
 
-		localhost, err := internal.NewRemoteHostWidget("localhost", "localhost")
+		localhost, err := internal.NewHostWidget("localhost", "localhost")
 		if err != nil {
 			fmt.Println(err)
 			internal.DisplayError(tui, err)()
