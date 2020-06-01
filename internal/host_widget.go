@@ -119,13 +119,13 @@ func (ms *HostWidget) boxUptime(widget Widget) (f func() error, err error) {
 		title = widget.Options[optionTitle]
 	}
 
-	uptime, err := ms.service.Uptime()
+	uptime, err := platform.HostUptime(ms.service.Runner)
 	if err != nil {
 		return nil, err
 	}
 
 	f = func() error {
-		return ms.tui.AddTextBox(FormatSeconds(time.Duration(uptime)), title, widget.Options)
+		return ms.tui.AddTextBox(formatSeconds(time.Duration(uptime)), title, widget.Options)
 	}
 
 	return
@@ -358,7 +358,7 @@ func (ms *HostWidget) table(widget Widget) (f func() error, err error) {
 	return
 }
 
-func FormatSeconds(dur time.Duration) string {
+func formatSeconds(dur time.Duration) string {
 	dur = dur - (dur % time.Second)
 	var days int
 	for dur.Hours() > 24.0 {

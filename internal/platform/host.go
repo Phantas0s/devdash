@@ -46,7 +46,7 @@ func NewHost(username, addr string) (*Host, error) {
 }
 
 // Run a command on remote server via SSH or on localhost
-func (s *Host) run(command string) (string, error) {
+func (s *Host) Runner(command string) (string, error) {
 	if s.localhost {
 		return runLocalhost(command)
 	}
@@ -80,9 +80,9 @@ func runLocalhost(command string) (string, error) {
 	return string(out), nil
 }
 
-func (s *Host) Uptime() (int64, error) {
+func HostUptime(runner func(cmd string) (string, error)) (int64, error) {
 	command := "/bin/cat /proc/uptime"
-	uptime, err := s.run(command)
+	uptime, err := runner(command)
 	if err != nil {
 		return 0, err
 	}
@@ -103,7 +103,7 @@ func (s *Host) Uptime() (int64, error) {
 
 func (s *Host) Load() (string, error) {
 	command := "/bin/cat /proc/loadavg"
-	lines, err := s.run(command)
+	lines, err := s.Runner(command)
 	if err != nil {
 		return "", err
 	}
@@ -121,7 +121,7 @@ func (s *Host) Load() (string, error) {
 
 func (s *Host) Processes() (string, error) {
 	command := "/bin/cat /proc/loadavg"
-	lines, err := s.run(command)
+	lines, err := s.Runner(command)
 	if err != nil {
 		return "", err
 	}
@@ -144,7 +144,7 @@ func (s *Host) Processes() (string, error) {
 }
 
 func (s *Host) Memory(metrics []string, unit string) (val []int, err error) {
-	lines, err := s.run("/bin/cat /proc/meminfo")
+	lines, err := s.Runner("/bin/cat /proc/meminfo")
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +181,7 @@ func (s *Host) Memory(metrics []string, unit string) (val []int, err error) {
 }
 
 func (s *Host) MemoryRate() (float64, error) {
-	lines, err := s.run("/bin/cat /proc/meminfo")
+	lines, err := s.Runner("/bin/cat /proc/meminfo")
 	if err != nil {
 		return 0, err
 	}
@@ -218,7 +218,7 @@ func (s *Host) MemoryRate() (float64, error) {
 
 // TODO to refactor - DRY
 func (s *Host) SwapRate() (float64, error) {
-	lines, err := s.run("/bin/cat /proc/meminfo")
+	lines, err := s.Runner("/bin/cat /proc/meminfo")
 	if err != nil {
 		return 0, err
 	}
@@ -255,7 +255,7 @@ func (s *Host) SwapRate() (float64, error) {
 
 // See https://www.idnt.net/en-US/kb/941772
 func (s *Host) CPURate() (float64, error) {
-	raw, err := s.run("/bin/cat /proc/stat")
+	raw, err := s.Runner("/bin/cat /proc/stat")
 	if err != nil {
 		return 0, err
 	}
@@ -307,7 +307,7 @@ func (s *Host) CPURate() (float64, error) {
 
 // GetNetStat returns net stat
 func (s *Host) NetIO(unit string) (string, error) {
-	lines, err := s.run("/bin/cat /proc/net/dev")
+	lines, err := s.Runner("/bin/cat /proc/net/dev")
 	if err != nil {
 		return "", err
 	}
@@ -341,7 +341,7 @@ func (s *Host) NetIO(unit string) (string, error) {
 }
 
 func (s *Host) Table(command string, headers []string) (cells [][]string, err error) {
-	lines, err := s.run(command)
+	lines, err := s.Runner(command)
 	if err != nil {
 		return nil, err
 	}
@@ -373,7 +373,7 @@ func (s *Host) Table(command string, headers []string) (cells [][]string, err er
 
 func (s *Host) Disk(headers []string, unit string) ([][]string, error) {
 	// GetIOStat returns io stat
-	lines, err := s.run("/bin/df -x devtmpfs -x tmpfs -x debugfs")
+	lines, err := s.Runner("/bin/df -x devtmpfs -x tmpfs -x debugfs")
 	if err != nil {
 		return nil, nil
 	}
@@ -427,7 +427,7 @@ func (s *Host) Disk(headers []string, unit string) ([][]string, error) {
 
 func (s *Host) DiskIO(unit string) (string, error) {
 	// GetIOStat returns io stat
-	lines, err := s.run("/bin/cat /proc/diskstats")
+	lines, err := s.Runner("/bin/cat /proc/diskstats")
 	if err != nil {
 		return "", nil
 	}

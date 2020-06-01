@@ -3,6 +3,8 @@ package platform
 import (
 	"reflect"
 	"testing"
+
+	"github.com/pkg/errors"
 )
 
 func Test_formatToTable(t *testing.T) {
@@ -63,6 +65,54 @@ func Test_formatToBar(t *testing.T) {
 			actual := formatToBar(tc.data)
 
 			if !reflect.DeepEqual(actual, tc.expected) {
+				t.Errorf("Expected %v, actual %v", tc.expected, actual)
+			}
+		})
+	}
+}
+
+func Test_HostUptime(t *testing.T) {
+	testCases := []struct {
+		name     string
+		expected int64
+		runner   func(cmd string) (string, error)
+		wantErr  bool
+	}{
+		{
+			name:     "happy case",
+			expected: 17200210000000,
+			runner:   func(cmd string) (string, error) { return "17200.21 59425.48", nil },
+			wantErr:  false,
+		},
+		{
+			name:     "Empty result",
+			expected: 0,
+			runner:   func(cmd string) (string, error) { return "", nil },
+			wantErr:  true,
+		},
+		{
+			name:     "Runner return error",
+			expected: 0,
+			runner:   func(cmd string) (string, error) { return "", errors.New("Error!") },
+			wantErr:  true,
+		},
+		{
+			name:     "Runner return impossible number",
+			expected: 0,
+			runner:   func(cmd string) (string, error) { return "hello", nil },
+			wantErr:  true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual, err := HostUptime(tc.runner)
+			if (err != nil) != tc.wantErr {
+				t.Errorf("Error '%v' even if wantErr is %t", err, tc.wantErr)
+				return
+			}
+
+			if tc.wantErr == false && actual != tc.expected {
 				t.Errorf("Expected %v, actual %v", tc.expected, actual)
 			}
 		})
