@@ -125,7 +125,7 @@ func (ms *HostWidget) boxUptime(widget Widget) (f func() error, err error) {
 	}
 
 	f = func() error {
-		return ms.tui.AddTextBox(formatSeconds(time.Duration(uptime)), title, widget.Options)
+		return ms.tui.AddTextBox(FormatSeconds(time.Duration(uptime)), title, widget.Options)
 	}
 
 	return
@@ -216,32 +216,6 @@ func (ms *HostWidget) barRates(widget Widget) (f func() error, err error) {
 	}
 
 	return
-}
-
-func formatSeconds(dur time.Duration) string {
-	dur = dur - (dur % time.Second)
-	var days int
-	for dur.Hours() > 24.0 {
-		days++
-		dur -= 24 * time.Hour
-	}
-	for dur.Hours() > 24.0 {
-		days++
-		dur -= 24 * time.Hour
-	}
-
-	s1 := dur.String()
-	s2 := ""
-	if days > 0 {
-		s2 = fmt.Sprintf("%dd ", days)
-	}
-	for _, ch := range s1 {
-		s2 += string(ch)
-		if ch == 'h' || ch == 'm' {
-			s2 += " "
-		}
-	}
-	return s2
 }
 
 func (ms *HostWidget) boxNetIO(widget Widget) (f func() error, err error) {
@@ -382,4 +356,30 @@ func (ms *HostWidget) table(widget Widget) (f func() error, err error) {
 	}
 
 	return
+}
+
+func FormatSeconds(dur time.Duration) string {
+	dur = dur - (dur % time.Second)
+	var days int
+	for dur.Hours() > 24.0 {
+		days++
+		dur -= 24 * time.Hour
+	}
+	for dur.Hours() > 24.0 {
+		days++
+		dur -= 24 * time.Hour
+	}
+
+	s1 := dur.String()
+	s2 := ""
+	if days > 0 {
+		s2 = fmt.Sprintf("%dd ", days)
+	}
+	for _, ch := range s1 {
+		s2 += string(ch)
+		if ch == 'h' || ch == 'm' {
+			s2 += " "
+		}
+	}
+	return s2
 }
