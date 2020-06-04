@@ -83,7 +83,7 @@ func (ms *HostWidget) boxLoad(widget Widget) (f func() error, err error) {
 		title = widget.Options[optionTitle]
 	}
 
-	load, err := ms.service.Load()
+	load, err := platform.HostLoad(ms.service.Runner)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +101,7 @@ func (ms *HostWidget) boxProcesses(widget Widget) (f func() error, err error) {
 		title = widget.Options[optionTitle]
 	}
 
-	procs, err := ms.service.Processes()
+	procs, err := platform.HostProcesses(ms.service.Runner)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +137,7 @@ func (ms *HostWidget) boxCPURate(widget Widget) (f func() error, err error) {
 		title = widget.Options[optionTitle]
 	}
 
-	CPURate, err := ms.service.CPURate()
+	CPURate, err := platform.HostCPURate(ms.service.Runner)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +155,7 @@ func (ms *HostWidget) boxMemRate(widget Widget) (f func() error, err error) {
 		title = widget.Options[optionTitle]
 	}
 
-	memRate, err := ms.service.MemoryRate()
+	memRate, err := platform.HostMemoryRate(ms.service.Runner)
 	if err != nil {
 		return nil, err
 	}
@@ -173,7 +173,7 @@ func (ms *HostWidget) boxSwapRate(widget Widget) (f func() error, err error) {
 		title = widget.Options[optionTitle]
 	}
 
-	swapRate, err := ms.service.SwapRate()
+	swapRate, err := platform.HostSwapRate(ms.service.Runner)
 	if err != nil {
 		return nil, err
 	}
@@ -191,17 +191,17 @@ func (ms *HostWidget) barRates(widget Widget) (f func() error, err error) {
 		title = widget.Options[optionTitle]
 	}
 
-	swapRate, err := ms.service.SwapRate()
+	swapRate, err := platform.HostSwapRate(ms.service.Runner)
 	if err != nil {
 		return nil, err
 	}
 
-	cpuRate, err := ms.service.CPURate()
+	cpuRate, err := platform.HostCPURate(ms.service.Runner)
 	if err != nil {
 		return nil, err
 	}
 
-	memoryRate, err := ms.service.MemoryRate()
+	memoryRate, err := platform.HostMemoryRate(ms.service.Runner)
 	if err != nil {
 		return nil, err
 	}
@@ -229,7 +229,7 @@ func (ms *HostWidget) boxNetIO(widget Widget) (f func() error, err error) {
 		title = widget.Options[optionTitle]
 	}
 
-	netIO, err := ms.service.NetIO(unit)
+	netIO, err := platform.HostNetIO(ms.service.Runner, unit)
 	if err != nil {
 		return nil, err
 	}
@@ -252,7 +252,7 @@ func (ms *HostWidget) boxDiskIO(widget Widget) (f func() error, err error) {
 		title = widget.Options[optionTitle]
 	}
 
-	diskIO, err := ms.service.DiskIO(unit)
+	diskIO, err := platform.HostDiskIO(ms.service.Runner, unit)
 	if err != nil {
 		return nil, err
 	}
@@ -289,7 +289,7 @@ func (ms *HostWidget) barMemory(widget Widget) (f func() error, err error) {
 		title = widget.Options[optionTitle]
 	}
 
-	mem, err := ms.service.Memory(metrics, unit)
+	mem, err := platform.HostMemory(ms.service.Runner, metrics, unit)
 	if err != nil {
 		return nil, err
 	}
@@ -313,7 +313,7 @@ func (ms *HostWidget) tableDisk(widget Widget) (f func() error, err error) {
 	}
 
 	headers := []string{"Filesystem", "Size", "Used", "Available", "Use%", "Mount"}
-	data, err := ms.service.Disk(headers, unit)
+	data, err := platform.HostDisk(ms.service.Runner, headers, unit)
 	if err != nil {
 		return nil, err
 	}
@@ -346,7 +346,7 @@ func (ms *HostWidget) table(widget Widget) (f func() error, err error) {
 		}
 	}
 
-	data, err := ms.service.Table(cmd, headers)
+	data, err := platform.HostTable(ms.service.Runner, cmd, headers)
 	if err != nil {
 		return nil, err
 	}

@@ -27,6 +27,9 @@ type Host struct {
 	localhost bool
 }
 
+// syntactic sugar
+type runnerFunc func(cmd string) (string, error)
+
 func NewHost(username, addr string) (*Host, error) {
 	if username == "localhost" && addr == "localhost" {
 		return &Host{
@@ -80,7 +83,7 @@ func runLocalhost(command string) (string, error) {
 	return string(out), nil
 }
 
-func HostUptime(runner func(cmd string) (string, error)) (int64, error) {
+func HostUptime(runner runnerFunc) (int64, error) {
 	command := "/bin/cat /proc/uptime"
 	uptime, err := runner(command)
 	if err != nil {
@@ -101,9 +104,9 @@ func HostUptime(runner func(cmd string) (string, error)) (int64, error) {
 	return int64(time.Duration(secs * 1e9)), nil
 }
 
-func (s *Host) Load() (string, error) {
+func HostLoad(runner runnerFunc) (string, error) {
 	command := "/bin/cat /proc/loadavg"
-	lines, err := s.Runner(command)
+	lines, err := runner(command)
 	if err != nil {
 		return "", err
 	}
@@ -119,9 +122,9 @@ func (s *Host) Load() (string, error) {
 	return fmt.Sprintf("%s %s %s", res[0], res[1], res[2]), nil
 }
 
-func (s *Host) Processes() (string, error) {
+func HostProcesses(runner runnerFunc) (string, error) {
 	command := "/bin/cat /proc/loadavg"
-	lines, err := s.Runner(command)
+	lines, err := runner(command)
 	if err != nil {
 		return "", err
 	}
@@ -143,8 +146,8 @@ func (s *Host) Processes() (string, error) {
 	return fmt.Sprintf("%s/%s", runProc, totalProc), nil
 }
 
-func (s *Host) Memory(metrics []string, unit string) (val []int, err error) {
-	lines, err := s.Runner("/bin/cat /proc/meminfo")
+func HostMemory(runner runnerFunc, metrics []string, unit string) (val []int, err error) {
+	lines, err := runner("/bin/cat /proc/meminfo")
 	if err != nil {
 		return nil, err
 	}
@@ -180,8 +183,8 @@ func (s *Host) Memory(metrics []string, unit string) (val []int, err error) {
 	return result, nil
 }
 
-func (s *Host) MemoryRate() (float64, error) {
-	lines, err := s.Runner("/bin/cat /proc/meminfo")
+func HostMemoryRate(runner runnerFunc) (float64, error) {
+	lines, err := runner("/bin/cat /proc/meminfo")
 	if err != nil {
 		return 0, err
 	}
@@ -217,8 +220,8 @@ func (s *Host) MemoryRate() (float64, error) {
 }
 
 // TODO to refactor - DRY
-func (s *Host) SwapRate() (float64, error) {
-	lines, err := s.Runner("/bin/cat /proc/meminfo")
+func HostSwapRate(runner runnerFunc) (float64, error) {
+	lines, err := runner("/bin/cat /proc/meminfo")
 	if err != nil {
 		return 0, err
 	}
@@ -254,8 +257,8 @@ func (s *Host) SwapRate() (float64, error) {
 }
 
 // See https://www.idnt.net/en-US/kb/941772
-func (s *Host) CPURate() (float64, error) {
-	raw, err := s.Runner("/bin/cat /proc/stat")
+func HostCPURate(runner runnerFunc) (float64, error) {
+	raw, err := runner("/bin/cat /proc/stat")
 	if err != nil {
 		return 0, err
 	}
@@ -306,8 +309,8 @@ func (s *Host) CPURate() (float64, error) {
 }
 
 // GetNetStat returns net stat
-func (s *Host) NetIO(unit string) (string, error) {
-	lines, err := s.Runner("/bin/cat /proc/net/dev")
+func HostNetIO(runner runnerFunc, unit string) (string, error) {
+	lines, err := runner("/bin/cat /proc/net/dev")
 	if err != nil {
 		return "", err
 	}
@@ -340,8 +343,8 @@ func (s *Host) NetIO(unit string) (string, error) {
 	return rx + " / " + tx, nil
 }
 
-func (s *Host) Table(command string, headers []string) (cells [][]string, err error) {
-	lines, err := s.Runner(command)
+func HostTable(runner runnerFunc, command string, headers []string) (cells [][]string, err error) {
+	lines, err := runner(command)
 	if err != nil {
 		return nil, err
 	}
@@ -371,9 +374,9 @@ func (s *Host) Table(command string, headers []string) (cells [][]string, err er
 	return
 }
 
-func (s *Host) Disk(headers []string, unit string) ([][]string, error) {
+func HostDisk(runner runnerFunc, headers []string, unit string) ([][]string, error) {
 	// GetIOStat returns io stat
-	lines, err := s.Runner("/bin/df -x devtmpfs -x tmpfs -x debugfs")
+	lines, err := runner("/bin/df -x devtmpfs -x tmpfs -x debugfs")
 	if err != nil {
 		return nil, nil
 	}
@@ -425,9 +428,9 @@ func (s *Host) Disk(headers []string, unit string) ([][]string, error) {
 	return c, nil
 }
 
-func (s *Host) DiskIO(unit string) (string, error) {
+func HostDiskIO(runner runnerFunc, unit string) (string, error) {
 	// GetIOStat returns io stat
-	lines, err := s.Runner("/bin/cat /proc/diskstats")
+	lines, err := runner("/bin/cat /proc/diskstats")
 	if err != nil {
 		return "", nil
 	}
