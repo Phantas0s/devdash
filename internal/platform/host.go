@@ -131,7 +131,11 @@ func HostProcesses(runner runnerFunc) (string, error) {
 
 	res := strings.Fields(lines)
 	if len(res) < 5 {
-		return "", errors.Errorf("command %s return unexpected %v, needs to have 5 parts separated with whitespaces", command, res)
+		return "", errors.Errorf(
+			"command %s return unexpected %v, needs to have 5 parts separated with whitespaces",
+			command,
+			res,
+		)
 	}
 
 	runProc := "unknown"
@@ -147,7 +151,8 @@ func HostProcesses(runner runnerFunc) (string, error) {
 }
 
 func HostMemory(runner runnerFunc, metrics []string, unit string) (val []int, err error) {
-	lines, err := runner("/bin/cat /proc/meminfo")
+	command := "/bin/cat /proc/meminfo"
+	lines, err := runner(command)
 	if err != nil {
 		return nil, err
 	}
@@ -245,14 +250,20 @@ func HostSwapRate(runner runnerFunc) (float64, error) {
 		k := strings.Trim(parts[0], ":")
 		switch k {
 		case "SwapTotal":
-			swapTotal = gokit.ConvertBinUnit(val, "kb", "mb")
+			swapTotal = val
 		case "SwapFree":
-			swapFree = gokit.ConvertBinUnit(val, "kb", "mb")
+			swapFree = val
 		}
 
 	}
 
 	swapUsed := swapTotal - swapFree
+
+	// prevent division by 0
+	if swapTotal == 0 {
+		return 0, nil
+	}
+
 	return gokit.Round(float64(swapUsed)*100/float64(swapTotal), 2), nil
 }
 
@@ -267,6 +278,7 @@ func HostCPURate(runner runnerFunc) (float64, error) {
 
 	// aggregate of all other cpus
 	cpu := strings.Fields(lines[0])
+	fmt.Println(cpu)
 
 	if len(cpu) < 5 {
 		return 0, errors.Errorf("needs 5 fields for cpu: header, user, nice, system, idle. Instead, having %s", cpu)
@@ -304,6 +316,10 @@ func HostCPURate(runner runnerFunc) (float64, error) {
 
 	total := user + nice + system + idle + IOWait + IRQ + softIRQs + steal + guest + guestNice
 
+	if total == 0 {
+		return 0, nil
+	}
+
 	// Percentage of not idle (busy)
 	return 100 - gokit.Round(float64(idle)*100/float64(total), 2), nil
 }
@@ -314,6 +330,7 @@ func HostNetIO(runner runnerFunc, unit string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	fmt.Println(lines)
 
 	scanner := bufio.NewScanner(strings.NewReader(lines))
 	var receiveBytes uint64 = 0
