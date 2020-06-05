@@ -221,6 +221,12 @@ func HostMemoryRate(runner runnerFunc) (float64, error) {
 	}
 
 	memUsed := memTotal - memFree
+
+	// prevent division by 0
+	if memTotal == 0 {
+		return 0, nil
+	}
+
 	return gokit.Round(float64(memUsed)*100/float64(memTotal), 2), nil
 }
 
@@ -278,7 +284,6 @@ func HostCPURate(runner runnerFunc) (float64, error) {
 
 	// aggregate of all other cpus
 	cpu := strings.Fields(lines[0])
-	fmt.Println(cpu)
 
 	if len(cpu) < 5 {
 		return 0, errors.Errorf("needs 5 fields for cpu: header, user, nice, system, idle. Instead, having %s", cpu)
@@ -330,7 +335,6 @@ func HostNetIO(runner runnerFunc, unit string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Println(lines)
 
 	scanner := bufio.NewScanner(strings.NewReader(lines))
 	var receiveBytes uint64 = 0
@@ -395,7 +399,7 @@ func HostDisk(runner runnerFunc, headers []string, unit string) ([][]string, err
 	// GetIOStat returns io stat
 	lines, err := runner("/bin/df -x devtmpfs -x tmpfs -x debugfs")
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	scanner := bufio.NewScanner(strings.NewReader(lines))
@@ -449,7 +453,7 @@ func HostDiskIO(runner runnerFunc, unit string) (string, error) {
 	// GetIOStat returns io stat
 	lines, err := runner("/bin/cat /proc/diskstats")
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	scanner := bufio.NewScanner(strings.NewReader(lines))

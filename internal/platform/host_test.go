@@ -269,6 +269,60 @@ func Test_HostMemory(t *testing.T) {
 	}
 }
 
+func Test_HostMemoryRate(t *testing.T) {
+	testCases := []struct {
+		name     string
+		runner   runnerFunc
+		expected float64
+		wantErr  bool
+	}{
+		{
+			name:     "happy case",
+			expected: 82.29,
+			runner: func(cmd string) (string, error) {
+				return string(ReadFixtureFile("./testdata/fixtures/host_memory", t)), nil
+			},
+			wantErr: false,
+		},
+		{
+			name:     "empty result",
+			expected: 0,
+			runner: func(cmd string) (string, error) {
+				return "", nil
+			},
+			wantErr: false,
+		},
+		{
+			name: "runner return error",
+			runner: func(cmd string) (string, error) {
+				return string(ReadFixtureFile("./testdata/fixtures/host_memory", t)), errors.New("Error")
+			},
+			wantErr: true,
+		},
+		{
+			name: "runner return impossible result",
+			runner: func(cmd string) (string, error) {
+				return string(ReadFixtureFile("./testdata/fixtures/ga_users.json", t)), errors.New("Error")
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual, err := HostMemoryRate(tc.runner)
+			if (err != nil) != tc.wantErr {
+				t.Errorf("Error '%v' even if wantErr is %t", err, tc.wantErr)
+				return
+			}
+
+			if tc.wantErr == false && actual != tc.expected {
+				t.Errorf("Expected %v, actual %v", tc.expected, actual)
+			}
+		})
+	}
+}
+
 func Test_HostSwapRate(t *testing.T) {
 	testCases := []struct {
 		name     string
@@ -423,6 +477,133 @@ func Test_HostNetIO(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			actual, err := HostNetIO(tc.runner, tc.unit)
+			if (err != nil) != tc.wantErr {
+				t.Errorf("Error '%v' even if wantErr is %t", err, tc.wantErr)
+				return
+			}
+
+			if tc.wantErr == false && actual != tc.expected {
+				t.Errorf("Expected %v, actual %v", tc.expected, actual)
+			}
+		})
+	}
+}
+
+func Test_HostDisk(t *testing.T) {
+	testCases := []struct {
+		name     string
+		runner   runnerFunc
+		headers  []string
+		expected [][]string
+		unit     string
+		wantErr  bool
+	}{
+		{
+			name:    "happy case",
+			headers: []string{"Filesystem", "Size", "Used", "Available", "Use%", "Mount"},
+			expected: [][]string{
+				{"Filesystem", "Size", "Used", "Available", "Use%", "Mount"},
+				{"/dev/sda3", "61665068.00kb", "16191716.00kb", "42311240.00kb", "28%", "/"},
+				{"/dev/sda1", "194235.00kb", "54856.00kb", "125043.00kb", "31%", "/boot"},
+			},
+			unit: "kb",
+			runner: func(cmd string) (string, error) {
+				return string(ReadFixtureFile("./testdata/fixtures/host_disk", t)), nil
+			},
+			wantErr: false,
+		},
+		{
+			name:     "empty result",
+			headers:  []string{"Filesystem", "Size", "Used", "Available", "Use%", "Mount"},
+			unit:     "kb",
+			expected: [][]string{{"Filesystem", "Size", "Used", "Available", "Use%", "Mount"}},
+			runner: func(cmd string) (string, error) {
+				return "", nil
+			},
+			wantErr: false,
+		},
+		{
+			name:    "runner return error",
+			headers: []string{"Filesystem", "Size", "Used", "Available", "Use%", "Mount"},
+			unit:    "kb",
+			runner: func(cmd string) (string, error) {
+				return string(ReadFixtureFile("./testdata/fixtures/host_disk", t)), errors.New("Error")
+			},
+			wantErr: true,
+		},
+		{
+			name:    "runner return impossible result",
+			headers: []string{"Filesystem", "Size", "Used", "Available", "Use%", "Mount"},
+			unit:    "kb",
+			runner: func(cmd string) (string, error) {
+				return string(ReadFixtureFile("./testdata/fixtures/ga_users.json", t)), errors.New("Error")
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual, err := HostDisk(tc.runner, tc.headers, tc.unit)
+			if (err != nil) != tc.wantErr {
+				t.Errorf("Error '%v' even if wantErr is %t", err, tc.wantErr)
+				return
+			}
+
+			if tc.wantErr == false && !reflect.DeepEqual(actual, tc.expected) {
+				t.Errorf("Expected %v, actual %v", tc.expected, actual)
+			}
+		})
+	}
+}
+
+func Test_HostDiskIO(t *testing.T) {
+	testCases := []struct {
+		name     string
+		runner   runnerFunc
+		expected string
+		unit     string
+		wantErr  bool
+	}{
+		{
+			name:     "happy case",
+			expected: "4170343424.00 / 5843349504.00",
+			unit:     "kb",
+			runner: func(cmd string) (string, error) {
+				return string(ReadFixtureFile("./testdata/fixtures/host_disk_io", t)), nil
+			},
+			wantErr: false,
+		},
+		{
+			name:     "empty result",
+			expected: "0.00 / 0.00",
+			unit:     "kb",
+			runner: func(cmd string) (string, error) {
+				return "", nil
+			},
+			wantErr: false,
+		},
+		{
+			name: "runner return error",
+			unit: "kb",
+			runner: func(cmd string) (string, error) {
+				return string(ReadFixtureFile("./testdata/fixtures/host_disk_io", t)), errors.New("Error")
+			},
+			wantErr: true,
+		},
+		{
+			name: "runner return impossible result",
+			unit: "kb",
+			runner: func(cmd string) (string, error) {
+				return string(ReadFixtureFile("./testdata/fixtures/ga_users.json", t)), errors.New("Error")
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual, err := HostDiskIO(tc.runner, tc.unit)
 			if (err != nil) != tc.wantErr {
 				t.Errorf("Error '%v' even if wantErr is %t", err, tc.wantErr)
 				return
