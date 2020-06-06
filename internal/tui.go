@@ -140,9 +140,19 @@ type drawer interface {
 	Table(
 		data [][]string,
 		title string,
-		tc uint16,
+		titleColor uint16,
 		bd uint16,
 		fg uint16,
+	)
+
+	Gauge(
+		data float64,
+		textColor uint16,
+		barColor uint16,
+		borderColor uint16,
+		title string,
+		titleColor uint16,
+		height int,
 	)
 	AddCol(size int)
 	AddRow()
@@ -357,6 +367,31 @@ func (t *Tui) AddTextBox(
 		int(height),
 		multiline,
 		bold,
+	)
+
+	return nil
+}
+
+func (t *Tui) AddGauge(
+	data float64,
+	title string,
+	options map[string]string,
+) (err error) {
+
+	var height int64 = 1
+	if _, ok := options[optionHeight]; ok {
+		height, _ = strconv.ParseInt(options[optionHeight], 0, 0)
+	}
+
+	ce := createColoredElements(options)
+	t.instance.Gauge(
+		data,
+		ce.textColor,
+		ce.barColor,
+		ce.borderColor,
+		title,
+		ce.titleColor,
+		int(height),
 	)
 
 	return nil

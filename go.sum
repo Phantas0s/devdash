@@ -21,6 +21,8 @@ github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAE
 github.com/OneOfOne/xxhash v1.2.5/go.mod h1:eZbhyaAYD41SGSSsnmcpxVoRiQ/MPUTjUdIIOT9Um7Q=
 github.com/Phantas0s/termui v0.0.0-20190825161953-d204f6ac0873 h1:5YLbONHvxijEMsOFgIdhRFG6ZGLaBeucVmyoJKXQn80=
 github.com/Phantas0s/termui v0.0.0-20190825161953-d204f6ac0873/go.mod h1:5R72E8oDvxobkryx5DK/lfblYGHe5y0pIWuFdoQOsl8=
+github.com/Phantas0s/termui v0.0.0-20200606131028-e1801ece841d h1:0a52GCTNwaKS3uQWzAJ17dY4VXTTWbWTdlNQhqTwF0Q=
+github.com/Phantas0s/termui v0.0.0-20200606131028-e1801ece841d/go.mod h1:5R72E8oDvxobkryx5DK/lfblYGHe5y0pIWuFdoQOsl8=
 github.com/Phantas0s/termui v2.3.0+incompatible h1:koWp4DWtxihOl4KIeLBalrZPzn0BC9MkJrtekmVV2H0=
 github.com/Phantas0s/termui v2.3.0+incompatible/go.mod h1:7yheYfLhXyesNA0CRRq6ue9v3e8EY6XIOf3S0Gv9XIQ=
 github.com/Phantas0s/testomatic v0.2.2 h1:P5xOf//fyfak5C1O21Q8El772ScE0LVhcdoMx85xIFA=

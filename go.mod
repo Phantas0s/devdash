@@ -7,7 +7,7 @@ require (
 	cloud.google.com/go/bigquery v1.2.0 // indirect
 	cloud.google.com/go/storage v1.1.2 // indirect
 	github.com/OneOfOne/xxhash v1.2.5 // indirect
-	github.com/Phantas0s/termui v0.0.0-20190825161953-d204f6ac0873
+	github.com/Phantas0s/termui v0.0.0-20200606131028-e1801ece841d
 	github.com/Phantas0s/testomatic v0.2.2
 	github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d // indirect
 	github.com/coreos/bbolt v1.3.3 // indirect

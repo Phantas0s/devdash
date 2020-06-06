@@ -11,19 +11,22 @@ import (
 )
 
 const (
-	rhUptime      = "rh.box_uptime"
-	rhLoad        = "rh.box_load"
-	rhProcesses   = "rh.box_processes"
-	rhBoxCPURate  = "rh.box_cpu_rate"
-	rhBoxMemRate  = "rh.box_memory_rate"
-	rhBoxSwapRate = "rh.box_swap_rate"
-	rhBoxNetIO    = "rh.box_net_io"
-	rhBoxDiskIO   = "rh.box_disk_io"
-	rhBarMemory   = "rh.bar_memory"
-	rhBarRates    = "rh.bar_rates"
-	rhTableDisk   = "rh.table_disk"
-	rhTable       = "rh.table"
-	rhBox         = "rh.box"
+	rhUptime        = "rh.box_uptime"
+	rhLoad          = "rh.box_load"
+	rhProcesses     = "rh.box_processes"
+	rhBoxMemRate    = "rh.box_memory_rate"
+	rhGaugeMemRate  = "rh.gauge_memory_rate"
+	rhBoxSwapRate   = "rh.box_swap_rate"
+	rhGaugeSwapRate = "rh.gauge_swap_rate"
+	rhBoxNetIO      = "rh.box_net_io"
+	rhBoxDiskIO     = "rh.box_disk_io"
+	rhBoxCPURate    = "rh.box_cpu_rate"
+	rhGaugeCPURate  = "rh.gauge_cpu_rate"
+	rhBarMemory     = "rh.bar_memory"
+	rhBarRates      = "rh.bar_rates"
+	rhTableDisk     = "rh.table_disk"
+	rhTable         = "rh.table"
+	rhBox           = "rh.box"
 )
 
 type HostWidget struct {
@@ -47,6 +50,7 @@ func (ms *HostWidget) CreateWidgets(widget Widget, tui *Tui) (f func() error, er
 
 	// Compatibility with localhost
 	name := strings.Replace(widget.Name, "lh", "rh", 1)
+
 	switch name {
 	case rhUptime:
 		f, err = ms.boxUptime(widget)
@@ -58,10 +62,16 @@ func (ms *HostWidget) CreateWidgets(widget Widget, tui *Tui) (f func() error, er
 		f, err = ms.barMemory(widget)
 	case rhBoxCPURate:
 		f, err = ms.boxCPURate(widget)
+	case rhGaugeCPURate:
+		f, err = ms.gaugeCPURate(widget)
 	case rhBoxMemRate:
 		f, err = ms.boxMemRate(widget)
+	case rhGaugeMemRate:
+		f, err = ms.gaugeMemRate(widget)
 	case rhBoxSwapRate:
 		f, err = ms.boxSwapRate(widget)
+	case rhGaugeSwapRate:
+		f, err = ms.gaugeSwapRate(widget)
 	case rhBoxNetIO:
 		f, err = ms.boxNetIO(widget)
 	case rhBoxDiskIO:
@@ -146,7 +156,25 @@ func (ms *HostWidget) boxCPURate(widget Widget) (f func() error, err error) {
 	}
 
 	f = func() error {
-		return ms.tui.AddTextBox(strconv.FormatFloat(CPURate, 'f', 2, 64)+" %", title, widget.Options)
+		return ms.tui.AddTextBox(strconv.FormatFloat(CPURate, 'f', 2, strconv.IntSize)+" %", title, widget.Options)
+	}
+
+	return
+}
+
+func (ms *HostWidget) gaugeCPURate(widget Widget) (f func() error, err error) {
+	title := " CPU usage "
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	CPURate, err := platform.HostCPURate(ms.service.Runner)
+	if err != nil {
+		return nil, err
+	}
+
+	f = func() error {
+		return ms.tui.AddGauge(CPURate, title, widget.Options)
 	}
 
 	return
@@ -170,6 +198,24 @@ func (ms *HostWidget) boxMemRate(widget Widget) (f func() error, err error) {
 	return
 }
 
+func (ms *HostWidget) gaugeMemRate(widget Widget) (f func() error, err error) {
+	title := " Memory usage "
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	memRate, err := platform.HostMemoryRate(ms.service.Runner)
+	if err != nil {
+		return nil, err
+	}
+
+	f = func() error {
+		return ms.tui.AddGauge(memRate, title, widget.Options)
+	}
+
+	return
+}
+
 func (ms *HostWidget) boxSwapRate(widget Widget) (f func() error, err error) {
 	title := " Swap usage "
 	if _, ok := widget.Options[optionTitle]; ok {
@@ -183,6 +229,24 @@ func (ms *HostWidget) boxSwapRate(widget Widget) (f func() error, err error) {
 
 	f = func() error {
 		return ms.tui.AddTextBox(strconv.FormatFloat(swapRate, 'f', 2, 64)+" %", title, widget.Options)
+	}
+
+	return
+}
+
+func (ms *HostWidget) gaugeSwapRate(widget Widget) (f func() error, err error) {
+	title := " Swap usage "
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	swapRate, err := platform.HostSwapRate(ms.service.Runner)
+	if err != nil {
+		return nil, err
+	}
+
+	f = func() error {
+		return ms.tui.AddGauge(swapRate, title, widget.Options)
 	}
 
 	return

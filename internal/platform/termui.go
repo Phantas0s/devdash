@@ -75,6 +75,27 @@ func (t *termUI) TextBox(
 	t.widgets = append(t.widgets, textBox)
 }
 
+func (t *termUI) Gauge(
+	data float64,
+	textColor uint16,
+	barColor uint16,
+	borderColor uint16,
+	title string,
+	tc uint16,
+	height int,
+) {
+	gauge := termui.NewGauge()
+
+	gauge.BarColor = termui.Attribute(barColor)
+	gauge.BorderFg = termui.Attribute(borderColor)
+	gauge.BorderLabelFg = termui.Attribute(tc)
+	gauge.PercentColor = termui.Attribute(textColor)
+	gauge.BorderLabel = title
+	gauge.Percent = data
+
+	t.widgets = append(t.widgets, gauge)
+}
+
 // Title is a special TextBox widget type.
 // TODO Should be replace with regular TextBox
 func (t *termUI) Title(
