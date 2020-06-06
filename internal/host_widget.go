@@ -23,6 +23,7 @@ const (
 	rhBarRates    = "rh.bar_rates"
 	rhTableDisk   = "rh.table_disk"
 	rhTable       = "rh.table"
+	rhBox         = "rh.box"
 )
 
 type HostWidget struct {
@@ -71,6 +72,8 @@ func (ms *HostWidget) CreateWidgets(widget Widget, tui *Tui) (f func() error, er
 		f, err = ms.tableDisk(widget)
 	case rhTable:
 		f, err = ms.table(widget)
+	case rhBox:
+		f, err = ms.box(widget)
 	default:
 		return nil, errors.Errorf("can't find the widget %s", widget.Name)
 	}
@@ -358,6 +361,29 @@ func (ms *HostWidget) table(widget Widget) (f func() error, err error) {
 	return
 }
 
+func (ms *HostWidget) box(widget Widget) (f func() error, err error) {
+	title := fmt.Sprintf(" Box ")
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	cmd := "echo 'box'"
+	// cmd := "/bin/df -x devtmpfs -x tmpfs -x debugfs | sed -n '1!p'"
+	if _, ok := widget.Options[optionCommand]; ok {
+		cmd = widget.Options[optionCommand]
+	}
+
+	data, err := platform.HostBox(ms.service.Runner, cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	f = func() error {
+		return ms.tui.AddTextBox(data, title, widget.Options)
+	}
+
+	return
+}
 func formatSeconds(dur time.Duration) string {
 	dur = dur - (dur % time.Second)
 	var days int

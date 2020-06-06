@@ -2,7 +2,6 @@ package platform
 
 import (
 	"bytes"
-	"fmt"
 	"os/exec"
 	"strings"
 
@@ -51,8 +50,6 @@ func formatBranches(data string) [][]string {
 	for i := 0; i < len(d)-1; i++ {
 		result = append(result, strings.Split(d[i], ","))
 	}
-
-	fmt.Println(result)
 
 	return result
 }

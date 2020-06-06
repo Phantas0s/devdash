@@ -615,3 +615,52 @@ func Test_HostDiskIO(t *testing.T) {
 		})
 	}
 }
+
+func Test_HostBox(t *testing.T) {
+	testCases := []struct {
+		name     string
+		runner   runnerFunc
+		expected string
+		command  string
+		wantErr  bool
+	}{
+		{
+			name:     "happy case",
+			expected: "hello",
+			runner: func(cmd string) (string, error) {
+				return "hello", nil
+			},
+			wantErr: false,
+		},
+		{
+			name:     "empty result",
+			expected: "",
+			runner: func(cmd string) (string, error) {
+				return "", nil
+			},
+			wantErr: false,
+		},
+		{
+			name:    "runner return error",
+			command: "kb",
+			runner: func(cmd string) (string, error) {
+				return string(ReadFixtureFile("./testdata/fixtures/host_disk_io", t)), errors.New("Error")
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual, err := HostBox(tc.runner, tc.command)
+			if (err != nil) != tc.wantErr {
+				t.Errorf("Error '%v' even if wantErr is %t", err, tc.wantErr)
+				return
+			}
+
+			if tc.wantErr == false && actual != tc.expected {
+				t.Errorf("Expected %v, actual %v", tc.expected, actual)
+			}
+		})
+	}
+}

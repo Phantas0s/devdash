@@ -485,6 +485,21 @@ func HostDiskIO(runner runnerFunc, unit string) (string, error) {
 	return strconv.FormatFloat(fr, 'f', 2, strconv.IntSize) + " / " + strconv.FormatFloat(fw, 'f', 2, strconv.IntSize), nil
 }
 
+func HostBox(runner runnerFunc, command string) (string, error) {
+	lines, err := runner(command)
+	if err != nil {
+		return "", err
+	}
+
+	scanner := bufio.NewScanner(strings.NewReader(lines))
+
+	for scanner.Scan() {
+		return scanner.Text(), nil
+	}
+
+	return "", nil
+}
+
 func formatToBar(data string) (val []uint64) {
 	data = strings.Trim(data, ",")
 	s := strings.Split(data, ",")
