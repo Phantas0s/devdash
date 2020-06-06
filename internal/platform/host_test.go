@@ -95,7 +95,7 @@ func Test_HostUptime(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "Runner return impossible number",
+			name:    "Runner return wrong number",
 			runner:  func(cmd string) (string, error) { return "hello", nil },
 			wantErr: true,
 		},
@@ -140,9 +140,10 @@ func Test_HostLoad(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "runner return impossible result",
-			runner:  func(cmd string) (string, error) { return "hello", nil },
-			wantErr: true,
+			name:     "runner return wrong result",
+			expected: "",
+			runner:   func(cmd string) (string, error) { return "hello", nil },
+			wantErr:  true,
 		},
 	}
 
@@ -184,7 +185,7 @@ func Test_HostProcesses(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "runner return impossible result",
+			name:    "runner return wrong result",
 			runner:  func(cmd string) (string, error) { return "hello", nil },
 			wantErr: true,
 		},
@@ -244,7 +245,7 @@ func Test_HostMemory(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "runner return impossible result",
+			name: "runner return wrong result",
 			runner: func(cmd string) (string, error) {
 				return string(ReadFixtureFile("./testdata/fixtures/ga_users.json", t)), errors.New("Error")
 			},
@@ -300,7 +301,7 @@ func Test_HostMemoryRate(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "runner return impossible result",
+			name: "runner return wrong result",
 			runner: func(cmd string) (string, error) {
 				return string(ReadFixtureFile("./testdata/fixtures/ga_users.json", t)), errors.New("Error")
 			},
@@ -354,7 +355,7 @@ func Test_HostSwapRate(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "runner return impossible result",
+			name: "runner return wrong result",
 			runner: func(cmd string) (string, error) {
 				return string(ReadFixtureFile("./testdata/fixtures/ga_users.json", t)), errors.New("Error")
 			},
@@ -407,7 +408,7 @@ func Test_HostCPURate(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "runner return impossible result",
+			name: "runner return wrong result",
 			runner: func(cmd string) (string, error) {
 				return string(ReadFixtureFile("./testdata/fixtures/ga_users.json", t)), errors.New("Error")
 			},
@@ -465,7 +466,7 @@ func Test_HostNetIO(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "runner return impossible result",
+			name: "runner return wrong result",
 			unit: "kb",
 			runner: func(cmd string) (string, error) {
 				return string(ReadFixtureFile("./testdata/fixtures/ga_users.json", t)), errors.New("Error")
@@ -532,13 +533,14 @@ func Test_HostDisk(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:    "runner return impossible result",
-			headers: []string{"Filesystem", "Size", "Used", "Available", "Use%", "Mount"},
-			unit:    "kb",
+			name:     "runner return wrong result",
+			headers:  []string{"Filesystem", "Size", "Used", "Available", "Use%", "Mount"},
+			expected: [][]string{{"Filesystem", "Size", "Used", "Available", "Use%", "Mount"}},
+			unit:     "kb",
 			runner: func(cmd string) (string, error) {
-				return string(ReadFixtureFile("./testdata/fixtures/ga_users.json", t)), errors.New("Error")
+				return "hello", nil
 			},
-			wantErr: true,
+			wantErr: false,
 		},
 	}
 
@@ -592,12 +594,13 @@ func Test_HostDiskIO(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "runner return impossible result",
-			unit: "kb",
+			name:     "runner return wrong result",
+			unit:     "kb",
+			expected: "0.00 / 0.00",
 			runner: func(cmd string) (string, error) {
-				return string(ReadFixtureFile("./testdata/fixtures/ga_users.json", t)), errors.New("Error")
+				return string(ReadFixtureFile("./testdata/fixtures/ga_users.json", t)), nil
 			},
-			wantErr: true,
+			wantErr: false,
 		},
 	}
 
@@ -653,6 +656,63 @@ func Test_HostBox(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			actual, err := HostBox(tc.runner, tc.command)
+			if (err != nil) != tc.wantErr {
+				t.Errorf("Error '%v' even if wantErr is %t", err, tc.wantErr)
+				return
+			}
+
+			if tc.wantErr == false && actual != tc.expected {
+				t.Errorf("Expected %v, actual %v", tc.expected, actual)
+			}
+		})
+	}
+}
+
+func Test_HostGauge(t *testing.T) {
+	testCases := []struct {
+		name     string
+		runner   runnerFunc
+		expected float64
+		command  string
+		wantErr  bool
+	}{
+		{
+			name:     "happy case",
+			expected: 60,
+			runner: func(cmd string) (string, error) {
+				return "60", nil
+			},
+			wantErr: false,
+		},
+		{
+			name:     "empty result",
+			expected: 0,
+			runner: func(cmd string) (string, error) {
+				return "", nil
+			},
+			wantErr: false,
+		},
+		{
+			name:     "runner return wrong result",
+			expected: 0,
+			runner: func(cmd string) (string, error) {
+				return "ldfsjsdf", nil
+			},
+			wantErr: false,
+		},
+		{
+			name:    "runner return error",
+			command: "kb",
+			runner: func(cmd string) (string, error) {
+				return "60", errors.New("Error")
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual, err := HostGauge(tc.runner, tc.command)
 			if (err != nil) != tc.wantErr {
 				t.Errorf("Error '%v' even if wantErr is %t", err, tc.wantErr)
 				return

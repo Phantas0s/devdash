@@ -27,6 +27,7 @@ const (
 	rhTableDisk     = "rh.table_disk"
 	rhTable         = "rh.table"
 	rhBox           = "rh.box"
+	rhGauge         = "rh.gauge"
 )
 
 type HostWidget struct {
@@ -84,6 +85,8 @@ func (ms *HostWidget) CreateWidgets(widget Widget, tui *Tui) (f func() error, er
 		f, err = ms.table(widget)
 	case rhBox:
 		f, err = ms.box(widget)
+	case rhGauge:
+		f, err = ms.gauge(widget)
 	default:
 		return nil, errors.Errorf("can't find the widget %s", widget.Name)
 	}
@@ -142,6 +145,32 @@ func (ms *HostWidget) boxUptime(widget Widget) (f func() error, err error) {
 	}
 
 	return
+}
+
+func formatSeconds(dur time.Duration) string {
+	dur = dur - (dur % time.Second)
+	var days int
+	for dur.Hours() > 24.0 {
+		days++
+		dur -= 24 * time.Hour
+	}
+	for dur.Hours() > 24.0 {
+		days++
+		dur -= 24 * time.Hour
+	}
+
+	s1 := dur.String()
+	s2 := ""
+	if days > 0 {
+		s2 = fmt.Sprintf("%dd ", days)
+	}
+	for _, ch := range s1 {
+		s2 += string(ch)
+		if ch == 'h' || ch == 'm' {
+			s2 += " "
+		}
+	}
+	return s2
 }
 
 func (ms *HostWidget) boxCPURate(widget Widget) (f func() error, err error) {
@@ -448,28 +477,27 @@ func (ms *HostWidget) box(widget Widget) (f func() error, err error) {
 
 	return
 }
-func formatSeconds(dur time.Duration) string {
-	dur = dur - (dur % time.Second)
-	var days int
-	for dur.Hours() > 24.0 {
-		days++
-		dur -= 24 * time.Hour
-	}
-	for dur.Hours() > 24.0 {
-		days++
-		dur -= 24 * time.Hour
+
+func (ms *HostWidget) gauge(widget Widget) (f func() error, err error) {
+	title := fmt.Sprintf(" Gauge ")
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
 	}
 
-	s1 := dur.String()
-	s2 := ""
-	if days > 0 {
-		s2 = fmt.Sprintf("%dd ", days)
+	cmd := "echo 50"
+	// cmd := "/bin/df -x devtmpfs -x tmpfs -x debugfs | sed -n '1!p'"
+	if _, ok := widget.Options[optionCommand]; ok {
+		cmd = widget.Options[optionCommand]
 	}
-	for _, ch := range s1 {
-		s2 += string(ch)
-		if ch == 'h' || ch == 'm' {
-			s2 += " "
-		}
+
+	data, err := platform.HostGauge(ms.service.Runner, cmd)
+	if err != nil {
+		return nil, err
 	}
-	return s2
+
+	f = func() error {
+		return ms.tui.AddGauge(data, title, widget.Options)
+	}
+
+	return
 }

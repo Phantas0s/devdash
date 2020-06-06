@@ -500,6 +500,22 @@ func HostBox(runner runnerFunc, command string) (string, error) {
 	return "", nil
 }
 
+func HostGauge(runner runnerFunc, command string) (float64, error) {
+	lines, err := runner(command)
+	if err != nil {
+		return 0, err
+	}
+
+	scanner := bufio.NewScanner(strings.NewReader(lines))
+
+	for scanner.Scan() {
+		f, _ := strconv.ParseFloat(scanner.Text(), strconv.IntSize)
+		return f, nil
+	}
+
+	return 0, nil
+}
+
 func formatToBar(data string) (val []uint64) {
 	data = strings.Trim(data, ",")
 	s := strings.Split(data, ",")

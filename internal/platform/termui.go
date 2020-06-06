@@ -92,6 +92,7 @@ func (t *termUI) Gauge(
 	gauge.PercentColor = termui.Attribute(textColor)
 	gauge.BorderLabel = title
 	gauge.Percent = data
+	gauge.Height = height
 
 	t.widgets = append(t.widgets, gauge)
 }

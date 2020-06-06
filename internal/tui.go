@@ -378,7 +378,7 @@ func (t *Tui) AddGauge(
 	options map[string]string,
 ) (err error) {
 
-	var height int64 = 1
+	var height int64 = 3
 	if _, ok := options[optionHeight]; ok {
 		height, _ = strconv.ParseInt(options[optionHeight], 0, 0)
 	}
