@@ -12,14 +12,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
     * ga.bar_countries
     * ga.bar_devices
 
-* Remote host service (grab data from command line via SSH on remote host)
-    * rh.box_uptime
+* Remote host / local host service (grab data from command line via SSH on remote or local host)
+    * rh.box_uptime 
     * rh.box_load
-    * rh.box_processes
+    * rh.box_net_io
+    * rh.box_disk_io
     * rh.bar_memory
+    * rh.gauge_cpu_rate
+    * rh.gauge_memory_rate
+    * rh.gauge_swap_rate
+    * rh.bar_rates
+    * rh.table_disk
+    * rh.box
+    * rh.gauge
+    * rh.table
+    * rh.bar
 
 * Possibility to load dashboard configurations from `$XDG_CONFIG_HOME` only using filename.
-Example: `devdash -c dashboard` if there is a file `$XDG_CONFIG_HOME/devdash/dashboard`
+    * Example: `devdash -c dashboard` if there is a file `$XDG_CONFIG_HOME/devdash/dashboard.yml/json`
 
 ### Updated 
 
