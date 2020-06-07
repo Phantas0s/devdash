@@ -364,37 +364,6 @@ func HostNetIO(runner runnerFunc, unit string) (string, error) {
 	return rx + " / " + tx, nil
 }
 
-func HostTable(runner runnerFunc, command string, headers []string) (cells [][]string, err error) {
-	lines, err := runner(command)
-	if err != nil {
-		return nil, err
-	}
-
-	scanner := bufio.NewScanner(strings.NewReader(lines))
-	data := ""
-
-	lineNumber := 0
-	for scanner.Scan() {
-		line := scanner.Text()
-		parts := strings.Fields(line)
-
-		if len(headers) == 0 {
-			headers = parts
-			lineNumber++
-			continue
-		}
-
-		data += strings.Join(parts, ",") + ","
-		lineNumber++
-	}
-	data = strings.Trim(data, ",")
-
-	cells = [][]string{headers}
-	cells = append(cells, formatToTable(len(headers), data)...)
-
-	return
-}
-
 func HostDisk(runner runnerFunc, headers []string, unit string) ([][]string, error) {
 	// GetIOStat returns io stat
 	lines, err := runner("/bin/df -x devtmpfs -x tmpfs -x debugfs")
@@ -448,7 +417,6 @@ func HostDisk(runner runnerFunc, headers []string, unit string) ([][]string, err
 
 	return c, nil
 }
-
 func HostDiskIO(runner runnerFunc, unit string) (string, error) {
 	// GetIOStat returns io stat
 	lines, err := runner("/bin/cat /proc/diskstats")
@@ -485,6 +453,33 @@ func HostDiskIO(runner runnerFunc, unit string) (string, error) {
 	return strconv.FormatFloat(fr, 'f', 2, strconv.IntSize) + " / " + strconv.FormatFloat(fw, 'f', 2, strconv.IntSize), nil
 }
 
+func HostBar(runner runnerFunc, command string) (data []int, err error) {
+	lines, err := runner(command)
+	if err != nil {
+		return nil, err
+	}
+
+	scanner := bufio.NewScanner(strings.NewReader(lines))
+	lineNumber := 0
+	str := ""
+	for scanner.Scan() {
+		line := scanner.Text()
+		parts := strings.Fields(line)
+
+		for _, v := range parts {
+			str += v + ","
+		}
+		lineNumber++
+	}
+
+	f := formatToBar(str)
+	result := []int{}
+	for _, f := range f {
+		result = append(result, int(f))
+	}
+	return result, nil
+}
+
 func HostBox(runner runnerFunc, command string) (string, error) {
 	lines, err := runner(command)
 	if err != nil {
@@ -514,6 +509,37 @@ func HostGauge(runner runnerFunc, command string) (float64, error) {
 	}
 
 	return 0, nil
+}
+
+func HostTable(runner runnerFunc, command string, headers []string) (cells [][]string, err error) {
+	lines, err := runner(command)
+	if err != nil {
+		return nil, err
+	}
+
+	scanner := bufio.NewScanner(strings.NewReader(lines))
+	data := ""
+
+	lineNumber := 0
+	for scanner.Scan() {
+		line := scanner.Text()
+		parts := strings.Fields(line)
+
+		if len(headers) == 0 {
+			headers = parts
+			lineNumber++
+			continue
+		}
+
+		data += strings.Join(parts, ",") + ","
+		lineNumber++
+	}
+	data = strings.Trim(data, ",")
+
+	cells = [][]string{headers}
+	cells = append(cells, formatToTable(len(headers), data)...)
+
+	return
 }
 
 func formatToBar(data string) (val []uint64) {

@@ -28,6 +28,7 @@ const (
 	rhTable         = "rh.table"
 	rhBox           = "rh.box"
 	rhGauge         = "rh.gauge"
+	rhBar           = "rh.bar"
 )
 
 type HostWidget struct {
@@ -87,6 +88,8 @@ func (ms *HostWidget) CreateWidgets(widget Widget, tui *Tui) (f func() error, er
 		f, err = ms.box(widget)
 	case rhGauge:
 		f, err = ms.gauge(widget)
+	case rhBar:
+		f, err = ms.bar(widget)
 	default:
 		return nil, errors.Errorf("can't find the widget %s", widget.Name)
 	}
@@ -409,6 +412,12 @@ func (ms *HostWidget) tableDisk(widget Widget) (f func() error, err error) {
 	}
 
 	headers := []string{"Filesystem", "Size", "Used", "Available", "Use%", "Mount"}
+	if _, ok := widget.Options[optionHeaders]; ok {
+		if len(widget.Options[optionHeaders]) > 0 {
+			headers = strings.Split(strings.TrimSpace(widget.Options[optionHeaders]), ",")
+		}
+	}
+
 	data, err := platform.HostDisk(ms.service.Runner, headers, unit)
 	if err != nil {
 		return nil, err
@@ -497,6 +506,41 @@ func (ms *HostWidget) gauge(widget Widget) (f func() error, err error) {
 
 	f = func() error {
 		return ms.tui.AddGauge(data, title, widget.Options)
+	}
+
+	return
+}
+
+func (ms *HostWidget) bar(widget Widget) (f func() error, err error) {
+	title := " Example of bar "
+	if _, ok := widget.Options[optionTitle]; ok {
+		title = widget.Options[optionTitle]
+	}
+
+	headers := []string{"small", "bigger", "big", "insane"}
+	if _, ok := widget.Options[optionHeaders]; ok {
+		if len(widget.Options[optionHeaders]) > 0 {
+			headers = strings.Split(strings.TrimSpace(widget.Options[optionHeaders]), ",")
+		}
+	}
+
+	cmd := "echo -e 20 30 40 50"
+	if _, ok := widget.Options[optionCommand]; ok {
+		cmd = widget.Options[optionCommand]
+	}
+
+	data, err := platform.HostBar(ms.service.Runner, cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	f = func() error {
+		return ms.tui.AddBarChart(
+			data,
+			headers,
+			title,
+			widget.Options,
+		)
 	}
 
 	return

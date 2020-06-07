@@ -724,3 +724,68 @@ func Test_HostGauge(t *testing.T) {
 		})
 	}
 }
+func Test_HostBar(t *testing.T) {
+	testCases := []struct {
+		name     string
+		runner   runnerFunc
+		expected []int
+		command  string
+		wantErr  bool
+	}{
+		{
+			name:     "happy case",
+			expected: []int{40, 50, 60, 70},
+			runner: func(cmd string) (string, error) {
+				return "40 50 60 70", nil
+			},
+			wantErr: false,
+		},
+		{
+			name:     "on multiple lines",
+			expected: []int{40, 50, 60, 70},
+			runner: func(cmd string) (string, error) {
+				return `40 50 
+						60 70`, nil
+			},
+			wantErr: false,
+		},
+		{
+			name:     "empty result",
+			expected: []int{0},
+			runner: func(cmd string) (string, error) {
+				return "", nil
+			},
+			wantErr: false,
+		},
+		{
+			name:     "runner return wrong result",
+			expected: []int{0},
+			runner: func(cmd string) (string, error) {
+				return "ldfsjsdf", nil
+			},
+			wantErr: false,
+		},
+		{
+			name:    "runner return error",
+			command: "kb",
+			runner: func(cmd string) (string, error) {
+				return "60", errors.New("Error")
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			actual, err := HostBar(tc.runner, tc.command)
+			if (err != nil) != tc.wantErr {
+				t.Errorf("Error '%v' even if wantErr is %t", err, tc.wantErr)
+				return
+			}
+
+			if tc.wantErr == false && !reflect.DeepEqual(actual, tc.expected) {
+				t.Errorf("Expected %v, actual %v", tc.expected, actual)
+			}
+		})
+	}
+}
