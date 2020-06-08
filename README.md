@@ -8,25 +8,25 @@ DevDash is a highly configurable terminal dashboard for developers, who want to 
 
 # Why using DevDash?
 
-* *Choose* the metrics you specifically need.
-* All the important data in your cosy terminal.
-* Pull and display data in cool diagrams from: 
-    * Your own computer (even output from command lines or scripts!)
+* Pull the data and display it in cool diagrams (or widgets) using YAML / JSON config, from: 
+    * Your own computer. From your own scripts / command lines too!
     * A remote computer via SSH
     * Github
     * Travis
     * Google Analytics 
-    * Google Search Console. More services to come!
+    * Google Search Console
     * Feedly
-* Unlimited amount of different dashboards with different configurations.
-* Widgets' data refreshed automatically.
 * A huge amount of flexibility compared to other terminal dashboards:
   * Choose the widgets you want.
   * Place your widgets where you want.
   * Choose the data you want to display, the colors you want to use, and a lot of other things for each widget.
+  * Don't want to personalize everything? Don't overwrite the defaults, then.
+* Unlimited amount of different dashboards with different configurations.
+* Data refreshed automatically via time ticks, or via a keyboard shortcut (Ctrl + r by default).
 
 # Menu
 
+* [Installation](#installation)
 * [Installation](#installation)
 * [Documentation](#documentation)
 * [Acknowledgement](#acknowledgement)
@@ -53,14 +53,15 @@ rm linux.sh
 
 You need to clone this repository and build the binary in `cmd/devdash`.
 
-# Getting Started
+# How Does It Work?
 
-This is how DevDash works in a nutshell. You can personalize every dashboard way further than that. See the [documentation](https://thedevdash.com).
+In a nutshell:
 
-* If you run DevDash without precising any dashboard configuration, it will display a default one created in `$XDG_CONFIG_HOME/devdash`, often `/home/user/.config/devdash`.
-* If you're running on linux, you can create a new dashboard which will display some information system by typing `devdash --create localhost` and then `devdash --config localhost`. The new dashboard will be, again, saved in `XDG_CONFIG_HOME/devdash'.
-* The best way to get used to the dashboard configuration file is to generate one of the two default configuration mentioned above and play with it. The [getting started examples](https://thedevdash.com/getting-started/examples/) from the documentation will help you further to create your own dashboards.
-* I'm thriving to make DevDash easy to configure, yet very flexible and customizable. More updates in that sense will come!
+* If you run DevDash without giving a dashboard configuration, it will create and display a default dashboard (`default.yml`) located in `$XDG_CONFIG_HOME/devdash` or `$HOME/.config/devdash`.
+* To get used to dashboard' configurations, there are many [examples here](https://thedevdash.com/getting-started/examples/). They can help you getting started.
+* To run a dashboard created in the two filepaths mentioned above, you just need to execute `dashboard -c my-super-dashboard`, if your configuration file is called `my-super-dashboard.yml`. You can use JSON as well!
+* You can as well run any dashboard from anywhere if you give an absolute or relative path.
+* I'm thriving to make DevDash easier to configure, yet very flexible and customizable. The next updates will go in that direction.
 
 # Documentation
 
@@ -68,9 +69,9 @@ This is how DevDash works in a nutshell. You can personalize every dashboard way
 
 You'll find:
 
-* Installation / getting started
-* Simple examples and real use cases
-* Complete reference for configuring your dashboards
+* [Installation / getting started](https://thedevdash.com/getting-started/installation/)
+* [Simple examples](https://thedevdash.com/getting-started/examples/) and [real use cases](https://thedevdash.com/getting-started/use-cases/devdash/)
+* [Complete reference for configuring whatever you want](https://thedevdash.com/reference/).
 
 # Acknowledgement
 
@@ -83,13 +84,13 @@ DevDash was inspired from other open source projects:
 
 # Bugs and Ideas
 
-I would be happy to read about new ideas and to fix bugs. Simply open an issue!
+I would be happy to read about new ideas and to fix bugs. Opening an issue is the way to go.
 
 # Contribute
 
 First of all, thanks a lot if you want to contribute to DevDash!
 
-If you want to implement a new feature, let's speak about it first to decide if it fits DevDash scope.
+If you want to implement a new feature, let's speak about it first and decide if it fits DevDash scope.
 
 # Making Of
 
