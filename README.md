@@ -4,20 +4,29 @@
 
 DevDash is a highly configurable terminal dashboard for developers, who want to choose and display the most up-to-date metrics they need, at one place.
 
+[![google analytics example DevDash configuration](./example/img/mix-1.png)](./example/img/mix-1.png)
+
 # Why using DevDash?
 
-* *Choose* the metrics you specifically need.
-* All the important data in your cosy terminal.
-* Pull data from Github, Google Analytics or Google Search Console. More services to come!
-* Unlimited amount of different dashboards with different configurations.
-* Widgets' data refreshed automatically.
+* Pull the data and display it in cool diagrams (or widgets) using YAML / JSON config, from: 
+    * Your own computer. From your own scripts / command lines too!
+    * A remote computer via SSH
+    * Github
+    * Travis
+    * Google Analytics 
+    * Google Search Console
+    * Feedly
 * A huge amount of flexibility compared to other terminal dashboards:
   * Choose the widgets you want.
   * Place your widgets where you want.
   * Choose the data you want to display, the colors you want to use, and a lot of other things for each widget.
+  * Don't want to personalize everything? Don't overwrite the defaults, then.
+* Unlimited amount of different dashboards with different configurations.
+* Data refreshed automatically via time ticks, or via a keyboard shortcut (Ctrl + r by default).
 
 # Menu
 
+* [Installation](#installation)
 * [Installation](#installation)
 * [Documentation](#documentation)
 * [Acknowledgement](#acknowledgement)
@@ -44,15 +53,25 @@ rm linux.sh
 
 You need to clone this repository and build the binary in `cmd/devdash`.
 
+# How Does It Work?
+
+In a nutshell:
+
+* If you run DevDash without giving a dashboard configuration, it will create and display a default dashboard (`default.yml`) located in `$XDG_CONFIG_HOME/devdash` or `$HOME/.config/devdash`.
+* To get used to dashboard' configurations, there are many [examples here](https://thedevdash.com/getting-started/examples/). They can help you getting started.
+* To run a dashboard created in the two filepaths mentioned above, you just need to execute `dashboard -c my-super-dashboard`, if your configuration file is called `my-super-dashboard.yml`. You can use JSON as well!
+* You can as well run any dashboard from anywhere if you give an absolute or relative path.
+* I'm thriving to make DevDash easier to configure, yet very flexible and customizable. The next updates will go in that direction.
+
 # Documentation
 
-[The documentation is here.](https://thedevdash.com)
+[The complete DevDash documentation is here.](https://thedevdash.com).
 
-In there you will find:
+You'll find:
 
-* Installation / getting started
-* Simple examples and real use cases
-* Complete reference of dashboard configurations
+* [Installation / getting started](https://thedevdash.com/getting-started/installation/)
+* [Simple examples](https://thedevdash.com/getting-started/examples/) and [real use cases](https://thedevdash.com/getting-started/use-cases/devdash/)
+* [Complete reference for configuring whatever you want](https://thedevdash.com/reference/).
 
 # Acknowledgement
 
@@ -63,15 +82,15 @@ DevDash was inspired from other open source projects:
 * [wtf](https://github.com/wtfutil/wtf)
 * [tdash](https://github.com/jessfraz/tdash)
 
+# Bugs and Ideas
+
+I would be happy to read about new ideas and to fix bugs. Opening an issue is the way to go.
+
 # Contribute
 
 First of all, thanks a lot if you want to contribute to DevDash!
 
-I think the ["talk, then code"](https://dave.cheney.net/tag/contributing) practice is pretty good to avoid misunderstandings and hours of work for nothing.
-
-Therefore:
-
-"Every new feature or bug fix should be discussed with the maintainer(s) of the project before work commences. It’s fine to experiment privately, but do not send a change without discussing it first."
+If you want to implement a new feature, let's speak about it first and decide if it fits DevDash scope.
 
 # Making Of
 
@@ -83,8 +102,6 @@ For anybody interested how I managed to develop DevDash on side of a full time j
 
 # Showcase
 
-![google analytics example DevDash configuration](./example/img/mix-1.png)
--------
 ![google analytics example DevDash configuration](./example/img/thevaluabledev-2.png)
 -------
 ![google analytics example DevDash configuration](./example/img/thevaluabledev-3.png)
