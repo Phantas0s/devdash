@@ -4,7 +4,7 @@
 
 DevDash is a highly configurable terminal dashboard for developers, who want to choose and display the most up-to-date metrics they need, at one place.
 
-[![google analytics example DevDash configuration](./example/img/mix-1.png)](./example/img/mix-1.png)
+[![google analytics example DevDash configuration](./example/img/mix-1.png)](https://raw.githubusercontent.com/Phantas0s/devdash/master/example/img/mix-1.png)
 
 # Why using DevDash?
 
