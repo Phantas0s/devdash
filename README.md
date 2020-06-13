@@ -51,7 +51,7 @@ rm linux.sh
 
 ## Manual installation
 
-You need to clone this repository and build the binary in `cmd/devdash`.
+You need to clone this repository and build the binary: `go build devdash.go`.
 
 # How Does It Work?
 
