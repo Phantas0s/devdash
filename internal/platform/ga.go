@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/jwt"
@@ -95,9 +96,14 @@ type AnalyticValues struct {
 
 // NewAnalyticsClient to connect to Google Analytics APIs.
 func NewAnalyticsClient(keyfile string) (*Analytics, error) {
+	// TODO generalize file opening by looking in the different possible folders (see trello ticket)
 	data, err := ioutil.ReadFile(keyfile)
 	if err != nil {
-		return nil, fmt.Errorf("reading keyfile %q failed: %v", keyfile, err)
+		home, _ := homedir.Dir()
+		data, err = ioutil.ReadFile(home + "/.config/devdash/" + keyfile)
+		if err != nil {
+			return nil, fmt.Errorf("reading keyfile %q failed: %v", keyfile, err)
+		}
 	}
 
 	an := &Analytics{}
