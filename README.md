@@ -25,8 +25,6 @@ DevDash is a highly configurable terminal dashboard for developers, who want to 
 * Data refreshed automatically via time ticks, or via a keyboard shortcut (Ctrl + r by default).
 
 # Menu
-
-* [Installation](#installation)
 * [Installation](#installation)
 * [Documentation](#documentation)
 * [Acknowledgement](#acknowledgement)
