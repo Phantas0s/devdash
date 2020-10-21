@@ -158,9 +158,8 @@ func mapServiceName(serviceID string) (string, error) {
 }
 
 // Create all the widgets and populate them with data.
-// Return channels with render functions
+// Return render functions (fetched concurently)
 func (p *project) CreateWidgets() [][][]func() error {
-	// TODO: use display.box instead of this shortcut
 	err := p.addTitle(p.tui)
 	if err != nil {
 		err = errors.Wrapf(err, "can't add project title %s", p.name)
@@ -192,8 +191,7 @@ func (p *project) CreateWidgets() [][][]func() error {
 					}(ch)
 					continue
 				}
-
-				go getChannelRenderers(service, serviceName, w, p.tui, ch)
+				go channelRenderers(service, serviceName, w, p.tui, ch)
 			}
 		}
 	}
@@ -210,29 +208,11 @@ func (p *project) CreateWidgets() [][][]func() error {
 			}
 		}
 	}
-
 	return funcs
 }
 
-// getConcurentRenderers and fetch information via different ways depending on Widget (API / SSH / ...)
-// A function to display the widget will be send to a channel.
-// One channel per widget to keep the widget order in a slice.
-func getChannelRenderers(s service, name string, w Widget, tui *Tui, c chan<- func() error) {
-	if s == nil {
-		c <- DisplayError(tui, errors.Errorf("can't use widget %s without service %s.", w.Name, name))
-	} else {
-		f, err := s.CreateWidgets(w, tui)
-		if err != nil {
-			c <- DisplayError(tui, errors.Errorf("%s / %s: %s", name, w.Name, err.Error()))
-		} else {
-			c <- f
-		}
-	}
-	close(c)
-}
-
 // Create all the widgets and populate them with data.
-// Return channels with render functions
+// Return render functions
 func (p *project) CreateNonConcWidgets() [][][]func() error {
 	// TODO: use display.box instead of this shortcut
 	err := p.addTitle(p.tui)
@@ -248,20 +228,18 @@ func (p *project) CreateNonConcWidgets() [][][]func() error {
 			funcs[ir] = append(funcs[ir], []func() error{})
 			for _, w := range col {
 				w = p.addDefaultTheme(w)
-
 				service, err := p.mapServiceID(w.serviceID())
 				if err != nil {
 					funcs[ir][ic] = append(funcs[ir][ic], DisplayError(p.tui, err))
 					continue
 				}
-
 				serviceName, err := mapServiceName(w.serviceID())
 				if err != nil {
 					funcs[ir][ic] = append(funcs[ir][ic], DisplayError(p.tui, err))
 					continue
 				}
 
-				funcs[ir][ic] = append(funcs[ir][ic], getFuncRenderers(service, serviceName, w, p.tui))
+				funcs[ir][ic] = append(funcs[ir][ic], funcRenderers(service, serviceName, w, p.tui))
 			}
 		}
 	}
@@ -269,7 +247,7 @@ func (p *project) CreateNonConcWidgets() [][][]func() error {
 	return funcs
 }
 
-func getFuncRenderers(s service, name string, w Widget, tui *Tui) (f func() error) {
+func funcRenderers(s service, name string, w Widget, tui *Tui) (f func() error) {
 	if s == nil {
 		f = DisplayError(tui, errors.Errorf(
 			"Configuration error - you can't use the widget %s without the service %s.",
@@ -284,6 +262,23 @@ func getFuncRenderers(s service, name string, w Widget, tui *Tui) (f func() erro
 	}
 
 	return f
+}
+
+// getConcurentRenderers and fetch information via different ways depending on Widget (API / SSH / ...)
+// A function to display the widget will be send in a channel.
+// One channel per widget to keep the widget order in a slice.
+func channelRenderers(s service, name string, w Widget, tui *Tui, c chan<- func() error) {
+	if s == nil {
+		c <- DisplayError(tui, errors.Errorf("can't use widget %s without service %s.", w.Name, name))
+	} else {
+		f, err := s.CreateWidgets(w, tui)
+		if err != nil {
+			c <- DisplayError(tui, errors.Errorf("%s / %s: %s", name, w.Name, err.Error()))
+		} else {
+			c <- f
+		}
+	}
+	close(c)
 }
 
 func (p *project) Render(funcs [][][]func() error) {

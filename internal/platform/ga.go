@@ -98,10 +98,12 @@ type AnalyticValues struct {
 func NewAnalyticsClient(keyfile string) (*Analytics, error) {
 	// TODO generalize file opening by looking in the different possible folders (see trello ticket)
 	data, err := ioutil.ReadFile(keyfile)
+
 	if err != nil {
+		var err2 error
 		home, _ := homedir.Dir()
-		data, err = ioutil.ReadFile(home + "/.config/devdash/" + keyfile)
-		if err != nil {
+		data, err2 = ioutil.ReadFile(home + "/.config/devdash/" + keyfile)
+		if err2 != nil {
 			return nil, fmt.Errorf("reading keyfile %q failed: %v", keyfile, err)
 		}
 	}

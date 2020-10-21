@@ -3,9 +3,11 @@ package platform
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"strings"
 
+	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/jwt"
@@ -32,7 +34,12 @@ type SearchConsoleResponse struct {
 func NewSearchConsoleClient(keyfile string) (*SearchConsole, error) {
 	data, err := ioutil.ReadFile(keyfile)
 	if err != nil {
-		return nil, errors.Errorf("reading keyfile %q failed: %v", keyfile, err)
+		var err2 error
+		home, _ := homedir.Dir()
+		data, err2 = ioutil.ReadFile(home + "/.config/devdash/" + keyfile)
+		if err2 != nil {
+			return nil, fmt.Errorf("reading keyfile %q failed: %v", keyfile, err)
+		}
 	}
 
 	// webmaster tools

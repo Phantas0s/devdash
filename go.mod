@@ -49,7 +49,7 @@ require (
 	github.com/shuheiktgw/go-travis v0.2.4
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/sparrc/go-ping v0.0.0-20190613174326-4e5b6552494c
-	github.com/spf13/afero v1.2.2 // indirect
+	github.com/spf13/afero v1.2.2
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
