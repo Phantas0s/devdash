@@ -172,14 +172,14 @@ func mapConfig(cfgFile string) config {
 	}
 
 	if cfgFile == "" {
-		defaultPath := home + "/.config/devdash/"
+		defaultPath := filepath.Join(home, ".config", "devdash")
 		cfgFile = defaultConfig(defaultPath, "default.yml")
 	}
 
 	// viper.AddConfigPath(home)
 	viper.AddConfigPath(".")
-	viper.AddConfigPath("$XDG_CONFIG_HOME/devdash/")
-	viper.AddConfigPath(home + "/.config/devdash/")
+	viper.AddConfigPath(filepath.Join("$XDG_CONFIG_HOME", "devdash"))
+	viper.AddConfigPath(filepath.Join(home, ".config", "devdash"))
 
 	viper.SetConfigName(removeExt(cfgFile))
 	err = viper.ReadInConfig()
@@ -210,7 +210,7 @@ func defaultConfig(path string, filename string) string {
 		os.MkdirAll(path, 0755)
 	}
 
-	f := path + filename
+	f := filepath.Join(path, filename)
 	if _, err := os.Stat(f); os.IsNotExist(err) {
 		file, _ := os.Create(f)
 		defer file.Close()
