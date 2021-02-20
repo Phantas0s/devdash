@@ -43,7 +43,13 @@ func (m *monitorWidget) CreateWidgets(widget Widget, tui *Tui) (f func() error, 
 }
 
 func (m *monitorWidget) pingWidget(widget Widget) (f func() error, err error) {
-	URL, err := url.Parse(m.address)
+	u := m.address
+
+	if _, ok := widget.Options[optionAddress]; ok {
+		u = widget.Options[optionAddress]
+	}
+
+	URL, err := url.Parse(u)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +79,12 @@ func (m *monitorWidget) pingWidget(widget Widget) (f func() error, err error) {
 }
 
 func (m *monitorWidget) availabilityWidget(widget Widget) (f func() error, err error) {
-	req, err := http.NewRequest(http.MethodGet, m.address, nil)
+	u := m.address
+	if _, ok := widget.Options[optionAddress]; ok {
+		u = widget.Options[optionAddress]
+	}
+
+	req, err := http.NewRequest(http.MethodGet, u, nil)
 	if err != nil {
 		return nil, err
 	}

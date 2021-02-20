@@ -10,6 +10,9 @@ const (
 	optionTitle      = "title"
 	optionTitleColor = "title_color"
 
+	// Monitor
+	optionAddress = "address"
+
 	// Time
 	optionStartDate  = "start_date"
 	optionEndDate    = "end_date"

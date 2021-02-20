@@ -2,8 +2,8 @@ package gokit
 
 import "math"
 
-// good old utiles stuff
-// expand the go language (ONLY very very general abstractions)
+// ONLY very general abstractions
+// which doesn't change with the messy world
 
 func Round(n float64, precision int) (r float64) {
 	pow := math.Pow(10, float64(precision))
