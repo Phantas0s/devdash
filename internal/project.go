@@ -1,8 +1,8 @@
 package internal
 
-// TODO it's a mess in there between concurrent / non concurrent ways of getting widget render function.
-// Initially it was made to go around the limitation of concurrent connection for google analytics.
-// To refactor!
+// TODO it's a mess in there between concurrent / non concurrent ways of getting widget render functions.
+// Initially it was made to go around the limitation of concurrent connection for Google Analytics.
+// I feel the absence of generics here...  To refactor somehow (using reflection?).
 
 import (
 	"github.com/pkg/errors"
@@ -232,7 +232,7 @@ func getChannelRenderers(s service, name string, w Widget, tui *Tui, c chan<- fu
 }
 
 // Create all the widgets and populate them with data.
-// Return channels with render functions
+// Return slice of widgets
 func (p *project) CreateNonConcWidgets() [][][]func() error {
 	// TODO: use display.box instead of this shortcut
 	err := p.addTitle(p.tui)
