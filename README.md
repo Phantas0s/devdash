@@ -2,7 +2,7 @@
 ![logo of devdash with a gopher](./doc/img/logo.jpg) 
 [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=DevDash%20-%20Highly%20Configurable%20Terminal%20Dashboard%20For%20Developers:&url=https%3A%2F%2Fgithub.com%2Fphantas0s%2Fdevdash&hashtags=developers,dashboard,terminal,CLI,golang)
 
-DevDash is a highly configurable terminal dashboard for developers, who want to choose and display the most up-to-date metrics they need, at one place.
+DevDash is a highly configurable terminal dashboard for developers and creators who want to choose and display the most up-to-date metrics they need, at one place.
 
 [![google analytics example DevDash configuration](./example/img/mix-1.png)](https://raw.githubusercontent.com/Phantas0s/devdash/master/example/img/mix-1.png)
 
