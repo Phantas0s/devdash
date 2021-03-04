@@ -25,6 +25,7 @@ DevDash is a highly configurable terminal dashboard for developers and creators 
 * Data refreshed automatically via time ticks, or via a keyboard shortcut (Ctrl + r by default).
 
 # Menu
+
 * [Installation](#installation)
 * [Documentation](#documentation)
 * [Acknowledgement](#acknowledgement)
@@ -73,7 +74,7 @@ You'll find:
 
 # Acknowledgement
 
-Thanks to [MariaLetta](https://github.com/MariaLetta/free-gophers-pack) for the awesome and beautiful Gopher pack she made! I used it for my logo on top.
+Thanks to [MariaLetta](https://github.com/MariaLetta/free-gophers-pack) for the awesome and beautiful Gopher pack! I used it for my logo on top.
 
 DevDash was inspired from other open source projects:
 
@@ -105,4 +106,3 @@ For anybody interested how I managed to develop DevDash on side of a full time j
 ![google analytics example DevDash configuration](./example/img/thevaluabledev-3.png)
 -------
 ![github example DevDash configuration](./example/img/devdash-1.png)
-
