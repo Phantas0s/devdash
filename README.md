@@ -16,7 +16,7 @@ DevDash is a highly configurable terminal dashboard for developers and creators 
     * Google Analytics 
     * Google Search Console
     * Feedly
-* A huge amount of flexibility compared to other terminal dashboards:
+* A lot flexibility compared to other terminal dashboards:
   * Choose the widgets you want.
   * Place your widgets where you want.
   * Choose the data you want to display, the colors you want to use, and a lot of other things for each widget.
