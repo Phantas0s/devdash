@@ -3,9 +3,12 @@ package platform
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
+	"path/filepath"
 	"strings"
 
+	"github.com/adrg/xdg"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/jwt"
@@ -32,7 +35,12 @@ type SearchConsoleResponse struct {
 func NewSearchConsoleClient(keyfile string) (*SearchConsole, error) {
 	data, err := ioutil.ReadFile(keyfile)
 	if err != nil {
-		return nil, errors.Errorf("reading keyfile %q failed: %v", keyfile, err)
+		home := filepath.Join(xdg.ConfigHome, "devdash")
+		var noFound error
+		data, noFound = ioutil.ReadFile(home + string(filepath.Separator) + keyfile)
+		if noFound != nil {
+			return nil, fmt.Errorf("reading keyfile %q failed: %v", keyfile, err)
+		}
 	}
 
 	// webmaster tools

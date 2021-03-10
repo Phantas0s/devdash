@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"path/filepath"
 	"strconv"
 	"strings"
 
-	"github.com/mitchellh/go-homedir"
+	"github.com/adrg/xdg"
 	"github.com/pkg/errors"
 	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/jwt"
@@ -96,12 +97,13 @@ type AnalyticValues struct {
 
 // NewAnalyticsClient to connect to Google Analytics APIs.
 func NewAnalyticsClient(keyfile string) (*Analytics, error) {
-	// TODO generalize file opening by looking in the different possible folders (see trello ticket)
+	// Verify first in the current directory if there is the JSON key, then in XDG_CONFIG_HOME.
 	data, err := ioutil.ReadFile(keyfile)
 	if err != nil {
-		home, _ := homedir.Dir()
-		data, err = ioutil.ReadFile(home + "/.config/devdash/" + keyfile)
-		if err != nil {
+		home := filepath.Join(xdg.ConfigHome, "devdash")
+		var noFound error
+		data, noFound = ioutil.ReadFile(home + string(filepath.Separator) + keyfile)
+		if noFound != nil {
 			return nil, fmt.Errorf("reading keyfile %q failed: %v", keyfile, err)
 		}
 	}

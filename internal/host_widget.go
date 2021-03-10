@@ -470,7 +470,6 @@ func (ms *HostWidget) box(widget Widget) (f func() error, err error) {
 	}
 
 	cmd := "echo 'box'"
-	// cmd := "/bin/df -x devtmpfs -x tmpfs -x debugfs | sed -n '1!p'"
 	if _, ok := widget.Options[optionCommand]; ok {
 		cmd = widget.Options[optionCommand]
 	}

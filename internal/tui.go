@@ -171,12 +171,17 @@ type reloader interface {
 	HotReload()
 }
 
+type aligner interface {
+	Align()
+}
+
 type manager interface {
 	keyManager
 	renderer
 	drawer
 	looper
 	reloader
+	aligner
 }
 
 type coloredElements struct {
@@ -523,6 +528,10 @@ func (t *Tui) AddKHotReload(key string, c chan<- time.Time) {
 // Loop the TUI to receive events.
 func (t *Tui) Loop() {
 	t.instance.Loop()
+}
+
+func (t *Tui) Align() {
+	t.instance.Align()
 }
 
 // Clean and reinitialize the TUI.

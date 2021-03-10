@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/Phantas0s/devdash/internal"
+	"github.com/adrg/xdg"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
@@ -172,13 +173,13 @@ func mapConfig(cfgFile string) config {
 	}
 
 	if cfgFile == "" {
-		defaultPath := filepath.Join(home, ".config", "devdash")
+		defaultPath := filepath.Join(xdg.ConfigHome, "devdash")
 		cfgFile = defaultConfig(defaultPath, "default.yml")
 	}
 
 	// viper.AddConfigPath(home)
 	viper.AddConfigPath(".")
-	viper.AddConfigPath(filepath.Join("$XDG_CONFIG_HOME", "devdash"))
+	viper.AddConfigPath(filepath.Join(xdg.ConfigHome, "devdash"))
 	viper.AddConfigPath(filepath.Join(home, ".config", "devdash"))
 
 	viper.SetConfigName(removeExt(cfgFile))
@@ -215,7 +216,6 @@ func defaultConfig(path string, filename string) string {
 		file, _ := os.Create(f)
 		defer file.Close()
 
-		// TODO kind of ugly, but not sure if I can use a template here: it will be runtimeee
 		if file != nil {
 			_, err := file.Write([]byte(internal.DefaultTemplate()))
 			if err != nil {

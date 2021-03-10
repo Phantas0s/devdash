@@ -45,10 +45,18 @@ func begin(file string, debug bool) {
 		}
 	}()
 
+	align := time.NewTicker(time.Duration(3) * time.Second)
+	go func() {
+		for range align.C {
+			tui.Align()
+			tui.Render()
+		}
+	}()
+
 	tui.Loop()
 }
 
-// TODO separate render from parsing projects
+// build every services present in the configuration
 func build(file string, tui *internal.Tui) {
 	cfg := mapConfig(file)
 	for _, p := range cfg.Projects {

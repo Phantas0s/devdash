@@ -15,8 +15,8 @@ var (
 
 	rootCmd = &cobra.Command{
 		Use:   "devdash",
-		Short: "DevDash is a highly configurable terminal dashboard for developers",
-		Long:  `DevDash is a highly flexible terminal dashboard for developers, which allows you to gather and refresh the data you really need from Google Analytics, Google Search Console, Github, TravisCI, and more.`,
+		Short: "DevDash is a highly configurable terminal dashboard for developers and creators",
+		Long:  `DevDash is a highly flexible terminal dashboard for developers and creators, which allows you to gather and refresh the data you really need from Google Analytics, Google Search Console, Github, TravisCI, and more.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			run()
 		},

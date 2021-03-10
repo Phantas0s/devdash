@@ -42,6 +42,11 @@ func (t *termUI) AddCol(size int) {
 // AddRow to the termui grid system.
 func (t *termUI) AddRow() {
 	t.body.AddRows(termui.NewRow(t.col...))
+	t.Align()
+}
+
+func (t *termUI) Align() {
+	t.body.Width = termui.TermWidth()
 	t.body.Align()
 }
 
@@ -211,6 +216,7 @@ func (*termUI) KQuit(key string) {
 	})
 }
 
+// Hot reload
 func (t *termUI) KHotReload(key string, c chan<- time.Time) {
 	termui.Handle(fmt.Sprintf("/sys/kbd/%s", key), func(e termui.Event) {
 		go func() {

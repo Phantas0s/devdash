@@ -1,0 +1,32 @@
+---
+before:
+  hooks:
+    - go mod download
+builds:
+  - id: main
+    goos:
+      - windows
+      - darwin
+      - linux
+    # main: ./cmd/devdash/devdash.go
+    env:
+      - CGO_ENABLED=0
+archives:
+  - builds:
+      - main
+    replacements:
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      386: x86
+      amd64: x86_64
+    format_overrides:
+      - goos: windows
+        format: zip
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+    # Keep a manual, simpler changelog for now
+    skip: true
