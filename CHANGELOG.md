@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 * Automatically redraw the dashboard when size of terminal change.
 * Fix errors linked to Google JWT files.
+* Command list - list the config available
 
 ## [0.4.2] - 2020-02-25
 

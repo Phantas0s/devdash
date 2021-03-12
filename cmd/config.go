@@ -11,7 +11,6 @@ import (
 
 	"github.com/Phantas0s/devdash/internal"
 	"github.com/adrg/xdg"
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
 
@@ -166,24 +165,21 @@ func (p Project) OrderWidgets() ([][][]internal.Widget, [][]string) {
 	return rows, sizes
 }
 
-func mapConfig(cfgFile string) config {
-	home, err := homedir.Dir()
-	if err != nil {
-		fmt.Println(err)
-	}
+func dashPath() string {
+	return filepath.Join(xdg.ConfigHome, "devdash")
+}
 
+func mapConfig(cfgFile string) config {
 	if cfgFile == "" {
-		defaultPath := filepath.Join(xdg.ConfigHome, "devdash")
-		cfgFile = defaultConfig(defaultPath, "default.yml")
+		cfgFile = defaultConfig(dashPath(), "default.yml")
 	}
 
 	// viper.AddConfigPath(home)
 	viper.AddConfigPath(".")
-	viper.AddConfigPath(filepath.Join(xdg.ConfigHome, "devdash"))
-	viper.AddConfigPath(filepath.Join(home, ".config", "devdash"))
+	viper.AddConfigPath(dashPath())
 
 	viper.SetConfigName(removeExt(cfgFile))
-	err = viper.ReadInConfig()
+	err := viper.ReadInConfig()
 	if err != nil {
 		tryReadFile(cfgFile)
 	}
