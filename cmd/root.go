@@ -1,5 +1,7 @@
 package cmd
 
+// TODO see gocket to make the command right (with possibility to use env variables)
+
 import (
 	"fmt"
 	"log"
@@ -78,14 +80,6 @@ func run(args []string) {
 			if debug {
 				fmt.Println("Last reload: " + hr.Format("2006-01-02 15:04:05"))
 			}
-		}
-	}()
-
-	align := time.NewTicker(time.Duration(3) * time.Second)
-	go func() {
-		for range align.C {
-			tui.Align()
-			tui.Render()
 		}
 	}()
 

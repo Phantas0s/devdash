@@ -20,17 +20,17 @@ func NewTermUI(d bool) (*termUI, error) {
 		return nil, err
 	}
 
-	termUI := &termUI{
+	termUI := termUI{
 		row: []*termui.Row{},
 	}
+
+	termui.Handle("/sys/wnd/resize", func(e termui.Event) {
+		termUI.Align()
+		termUI.Render()
+	})
 	termUI.Clean()
 
-	return termUI, nil
-}
-
-// Close termui.
-func (termUI) Close() {
-	termui.Close()
+	return &termUI, nil
 }
 
 // AddCol to the termui grid system.
@@ -233,6 +233,7 @@ func (t *termUI) Loop() {
 // Render termui and delete the instance of the widgets rendered.
 func (t *termUI) Render() {
 	termui.Render(t.body)
+
 	// delete every widget for the rows / cols rendered.
 	t.removeWidgets()
 }
@@ -251,11 +252,12 @@ func (t *termUI) Clean() {
 	t.body.Width = termui.TermWidth()
 }
 
+// Close termui.
+func (termUI) Close() {
+	termui.Close()
+}
+
 func (t *termUI) HotReload() {
-	// termui.Close()
-	// Re-initializes event poll... which double them each time
-	// TODO no visual clue that the reload happened
-	// _ = termui.Init()
 	t.Clean()
 	termui.Clear()
 }
