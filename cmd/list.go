@@ -54,6 +54,7 @@ func runList() {
 
 	for _, f := range fs {
 		s := strings.Split(f.Name(), ".")
+		// TODO erk
 		if !f.IsDir() && len(s) > 1 && (s[1] == "json" || s[1] == "toml" || s[1] == "yaml" || s[1] == "yml") {
 			fmt.Fprintln(os.Stdout, s[0])
 		}
