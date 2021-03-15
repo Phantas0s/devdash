@@ -1,8 +1,10 @@
 package internal
 
+// Dispatch the different widgets from the config to their widget managers and get back the render functions.
+
 // TODO it's a mess in there between concurrent / non concurrent ways of getting widget render functions.
-// Initially it was made to go around the limitation of concurrent connection for Google Analytics.
-// I feel the absence of generics here...  To refactor somehow (using reflection?).
+// TODO Initially it was made to go around the limitation of concurrent connection for Google Analytics.
+// TODO I feel the absence of generics here...  To refactor somehow (using reflection?).
 
 import (
 	"github.com/pkg/errors"

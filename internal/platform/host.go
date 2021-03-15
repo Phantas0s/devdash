@@ -486,13 +486,7 @@ func HostBox(runner runnerFunc, command string) (string, error) {
 		return "", err
 	}
 
-	scanner := bufio.NewScanner(strings.NewReader(lines))
-
-	for scanner.Scan() {
-		return scanner.Text(), nil
-	}
-
-	return "", nil
+	return lines, nil
 }
 
 func HostGauge(runner runnerFunc, command string) (float64, error) {

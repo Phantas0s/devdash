@@ -16,9 +16,6 @@ func ExecCmd(command string) (out, errs []byte, pipeLineError error) {
 		for k, v := range c[1:] {
 			c[k+1] = strings.Replace(v, "'", "", -1)
 		}
-		// let it here for debug purposes... might need it :D
-		// fmt.Println(c[0])
-		// fmt.Println(strings.Join(c[1:], ","))
 		cmds = append(cmds, exec.Command(strings.TrimSpace(c[0]), c[1:]...))
 	}
 

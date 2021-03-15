@@ -439,7 +439,6 @@ func (ms *HostWidget) table(widget Widget) (f func() error, err error) {
 	headers := []string{"Filesystem", "Size", "Used", "Available", "Use%", "Mount"}
 
 	cmd := "/bin/df -x devtmpfs -x tmpfs -x debugfs | tail -n +2"
-	// cmd := "/bin/df -x devtmpfs -x tmpfs -x debugfs | sed -n '1!p'"
 	if _, ok := widget.Options[optionCommand]; ok {
 		cmd = widget.Options[optionCommand]
 		headers = []string{}
