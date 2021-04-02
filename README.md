@@ -57,12 +57,19 @@ You need to:
 ## Getting started
 
 * If you run `devdash` without giving a dashboard configuration, it will:
-    * Create a default dashboard (`default.yml`) located in `$XDG_CONFIG_HOME/devdash`
-    * Display this default dashboard
+    * Create a config of the default dashboard (`default.yml`) located in `$XDG_CONFIG_HOME/devdash`.
+    * Display this default dashboard.
 * You have [many examples here](https://thedevdash.com/getting-started/examples/) to modify this default dashboard or create your own from scratch.
-* To run a dashboard created in your working directory or in `$XDG_CONFIG_HOME` directory, you need to execute `dashboard -c name-of-the-file`.
-    * You can create your dashboard config in JSON, YAML, or TOML.
-* You can also give a absolute or relative path if your dashboard's config is somewhere else.
+* Each dashboard need a config file. To pass this config file to DevDash, you need to use the option `-c`. For example: `devdash -c default`.
+    * If you only pass the filename of the dashboard's config, it needs to be in the working directory or in `$XDG_CONFIG_HOME/devdash`.
+    * You can also pass a relative or absolute path to the config.
+    * The dashboard's config can be written in YAML, JSON, or TOML.
+
+The value of `$XDG_CONFIG_HOME` depends of your OS. Here are the defaults (if you didn't modify it):
+
+* **Unix systems**: `~/.config`
+* **macOS**: `~/Library/Application Support`
+* **Windows**: `%LOCALAPPDATA%`
 
 ## Documentation
 
@@ -71,7 +78,8 @@ You need to:
 You'll find in there:
 
 * [Installation / getting started](https://thedevdash.com/getting-started/installation/)
-* [Simple examples](https://thedevdash.com/getting-started/examples/) and [real use cases](https://thedevdash.com/getting-started/use-cases/devdash/)
+* [Simple examples](https://thedevdash.com/getting-started/examples/)
+* [Real use cases](https://thedevdash.com/getting-started/use-cases/devdash/)
 * [Complete reference for configuring whatever you want](https://thedevdash.com/reference/).
 
 ## Acknowledgement
