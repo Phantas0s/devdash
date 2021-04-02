@@ -6,9 +6,9 @@ DevDash is a highly configurable terminal dashboard for developers and creators 
 
 [![google analytics example DevDash configuration](./example/img/mix-1.png)](https://raw.githubusercontent.com/Phantas0s/devdash/master/example/img/mix-1.png)
 
-# Why using DevDash?
+## Why using DevDash?
 
-* Pull the data and display it in cool diagrams (or widgets) using YAML / JSON config, from: 
+* Pull the data and display it in cool widgets using YAML / JSON config, from: 
     * Your own computer. From your own scripts / command lines too!
     * A remote computer via SSH
     * Github
@@ -24,7 +24,7 @@ DevDash is a highly configurable terminal dashboard for developers and creators 
 * Unlimited amount of different dashboards with different configurations.
 * Data refreshed automatically via time ticks, or via a keyboard shortcut (Ctrl + r by default).
 
-# Menu
+## Menu
 
 * [Installation](#installation)
 * [Documentation](#documentation)
@@ -34,45 +34,47 @@ DevDash is a highly configurable terminal dashboard for developers and creators 
 * [Making of](#Making-of)
 * [Showcase](#showcase)
 
-# Installation
+## Installation
 
 You can simply grab the [latest released binary file](https://github.com/Phantas0s/devdash/releases/latest) and download the version you need, depending on your OS.
 
-## Linux script
+### Linux script
 
-Here's a simple way to download DevDash and move it in `/usr/local/bin`, in order to be able to use DevDash everywhere easily.
+To download DevDash in `/usr/local/bin`, run the following in a terminal:
 
 ```shell
-curl -LO https://raw.githubusercontent.com/Phantas0s/devdash/master/install/linux.sh && \
-sh ./linux.sh && \
-rm linux.sh
+curl -LO https://raw.githubusercontent.com/Phantas0s/devdash/master/install/linux.sh | bash
 ```
 
-## Manual installation
+### Manual installation
 
-You need to clone this repository and build the binary: `go build devdash.go`.
+You need to: 
+1. Clone this repository 
+2. In your terminal, run in the root directory of the project `go build devdash.go`
 
-# How Does It Work?
+#
 
-In a nutshell:
+## Getting started
 
-* If you run DevDash without giving a dashboard configuration, it will create and display a default dashboard (`default.yml`) located in `$XDG_CONFIG_HOME/devdash` or `$HOME/.config/devdash`.
-* To get used to dashboard' configurations, there are many [examples here](https://thedevdash.com/getting-started/examples/). They can help you getting started.
-* To run a dashboard created in the two filepaths mentioned above, you just need to execute `dashboard -c my-super-dashboard`, if your configuration file is called `my-super-dashboard.yml`. You can use JSON as well!
-* You can as well run any dashboard from anywhere if you give an absolute or relative path.
-* I'm thriving to make DevDash easier to configure, yet very flexible and customizable. The next updates will go in that direction.
+* If you run `devdash` without giving a dashboard configuration, it will:
+    * Create a default dashboard (`default.yml`) located in `$XDG_CONFIG_HOME/devdash`
+    * Display this default dashboard
+* You have [many examples here](https://thedevdash.com/getting-started/examples/) to modify this default dashboard or create your own from scratch.
+* To run a dashboard created in your working directory or in `$XDG_CONFIG_HOME` directory, you need to execute `dashboard -c name-of-the-file`.
+    * You can create your dashboard config in JSON, YAML, or TOML.
+* You can also give a absolute or relative path if your dashboard's config is somewhere else.
 
-# Documentation
+## Documentation
 
 [The complete DevDash documentation is here.](https://thedevdash.com).
 
-You'll find:
+You'll find in there:
 
 * [Installation / getting started](https://thedevdash.com/getting-started/installation/)
 * [Simple examples](https://thedevdash.com/getting-started/examples/) and [real use cases](https://thedevdash.com/getting-started/use-cases/devdash/)
 * [Complete reference for configuring whatever you want](https://thedevdash.com/reference/).
 
-# Acknowledgement
+## Acknowledgement
 
 Thanks to [MariaLetta](https://github.com/MariaLetta/free-gophers-pack) for the awesome and beautiful Gopher pack! I used it for my logo on top.
 
@@ -81,25 +83,25 @@ DevDash was inspired from other open source projects:
 * [wtf](https://github.com/wtfutil/wtf)
 * [tdash](https://github.com/jessfraz/tdash)
 
-# Bugs and Ideas
+## Bugs and Ideas
 
-I would be happy to read about new ideas and to fix bugs. Opening an issue is the way to go.
+If you have any idea to improve DevDash or if you see any bug, please open an issue.
 
-# Contribute
+## Contribute
 
-First of all, thanks a lot if you want to contribute to DevDash!
+Thanks a lot if you want to contribute to DevDash!
 
-If you want to implement a new feature, let's speak about it first and decide if it fits DevDash scope.
+If you want to implement a new feature, let's speak about it first (by opening an issue) and decide if it fits DevDash scope.
 
-# Making Of
+## Making Of
 
 For anybody interested how I managed to develop DevDash on side of a full time job, and how I organized my time and kept my motivation, [I wrote an article about that on my blog](https://thevaluable.dev/programming-side-project-example-devdash/).
 
-# Licence
+## Licence
 
 [Apache Licence 2.0](https://choosealicense.com/licenses/apache-2.0/)
 
-# Showcase
+## Showcase
 
 ![google analytics example DevDash configuration](./example/img/thevaluabledev-2.png)
 -------
