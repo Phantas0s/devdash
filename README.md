@@ -8,15 +8,16 @@ DevDash is a highly configurable terminal dashboard for developers and creators 
 
 ## Why using DevDash?
 
-* Pull the data and display it in cool widgets using YAML / JSON config, from: 
-    * Your own computer. From your own scripts / command lines too!
-    * A remote computer via SSH
-    * Github
-    * Travis
-    * Google Analytics 
-    * Google Search Console
-    * Feedly
-* A lot flexibility compared to other terminal dashboards:
+* Pull and display the data in nice widgets using YAML (or JSON) config files, from: 
+    * Your own computer. From your own scripts and command lines too!
+    * A remote computer via SSH.
+    * Github.
+    * Travis.
+    * Google Analytics.
+    * Google Search Console.
+    * Feedly.
+
+* A lot of flexibility compared to other terminal dashboards:
   * Choose the widgets you want.
   * Place your widgets where you want.
   * Choose the data you want to display, the colors you want to use, and a lot of other things for each widget.
@@ -27,6 +28,7 @@ DevDash is a highly configurable terminal dashboard for developers and creators 
 ## Menu
 
 * [Installation](#installation)
+* [Getting Started](#getting-started)
 * [Documentation](#documentation)
 * [Acknowledgement](#acknowledgement)
 * [Contribute](#contribute)
@@ -51,8 +53,6 @@ curl -LO https://raw.githubusercontent.com/Phantas0s/devdash/master/install/linu
 You need to: 
 1. Clone this repository 
 2. In your terminal, run in the root directory of the project `go build devdash.go`
-
-#
 
 ## Getting started
 
