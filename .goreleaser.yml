@@ -4,11 +4,11 @@ before:
     - go mod download
 builds:
   - id: main
+    ldflags: -s -w -X github.com/Phantas0s/devdash/cmd.current={{.Version}} -X github.com/Phantas0s/devdash/cmd.buildDate={{.Date}}
     goos:
       - windows
       - darwin
       - linux
-    # main: ./cmd/devdash/devdash.go
     env:
       - CGO_ENABLED=0
 archives:
