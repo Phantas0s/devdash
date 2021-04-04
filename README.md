@@ -57,7 +57,7 @@ You need to:
 ## Getting started
 
 * If you run `devdash` without giving a dashboard configuration, it will:
-    * Create a config of the default dashboard (`default.yml`) located in `$XDG_CONFIG_HOME/devdash`.
+    * Create a config for the default dashboard (`default.yml`) in `$XDG_CONFIG_HOME/devdash`.
     * Display this default dashboard.
 * You have [many examples here](https://thedevdash.com/getting-started/examples/) to modify this default dashboard or create your own from scratch.
 * Each dashboard need a config file. To pass this config file to DevDash, you need to use the option `-c`. For example: `devdash -c default`.
@@ -73,14 +73,14 @@ The value of `$XDG_CONFIG_HOME` depends of your OS. Here are the defaults (if yo
 
 ## Documentation
 
-[The complete DevDash documentation is here.](https://thedevdash.com).
+[The complete DevDash documentation is here](https://thedevdash.com)
 
 You'll find in there:
 
 * [Installation / getting started](https://thedevdash.com/getting-started/installation/)
 * [Simple examples](https://thedevdash.com/getting-started/examples/)
-* [Real use cases](https://thedevdash.com/getting-started/use-cases/devdash/)
-* [Complete reference for configuring whatever you want](https://thedevdash.com/reference/).
+* [Real-life use cases](https://thedevdash.com/getting-started/use-cases/devdash/)
+* [Complete reference of dashboard's config](https://thedevdash.com/reference/)
 
 ## Acknowledgement
 
