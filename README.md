@@ -71,6 +71,7 @@ The value of `$XDG_CONFIG_HOME` depends of your OS. Here are the defaults (if yo
 * **macOS**: `~/Library/Application Support`
 * **Windows**: `%LOCALAPPDATA%`
 
+
 ## Documentation
 
 [The complete DevDash documentation is here](https://thedevdash.com)
@@ -81,6 +82,8 @@ You'll find in there:
 * [Simple examples](https://thedevdash.com/getting-started/examples/)
 * [Real-life use cases](https://thedevdash.com/getting-started/use-cases/devdash/)
 * [Complete reference of dashboard's config](https://thedevdash.com/reference/)
+
+If you want to see even more real life examples, I've [all of them in my dotfiles](https://github.com/Phantas0s/.dotfiles/tree/master/devdash).
 
 ## Acknowledgement
 
