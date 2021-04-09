@@ -35,6 +35,7 @@ func init() {
 	// rootCmd.Flags().StringVarP(&logpath, "logpath", "l", "", "Path for logging")
 	rootCmd.Flags().BoolVarP(&debug, "debug", "d", false, "Debug Mode - doesn't display graph")
 	rootCmd.AddCommand(listCmd())
+	rootCmd.AddCommand(versionCmd())
 }
 
 func Execute() {
@@ -98,8 +99,9 @@ func build(file string, tui *internal.Tui) {
 			gaWidget, err := internal.NewGaWidget(gaService.Keyfile, gaService.ViewID)
 			if err != nil {
 				internal.DisplayError(tui, err)()
+			} else {
+				project.WithGa(gaWidget)
 			}
-			project.WithGa(gaWidget)
 		}
 
 		gscService := p.Services.GoogleSearchConsole
@@ -107,8 +109,9 @@ func build(file string, tui *internal.Tui) {
 			gscWidget, err := internal.NewGscWidget(gscService.Keyfile, gscService.Address)
 			if err != nil {
 				internal.DisplayError(tui, err)()
+			} else {
+				project.WithGoogleSearchConsole(gscWidget)
 			}
-			project.WithGoogleSearchConsole(gscWidget)
 		}
 
 		monService := p.Services.Monitor
@@ -116,8 +119,9 @@ func build(file string, tui *internal.Tui) {
 			monWidget, err := internal.NewMonitorWidget(monService.Address)
 			if err != nil {
 				internal.DisplayError(tui, err)()
+			} else {
+				project.WithMonitor(monWidget)
 			}
-			project.WithMonitor(monWidget)
 		}
 
 		githubService := p.Services.Github
@@ -129,8 +133,9 @@ func build(file string, tui *internal.Tui) {
 			)
 			if err != nil {
 				internal.DisplayError(tui, err)()
+			} else {
+				project.WithGithub(githubWidget)
 			}
-			project.WithGithub(githubWidget)
 		}
 
 		travisService := p.Services.TravisCI
@@ -160,8 +165,9 @@ func build(file string, tui *internal.Tui) {
 			if err != nil {
 				fmt.Println(err)
 				internal.DisplayError(tui, err)()
+			} else {
+				project.WithRemoteHost(remoteHostWidget)
 			}
-			project.WithRemoteHost(remoteHostWidget)
 		}
 
 		localhost, err := internal.NewHostWidget("localhost", "localhost")

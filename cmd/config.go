@@ -184,10 +184,24 @@ func mapConfig(cfgFile string) config {
 		tryReadFile(cfgFile)
 	}
 
-	// viper.WatchConfig()
 	var cfg config
 	if err := viper.Unmarshal(&cfg); err != nil {
 		panic(err)
+	}
+
+	prefix := "DEVDASH"
+	for k, _ := range cfg.Projects {
+		if cfg.Projects[k].Services.GoogleAnalytics.Keyfile == "" {
+			cfg.Projects[k].Services.GoogleAnalytics.Keyfile = os.Getenv(prefix + "_GA_KEYFILE")
+		}
+
+		if cfg.Projects[k].Services.GoogleSearchConsole.Keyfile == "" {
+			cfg.Projects[k].Services.GoogleSearchConsole.Keyfile = os.Getenv(prefix + "_GSC_KEYFILE")
+		}
+
+		if cfg.Projects[k].Services.Github.Token == "" {
+			cfg.Projects[k].Services.Github.Token = os.Getenv(prefix + "_GITHUB_TOKEN")
+		}
 	}
 
 	return cfg

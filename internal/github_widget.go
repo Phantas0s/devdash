@@ -181,7 +181,7 @@ func (g *githubWidget) tableRepo(widget Widget) (f func() error, err error) {
 
 	order := "pushed"
 	if _, ok := widget.Options[optionOrder]; ok {
-		order = widget.Options[optionRowLimit]
+		order = widget.Options[optionOrder]
 	}
 
 	rs, err := g.client.ListRepo(int(limit), order, metrics)
@@ -227,6 +227,7 @@ func (g *githubWidget) tableBranches(widget Widget) (f func() error, err error) 
 	return
 }
 
+// TODO can filter by open or close issue?
 func (g *githubWidget) tableIssues(widget Widget) (f func() error, err error) {
 	var repo string
 	if _, ok := widget.Options[optionRepository]; ok {

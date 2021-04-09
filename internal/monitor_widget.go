@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"net/url"
 
+	goping "github.com/go-ping/ping"
 	"github.com/pkg/errors"
-	goping "github.com/sparrc/go-ping"
 )
 
 const (
