@@ -28,6 +28,20 @@ func listCmd() *cobra.Command {
 
 // TODO to refactor and TEST
 func runList() {
+	var err error
+	path := dashPath()
+	d, err := os.Lstat(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if d.Mode()&os.ModeSymlink == os.ModeSymlink {
+		path, err = os.Readlink(path)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	homeFiles, err := ioutil.ReadDir(dashPath())
 	if err != nil {
 		log.Fatal(err)
