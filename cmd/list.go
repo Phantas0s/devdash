@@ -13,6 +13,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var extension bool
+
 func listCmd() *cobra.Command {
 	listCmd := &cobra.Command{
 		Use:   "list",
@@ -22,6 +24,8 @@ func listCmd() *cobra.Command {
 			runList()
 		},
 	}
+
+	listCmd.Flags().BoolVarP(&extension, "extension", "e", false, "Display file extensions")
 
 	return listCmd
 }
@@ -68,9 +72,13 @@ func runList() {
 
 	for _, f := range fs {
 		s := strings.Split(f.Name(), ".")
-		// TODO erk
+		// TODO erk to refactor
 		if !f.IsDir() && len(s) > 1 && (s[1] == "json" || s[1] == "toml" || s[1] == "yaml" || s[1] == "yml") {
-			fmt.Fprintln(os.Stdout, s[0])
+			if extension {
+				fmt.Fprintln(os.Stdout, f.Name())
+			} else {
+				fmt.Fprintln(os.Stdout, s[0])
+			}
 		}
 	}
 }
