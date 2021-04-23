@@ -236,6 +236,8 @@ func (t *termUI) KEdit(key string, c chan<- time.Time, config string, editor str
 		if err != nil {
 			fmt.Println(err)
 		}
+
+		// Hot reload when command complete
 		c <- time.Now()
 	})
 }

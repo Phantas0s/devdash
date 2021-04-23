@@ -10,18 +10,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var configType string
+var configType, templateFile string
 
 func generateCmd() *cobra.Command {
 	generateCmd := &cobra.Command{
 		Use:   "generate",
-		Short: "Generate default dashboard",
+		Short: "Generate dashboard templates",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Fprintln(os.Stdout, generate(args))
 		},
 	}
 
 	generateCmd.Flags().StringVarP(&configType, "type", "t", "", "Debug Mode - doesn't display graph")
+	generateCmd.Flags().StringVarP(&templateFile, "file", "f", "", "Save the template into a file ($XDG_CONFIG_HOME/<name_of_file>")
 	return generateCmd
 }
 
@@ -37,7 +38,7 @@ func generate(args []string) string {
 }
 
 func createBlogDefaultConfig() string {
-	wizardIntro("blogs")
+	wizardIntro("a blog")
 	keyfile := askKeyfile()
 	address := askSiteAddress()
 	viewID := askViewID()
@@ -50,7 +51,16 @@ func createBlogDefaultConfig() string {
 	b := bytes.NewBuffer([]byte{})
 	err = ut.Execute(b, internal.CreateBlogConfig(keyfile, address, viewID))
 
-	return b.String()
+	if templateFile != "" {
+		cfg := createTemplateFile(templateFile, b.String())
+		return fmt.Sprintf("The file %s has been created.", cfg)
+	} else {
+		return b.String()
+	}
+}
+
+func createTemplateFile(filename string, template string) string {
+	return createConfig(dashPath(), filename+".yml", template)
 }
 
 func wizardIntro(name string) {
