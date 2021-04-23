@@ -2,6 +2,8 @@ package platform
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
 	"time"
 
 	"github.com/Phantas0s/termui"
@@ -222,6 +224,19 @@ func (t *termUI) KHotReload(key string, c chan<- time.Time) {
 		go func() {
 			c <- time.Now()
 		}()
+	})
+}
+
+func (t *termUI) KEdit(key string, c chan<- time.Time, config string, editor string) {
+	termui.Handle(fmt.Sprintf("/sys/kbd/%s", key), func(e termui.Event) {
+		cmd := exec.Command(os.ExpandEnv(editor), config)
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		err := cmd.Run()
+		if err != nil {
+			fmt.Println(err)
+		}
+		c <- time.Now()
 	})
 }
 

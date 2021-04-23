@@ -36,6 +36,8 @@ func init() {
 	rootCmd.Flags().BoolVarP(&debug, "debug", "d", false, "Debug Mode - doesn't display graph")
 	rootCmd.AddCommand(listCmd())
 	rootCmd.AddCommand(versionCmd())
+	rootCmd.AddCommand(editCmd())
+	rootCmd.AddCommand(generateCmd())
 }
 
 func Execute() {
@@ -58,10 +60,16 @@ func run(args []string) {
 		file = args[0]
 	}
 
-	cfg := mapConfig(file)
+	cfg, file := mapConfig(file)
 	hotReload := make(chan time.Time)
 	tui.AddKHotReload(cfg.KHotReload(), hotReload)
 	tui.AddKQuit(cfg.KQuit())
+
+	editor := os.Getenv("EDITOR")
+	if cfg.General.Editor != "" {
+		editor = cfg.General.Editor
+	}
+	tui.AddKEdit(cfg.KEdit(), hotReload, file, editor)
 
 	// first display
 	build(file, tui)
@@ -89,7 +97,7 @@ func run(args []string) {
 
 // build every services present in the configuration
 func build(file string, tui *internal.Tui) {
-	cfg := mapConfig(file)
+	cfg, _ := mapConfig(file)
 	for _, p := range cfg.Projects {
 		rows, sizes := p.OrderWidgets()
 		project := internal.NewProject(p.Name, p.NameOptions, rows, sizes, p.Themes, tui)

@@ -18,6 +18,7 @@ const (
 	// keys
 	kQuit      = "C-c"
 	kHotReload = "C-r"
+	kEdit      = "C-e"
 )
 
 type config struct {
@@ -28,6 +29,7 @@ type config struct {
 type General struct {
 	Keys    map[string]string `mapstructure:"keys"`
 	Refresh int64             `mapstructure:"refresh"`
+	Editor  string            `mapstructure:"editor"`
 }
 
 // RefreshTime return the duration before refreshing the data of all widgets, in seconds.
@@ -169,9 +171,10 @@ func dashPath() string {
 	return filepath.Join(xdg.ConfigHome, "devdash")
 }
 
-func mapConfig(cfgFile string) config {
+// Map config and return it with the config path
+func mapConfig(cfgFile string) (config, string) {
 	if cfgFile == "" {
-		cfgFile = defaultConfig(dashPath(), "default.yml")
+		cfgFile = createConfig(dashPath(), "default.yml", defaultConfig())
 	}
 
 	// viper.AddConfigPath(home)
@@ -204,7 +207,7 @@ func mapConfig(cfgFile string) config {
 		}
 	}
 
-	return cfg
+	return cfg, viper.ConfigFileUsed()
 }
 
 func removeExt(filepath string) string {
@@ -216,7 +219,7 @@ func removeExt(filepath string) string {
 	return filepath
 }
 
-func defaultConfig(path string, filename string) string {
+func createConfig(path string, filename string, template string) string {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.MkdirAll(path, 0755)
 	}
@@ -227,7 +230,7 @@ func defaultConfig(path string, filename string) string {
 		defer file.Close()
 
 		if file != nil {
-			_, err := file.Write([]byte(internal.DefaultTemplate()))
+			_, err := file.Write([]byte(template))
 			if err != nil {
 				panic(err)
 			}
@@ -269,4 +272,37 @@ func (c config) KHotReload() string {
 	}
 
 	return kHotReload
+}
+
+func (c config) KEdit() string {
+	if ok := c.General.Keys["edit"]; ok != "" {
+		return c.General.Keys["edit"]
+	}
+
+	return kEdit
+}
+
+func defaultConfig() string {
+	return `---
+general:
+  refresh: 600
+  keys:
+    quit: "C-c"
+    hot_reload: "C-r"
+
+
+projects:
+  - name: Default dashboard located at $HOME/.config/devdash/default.yml
+    services:
+      monitor:
+        address: "https://thevaluable.dev"
+    widgets:
+      - row:
+          - col:
+              size: "M"
+              elements:
+                - name: mon.box_availability
+                  options:
+                    title: " thevaluable.dev status "
+                    color: yellow`
 }

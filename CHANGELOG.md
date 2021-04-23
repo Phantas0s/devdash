@@ -9,6 +9,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 * Automatically redraw the dashboard when size of terminal change.
 * Fix errors linked to Google JWT files.
 * Command list - list the config available
+* Command version - Display the current version of DevDash
+* Add possibility to add sensible information in environment variable:
+    * DEVDASH_GITHUB_TOKEN (token for Github service) 
+    * DEVDASH_GA_KEYFILE (keyfile for Google Analytics service)
+    * DEVDASH_GSC_KEYFILE (keyfile for Google Search Console service)
+* Add possibility to edit file with an editor of your choice
 
 ## [0.4.2] - 2020-02-25
 
@@ -138,6 +144,3 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 * Projects / Services / Widget system
 * Display and Grid system
 * YAML configuration system
-
-[0.1.1]: https://github.com/Phantas0s/devdash/releases/tag/v0.1.1
-[0.1.0]: https://github.com/Phantas0s/devdash/releases/tag/v0.1.0

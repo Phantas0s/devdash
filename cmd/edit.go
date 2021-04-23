@@ -14,7 +14,7 @@ var editor string
 func editCmd() *cobra.Command {
 	editCmd := &cobra.Command{
 		Use:   "edit",
-		Short: "edit dashboard",
+		Short: "Edit your dashboard with an shell editor",
 		Run: func(cmd *cobra.Command, args []string) {
 			edit(args)
 		},
