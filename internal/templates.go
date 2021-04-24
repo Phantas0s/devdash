@@ -1,9 +1,17 @@
 package internal
 
+// TODO to test all of that!
+
 type blogConfig struct {
 	Keyfile string
 	Address string
 	ViewID  string
+}
+
+type githubConfig struct {
+	Token string
+	Owner string
+	Repo  string
 }
 
 func CreateBlogConfig(keyfile string, viewID string, address string) blogConfig {
@@ -29,10 +37,33 @@ func CreateBlogConfig(keyfile string, viewID string, address string) blogConfig 
 	return bc
 }
 
-func GA() string {
+func CreateGitHubProjectConfig(token string, owner string, repo string) githubConfig {
+	gc := githubConfig{}
+	if token != "" {
+		gc.Token = "token: " + token
+	} else {
+		gc.Token = "# token: env var DEVDASH_GITHUB_TOKEN"
+	}
+
+	if owner != "" {
+		gc.Owner = "owner: " + owner
+	} else {
+		gc.Owner = "# owner: your github username"
+	}
+
+	if repo != "" {
+		gc.Repo = "repository: " + repo
+	} else {
+		gc.Repo = "# repository: name of your GitHub repository"
+	}
+
+	return gc
+}
+
+func Blog() string {
 	return `---
 projects:
-  - name: https://thevaluable.dev - General
+  - name: Your Blog
     title_options:
       border_color: default
       text_color: default
@@ -157,5 +188,67 @@ projects:
                     end_date: "today"
                     row_limit: 100
                     character_limit: 65
-                    `
+`
+}
+
+func GitHubProject() string {
+	return `---
+projects:
+  - name: Your GitHub Project
+    services:
+      github:
+        {{ .Token }}
+        {{ .Owner }}
+        {{ .Repo }}
+    themes:
+      bar:
+        # Everything is yellow except the title color / bar color.
+        color: yellow
+        title_color: red
+        bar_color: green
+        bar_gap: 1
+      table:
+        border_color: green
+        row_limit: 10
+      ocean:
+        border_color: blue
+        num_color: black
+        bar_color: cyan
+        title_color: magenta
+        bar_gap: 1
+    widgets:
+      - row:
+          - col:
+              size: 12
+              elements:
+                # The widget is of type "bar": the theme bar is applied.
+                - name: github.bar_stars
+      - row:
+          - col:
+              size: 6
+              elements:
+                - name: github.bar_views
+                  # The theme "ocean" override the theme "bar".
+                  theme: ocean
+                  options:
+                    height: 23
+                    bar_gap: 5
+                    bar_width: 6
+          - col:
+              size: 6
+              elements:
+                # The theme table is applied
+                - name: github.table_issues
+                  options:
+                    bar_gap: 1
+                    bar_width: 6
+      - row:
+          - col:
+              size: 12
+              elements:
+                # The theme bar is applied
+                - name: github.bar_commits
+                  options:
+                    start_date: 35_weeks_ago
+`
 }
