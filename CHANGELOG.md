@@ -4,16 +4,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Next version
+## [0.5.0] - 2021-04-25
 
-* Automatically redraw the dashboard when size of terminal change.
+### ADDED
+
+* Automatically redraw the dashboard when the size of the terminal change.
+* New command "list" - list all the dashboards available.
+* New command "generate" - Generate dashboards according to templates.
+* New command "edit" - Edit dashboard with the default $EDITOR or any other shell based editor you want.
+* New command "version" - Display the version of DevDash.
+* Add the possibility to edit the dashboard configuration file from the display with the keystroke `CTRL+e`.
+* Add the possibility to set authorization tokens and files via environment variables:
+    * "DEVDASH_GITHUB_TOKEN" - Token for the service Github.
+    * "DEVDASH_GA_KEYFILE" - Keyfile for the service Google Analytics.
+    * "DEVDASH_GSC_KEYFILE" - Keyfile for the service Google Search Console.
+
+### UPDATED
+
 * Fix errors linked to Google JWT files.
-* Command list - list the config available
 * Command version - Display the current version of DevDash
-* Add possibility to add sensible information in environment variable:
-    * DEVDASH_GITHUB_TOKEN (token for Github service) 
-    * DEVDASH_GA_KEYFILE (keyfile for Google Analytics service)
-    * DEVDASH_GSC_KEYFILE (keyfile for Google Search Console service)
 * Add possibility to edit file with an editor of your choice
 
 ## [0.4.2] - 2020-02-25
