@@ -24,7 +24,7 @@ var (
 		Short: "DevDash is a highly configurable terminal dashboard for developers and creators",
 		Long:  `DevDash is a highly flexible terminal dashboard for developers and creators, which allows you to gather and refresh the data you really need from Google Analytics, Google Search Console, Github, TravisCI, and more.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			run(args)
+			run()
 		},
 	}
 )
@@ -47,41 +47,52 @@ func Execute() {
 	}
 }
 
-func run(args []string) {
+// run the dashboard.
+func run() {
 	termui, err := platform.NewTermUI(debug)
 	if err != nil {
 		fmt.Println(err)
 	}
 
+	// Create the TUI.
 	tui := internal.NewTUI(termui)
 	defer tui.Close()
 
-	if file == "" && len(args) > 0 {
-		file = args[0]
-	}
-
+	// Map dashboard config to a struct Config.
 	cfg, file := mapConfig(file)
+
+	// Passing a time.Time to this channel reload the entire dashboard.
 	hotReload := make(chan time.Time)
+
+	// Add keystrokes to reload and quit
 	tui.AddKHotReload(cfg.KHotReload(), hotReload)
 	tui.AddKQuit(cfg.KQuit())
+
+	// Passing a bool to this channel stop the automatic reload of the dashboard.
+	stopAutoReload := make(chan bool)
+	autoReload(cfg.RefreshTime(), stopAutoReload, hotReload)
 
 	editor := os.Getenv("EDITOR")
 	if cfg.General.Editor != "" {
 		editor = cfg.General.Editor
 	}
-	tui.AddKEdit(cfg.KEdit(), hotReload, file, editor)
 
-	// first display
+	// Add keystroke (managed by TUI) to edit the configuration in a CLI editor.
+	// Wrap edit config in lambda to defer the execution.
+	tui.AddKEdit(
+		cfg.KEdit(),
+		func() {
+			stopReload(stopAutoReload)
+			editDashboard(editor, file)
+			hotReload <- time.Now()
+			autoReload(cfg.RefreshTime(), stopAutoReload, hotReload)
+		},
+	)
+
+	// First display.
 	build(file, tui)
 
-	ticker := time.NewTicker(time.Duration(cfg.RefreshTime()) * time.Second)
-
-	go func() {
-		for {
-			hotReload <- <-ticker.C
-		}
-	}()
-
+	// Automatic reload
 	go func() {
 		for hr := range hotReload {
 			tui.HotReload()
@@ -93,6 +104,25 @@ func run(args []string) {
 	}()
 
 	tui.Loop()
+}
+
+func autoReload(refresh int64, stopAutoReload <-chan bool, hotReload chan<- time.Time) {
+	go func() {
+		ticker := time.NewTicker(time.Duration(refresh) * time.Second)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-stopAutoReload:
+				return
+			case tick := <-ticker.C:
+				hotReload <- tick
+			}
+		}
+	}()
+}
+
+func stopReload(stopAutoReload chan<- bool) {
+	stopAutoReload <- true
 }
 
 // build every services present in the configuration

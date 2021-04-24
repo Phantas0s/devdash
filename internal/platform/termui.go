@@ -2,8 +2,6 @@ package platform
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
 	"time"
 
 	"github.com/Phantas0s/termui"
@@ -222,23 +220,18 @@ func (*termUI) KQuit(key string) {
 func (t *termUI) KHotReload(key string, c chan<- time.Time) {
 	termui.Handle(fmt.Sprintf("/sys/kbd/%s", key), func(e termui.Event) {
 		go func() {
+			// TODO wrap that into a function and pass it till here
 			c <- time.Now()
 		}()
 	})
 }
 
-func (t *termUI) KEdit(key string, c chan<- time.Time, config string, editor string) {
+// Key to edit a dashboard config.
+// Need to stop the hot reload while editing the file.
+// Automatically reload the dashboad after the edit is done.
+func (t *termUI) KEdit(key string, editDashboard func()) {
 	termui.Handle(fmt.Sprintf("/sys/kbd/%s", key), func(e termui.Event) {
-		cmd := exec.Command(os.ExpandEnv(editor), config)
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		err := cmd.Run()
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		// Hot reload when command complete
-		c <- time.Now()
+		editDashboard()
 	})
 }
 

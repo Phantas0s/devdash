@@ -161,7 +161,10 @@ type drawer interface {
 type keyManager interface {
 	KQuit(key string)
 	KHotReload(key string, c chan<- time.Time)
-	KEdit(key string, c chan<- time.Time, config string, editor string)
+	KEdit(
+		key string,
+		editDashboard func(),
+	)
 }
 
 type looper interface {
@@ -526,8 +529,11 @@ func (t *Tui) AddKHotReload(key string, c chan<- time.Time) {
 	t.instance.KHotReload(key, c)
 }
 
-func (t *Tui) AddKEdit(key string, c chan<- time.Time, config string, editor string) {
-	t.instance.KEdit(key, c, config, editor)
+func (t *Tui) AddKEdit(
+	key string,
+	editDashboard func(),
+) {
+	t.instance.KEdit(key, editDashboard)
 }
 
 // Loop the TUI to receive events.

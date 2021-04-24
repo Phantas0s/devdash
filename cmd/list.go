@@ -1,5 +1,7 @@
 package cmd
 
+// TODO to test
+
 import (
 	"bufio"
 	"fmt"
@@ -30,7 +32,6 @@ func listCmd() *cobra.Command {
 	return listCmd
 }
 
-// TODO to refactor and TEST
 func runList() {
 	var err error
 	path := dashPath()
@@ -46,6 +47,21 @@ func runList() {
 		}
 	}
 
+	fs := getConfigFiles()
+	for _, f := range fs {
+		s := strings.Split(f.Name(), ".")
+		// TODO erk to refactor
+		if !f.IsDir() && len(s) > 1 && (s[1] == "json" || s[1] == "toml" || s[1] == "yaml" || s[1] == "yml") {
+			if extension {
+				fmt.Fprintln(os.Stdout, f.Name())
+			} else {
+				fmt.Fprintln(os.Stdout, s[0])
+			}
+		}
+	}
+}
+
+func getConfigFiles() []fs.FileInfo {
 	homeFiles, err := ioutil.ReadDir(dashPath())
 	if err != nil {
 		log.Fatal(err)
@@ -70,17 +86,7 @@ func runList() {
 		}
 	}
 
-	for _, f := range fs {
-		s := strings.Split(f.Name(), ".")
-		// TODO erk to refactor
-		if !f.IsDir() && len(s) > 1 && (s[1] == "json" || s[1] == "toml" || s[1] == "yaml" || s[1] == "yml") {
-			if extension {
-				fmt.Fprintln(os.Stdout, f.Name())
-			} else {
-				fmt.Fprintln(os.Stdout, s[0])
-			}
-		}
-	}
+	return fs
 }
 
 func isDashboard(fileInfo fs.FileInfo, path string) (fs.FileInfo, bool) {
