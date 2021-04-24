@@ -31,7 +31,7 @@ func CreateBlogConfig(keyfile string, viewID string, address string) blogConfig 
 	if viewID != "" {
 		bc.ViewID = "view_id: " + viewID
 	} else {
-		bc.ViewID = "# view_id: The value of the address is required"
+		bc.ViewID = "# view_id: The value of the viewID is required"
 	}
 
 	return bc
@@ -62,6 +62,13 @@ func CreateGitHubProjectConfig(token string, owner string, repo string) githubCo
 
 func Blog() string {
 	return `---
+general:
+  refresh: 600
+  keys:
+    quit: "C-c"
+	reload: "C-r"
+	edit: "C-e"
+
 projects:
   - name: Your Blog
     title_options:
@@ -73,7 +80,6 @@ projects:
       google_analytics:
         {{ .Keyfile }}
         {{ .ViewID }}
-        view_id: 89379071
       feedly:
         {{ .Address }}
       monitor:
