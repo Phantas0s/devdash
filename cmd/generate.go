@@ -1,5 +1,7 @@
 package cmd
 
+// TODO need to test all of that!
+
 import (
 	"bytes"
 	"fmt"
@@ -28,8 +30,10 @@ func generateCmd() *cobra.Command {
 
 func generate(args []string) string {
 	switch configType {
-	case "ga":
+	case "blog":
 		return createBlogDefaultConfig()
+	case "project", "githubProject", "github_project":
+		return createGitHubDefaultConfig()
 	default:
 		return createBlogDefaultConfig()
 	}
@@ -43,7 +47,7 @@ func createBlogDefaultConfig() string {
 	address := askSiteAddress()
 	viewID := askViewID()
 
-	ut, err := template.New("Ga").Parse(internal.GA())
+	ut, err := template.New("blog").Parse(internal.Blog())
 	if err != nil {
 		panic(err)
 	}
@@ -51,11 +55,32 @@ func createBlogDefaultConfig() string {
 	b := bytes.NewBuffer([]byte{})
 	err = ut.Execute(b, internal.CreateBlogConfig(keyfile, address, viewID))
 
+	return createOrDisplayTemplate(b.String())
+}
+
+func createGitHubDefaultConfig() string {
+	wizardIntro("a project on GitHub")
+	token := askGitHubToken()
+	owner := askGitHubOwner()
+	repo := askGitHubRepo()
+
+	ut, err := template.New("github").Parse(internal.GitHubProject())
+	if err != nil {
+		panic(err)
+	}
+
+	b := bytes.NewBuffer([]byte{})
+	err = ut.Execute(b, internal.CreateGitHubProjectConfig(token, owner, repo))
+
+	return createOrDisplayTemplate(b.String())
+}
+
+func createOrDisplayTemplate(content string) string {
 	if templateFile != "" {
-		cfg := createTemplateFile(templateFile, b.String())
+		cfg := createTemplateFile(templateFile, content)
 		return fmt.Sprintf("The file %s has been created.", cfg)
 	} else {
-		return b.String()
+		return content
 	}
 }
 
@@ -104,4 +129,37 @@ func askViewID() string {
 	fmt.Scanf("%s", &viewID)
 
 	return viewID
+}
+
+func askGitHubToken() string {
+	fmt.Fprintln(os.Stdout, "")
+	fmt.Fprintln(os.Stdout, "A token is required for GitHub.")
+	fmt.Fprintln(os.Stdout, "See https://thedevdash.com/reference/services/github/")
+	fmt.Fprintln(os.Stdout, "")
+	fmt.Fprint(os.Stdout, "Enter the GitHub token: ")
+
+	var token string
+	fmt.Scanf("%s", &token)
+
+	return token
+}
+
+func askGitHubOwner() string {
+	fmt.Fprintln(os.Stdout, "")
+	fmt.Fprint(os.Stdout, "Enter your GitHub username: ")
+
+	var owner string
+	fmt.Scanf("%s", &owner)
+
+	return owner
+}
+
+func askGitHubRepo() string {
+	fmt.Fprintln(os.Stdout, "")
+	fmt.Fprint(os.Stdout, "Enter the name of the GitHub repo: ")
+
+	var repo string
+	fmt.Scanf("%s", &repo)
+
+	return repo
 }
