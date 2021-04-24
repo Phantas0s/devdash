@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -50,11 +49,7 @@ func editDashboard(editor string, config string) {
 func findConfigFile(search string) string {
 	fs := getConfigFiles()
 	for _, v := range fs {
-		s := strings.Split(v.Name(), ".")
-		if search == s[0] || search == v.Name() {
-			fmt.Println(s[0])
-			fmt.Println(v.Name())
-			fmt.Println(search)
+		if search == removeExt(v.Name()) || search == v.Name() {
 			return v.Name()
 		}
 	}

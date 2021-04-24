@@ -258,3 +258,57 @@ projects:
                     start_date: 35_weeks_ago
 `
 }
+
+func localhost() string {
+	return `---
+projects:
+  - name: General
+    services:
+      github:
+        {{ .Token }}
+        {{ .Owner }}
+    widgets:
+      - row:
+          - col:
+              size: "4"
+              elements:
+                - name: github.table_repositories
+                  options:
+                    color: yellow
+                    row_limit: 30
+          - col:
+              size: "5"
+              elements:
+                - name: lh.box
+                  options:
+                    title: " Cow says "
+                    command: "fortune wisdom | cowsay"
+                    height: 20
+                - name: lh.table_disk
+                  options:
+                    title: " Disks "
+                    row_limit: 3
+                    color: blue
+                - name: github.table_issues
+                  options:
+                    color: red
+                    row_limit: 10
+                    repository: devdash
+          - col:
+              size: 3
+              elements:
+                - name: lh.box
+                  options:
+                    title: " Weather - Berlin "
+                    color: yellow
+                    height: 8
+                    command: "curl --stderr - --silent wttr.in/berlin?T0Q"
+                - name: lh.table
+                  options:
+                    title: " Dashboards "
+                    title_color: cyan
+                    border_color: blue
+                    text_color: green
+                    command: "ls | grep yml"
+`
+}

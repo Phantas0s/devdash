@@ -8,11 +8,11 @@ projects:
   - name: Default Configuration - You can modify at at $XDG_CONFIG_HOME/devdash/devdash.yml
     services:
       monitor:
-        address: "https://thevaluable.dev"
+        address: "https://thevaluable.dev/sdifljasflkafjsdfljfksasdflk"
     widgets:
       - row:
           - col:
-              size: "M"
+              size: "12"
               elements:
                 - name: mon.box_availability
                   options:

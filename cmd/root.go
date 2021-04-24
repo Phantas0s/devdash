@@ -15,7 +15,7 @@ import (
 
 var (
 	// Used for flags
-	file    string
+	cfgName string
 	logpath string
 	debug   bool
 
@@ -30,7 +30,7 @@ var (
 )
 
 func init() {
-	rootCmd.Flags().StringVarP(&file, "config", "c", "", "A valid dashboard configuration")
+	rootCmd.Flags().StringVarP(&cfgName, "config", "c", "", "A valid dashboard configuration")
 	// TODO logger
 	// rootCmd.Flags().StringVarP(&logpath, "logpath", "l", "", "Path for logging")
 	rootCmd.Flags().BoolVarP(&debug, "debug", "d", false, "Debug Mode - doesn't display graph")
@@ -59,7 +59,10 @@ func run() {
 	defer tui.Close()
 
 	// Map dashboard config to a struct Config.
-	cfg, file := mapConfig(file)
+	cfg, cfgFile := mapConfig(cfgName)
+	if debug {
+		fmt.Fprintf(os.Stdout, "Config file used: %s", cfgFile)
+	}
 
 	// Passing a time.Time to this channel reload the entire dashboard.
 	hotReload := make(chan time.Time)
@@ -83,20 +86,20 @@ func run() {
 		cfg.KEdit(),
 		func() {
 			stopReload(stopAutoReload)
-			editDashboard(editor, file)
+			editDashboard(editor, cfgFile)
 			hotReload <- time.Now()
 			autoReload(cfg.RefreshTime(), stopAutoReload, hotReload)
 		},
 	)
 
 	// First display.
-	build(file, tui)
+	build(cfgName, tui)
 
 	// Automatic reload
 	go func() {
 		for hr := range hotReload {
 			tui.HotReload()
-			build(file, tui)
+			build(cfgName, tui)
 			if debug {
 				fmt.Println("Last reload: " + hr.Format("2006-01-02 15:04:05"))
 			}

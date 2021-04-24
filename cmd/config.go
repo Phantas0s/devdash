@@ -174,12 +174,13 @@ func dashPath() string {
 // Map config and return it with the config path
 func mapConfig(cfgFile string) (config, string) {
 	if cfgFile == "" {
-		cfgFile = createConfig(dashPath(), "default.yml", defaultConfig())
+		cfgFile = "default.yml"
+		createConfig(dashPath(), cfgFile, defaultConfig())
 	}
 
 	// viper.AddConfigPath(home)
-	viper.AddConfigPath(".")
 	viper.AddConfigPath(dashPath())
+	viper.AddConfigPath(".")
 
 	viper.SetConfigName(removeExt(cfgFile))
 	err := viper.ReadInConfig()
@@ -211,7 +212,7 @@ func mapConfig(cfgFile string) (config, string) {
 }
 
 func removeExt(filepath string) string {
-	ext := []string{".json", ".yml", ".yaml"}
+	ext := []string{".json", ".yml", ".yaml", ".toml"}
 	for _, v := range ext {
 		filepath = strings.Replace(filepath, v, "", -1)
 	}
@@ -247,7 +248,7 @@ func tryReadFile(cfgFile string) {
 
 	f, err := ioutil.ReadFile(cfgFile)
 	if err != nil {
-		panic(fmt.Errorf("could not read file %s data", cfgFile))
+		panic(fmt.Errorf("could not read file %s", cfgFile))
 	}
 
 	viper.SetConfigType(strings.Trim(filepath.Ext(cfgFile), "."))
