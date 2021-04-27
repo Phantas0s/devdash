@@ -25,6 +25,10 @@ DevDash is a highly configurable terminal dashboard for developers and creators 
 * Unlimited amount of different dashboards with different configurations.
 * Data refreshed automatically via time ticks, or via a keyboard shortcut (Ctrl + r by default).
 
+## Presentation
+
+You can watch a [quick demo on Youtube](https://www.youtube.com/watch?v=aYQVJRuBrC8&feature=youtu.be).
+
 ## Menu
 
 * [Installation](#installation)
