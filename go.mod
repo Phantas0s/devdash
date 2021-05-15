@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	github.com/Phantas0s/termui v0.0.0-20200606131028-e1801ece841d
-	github.com/adrg/xdg v0.3.2
+	github.com/adrg/xdg v0.3.3
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/go-ping/ping v0.0.0-20210402232549-1726e5ede5b6
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
