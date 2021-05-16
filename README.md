@@ -120,6 +120,8 @@ For anybody interested how I managed to develop DevDash on side of a full time j
 
 ![google analytics example DevDash configuration](./example/img/thevaluabledev-2.png)
 -------
+![google analytics example DevDash configuration](./example/img/terminal.png)
+-------
 ![google analytics example DevDash configuration](./example/img/thevaluabledev-3.png)
 -------
 ![github example DevDash configuration](./example/img/devdash-1.png)
