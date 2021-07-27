@@ -175,7 +175,7 @@ func dashPath() string {
 func mapConfig(cfgFile string) (config, string) {
 	if cfgFile == "" {
 		cfgFile = "default.yml"
-		createConfig(dashPath(), cfgFile, defaultConfig())
+		createConfig(dashPath(), cfgFile, defaultConfig(dashPath()))
 	}
 
 	// viper.AddConfigPath(home)
@@ -283,8 +283,8 @@ func (c config) KEdit() string {
 	return kEdit
 }
 
-func defaultConfig() string {
-	return `---
+func defaultConfig(dashPath string) string {
+	return fmt.Sprintf(`---
 general:
   refresh: 600
   keys:
@@ -293,7 +293,7 @@ general:
 
 
 projects:
-  - name: Default dashboard located at $HOME/.config/devdash/default.yml
+  - name: Default dashboard located at %s
     services:
       monitor:
         address: "https://thevaluable.dev"
@@ -305,5 +305,5 @@ projects:
                 - name: mon.box_availability
                   options:
                     title: " thevaluable.dev status "
-                    color: yellow`
+                    color: yellow`, filepath.Join(dashPath, "default.yml"))
 }
