@@ -218,8 +218,6 @@ func build(file string, tui *internal.Tui) {
 		}
 		project.WithLocalhost(localhost)
 
-		// TODO choice between concurency and non concurency
-		// renderFuncs := project.CreateNonConcWidgets()
 		renderFuncs := project.CreateWidgets()
 		if !debug {
 			project.Render(renderFuncs)
