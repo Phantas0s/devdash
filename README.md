@@ -52,6 +52,16 @@ To download DevDash in `/usr/local/bin`, run the following in a terminal:
 curl -LO https://raw.githubusercontent.com/Phantas0s/devdash/master/install/linux.sh | bash
 ```
 
+### macOS
+
+On macOS, DevDash can also be installed via [MacPorts](https://www.macports.org):
+
+```shell
+sudo port install devdash
+```
+
+More information [here](https://ports.macports.org/port/devdash/).
+
 ### Manual installation
 
 You need to: 
