@@ -26,6 +26,10 @@ func editCmd() *cobra.Command {
 }
 
 func edit(args []string) {
+	if len(args) == 0 {
+		fmt.Fprintf(os.Stdout, "You need to specify a config file as first argument")
+		return
+	}
 	file := findConfigFile(args[0])
 	if file == "" {
 		fmt.Fprintf(os.Stdout, "The config %s doesn't exist", args[0])
