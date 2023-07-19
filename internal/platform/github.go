@@ -328,9 +328,7 @@ func formatCountCommits(
 	}
 
 	counts := []int{}
-	for _, v := range c {
-		counts = append(counts, v)
-	}
+	counts = append(counts, c...)
 
 	dimension := []string{}
 	for k, _ := range c {
