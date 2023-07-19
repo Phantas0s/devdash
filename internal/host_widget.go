@@ -406,7 +406,7 @@ func (ms *HostWidget) tableDisk(widget Widget) (f func() error, err error) {
 		unit = widget.Options[optionUnit]
 	}
 
-	title := fmt.Sprintf(" Disks ")
+	title := " Disks "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}
@@ -431,7 +431,7 @@ func (ms *HostWidget) tableDisk(widget Widget) (f func() error, err error) {
 }
 
 func (ms *HostWidget) table(widget Widget) (f func() error, err error) {
-	title := fmt.Sprintf(" Table ")
+	title := " Table "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}
@@ -463,7 +463,7 @@ func (ms *HostWidget) table(widget Widget) (f func() error, err error) {
 }
 
 func (ms *HostWidget) box(widget Widget) (f func() error, err error) {
-	title := fmt.Sprintf(" Box ")
+	title := " Box "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}
@@ -486,7 +486,7 @@ func (ms *HostWidget) box(widget Widget) (f func() error, err error) {
 }
 
 func (ms *HostWidget) gauge(widget Widget) (f func() error, err error) {
-	title := fmt.Sprintf(" Gauge ")
+	title := " Gauge "
 	if _, ok := widget.Options[optionTitle]; ok {
 		title = widget.Options[optionTitle]
 	}
